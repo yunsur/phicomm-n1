@@ -1,0 +1,5 @@
+01xx - debian specific patches
+02xx - documentation patches
+03xx - makefile/build patches
+04xx - code patches
+05xx - miscellaneous patches

@@ -1,0 +1,63 @@
+Test-Command: iptables -h
+Depends: @
+Restrictions: needs-root, isolation-container
+
+Test-Command: ip6tables -h
+Depends: @
+Restrictions: needs-root, isolation-container
+
+Test-Command: iptables-save
+Depends: @
+Restrictions: needs-root, isolation-container
+
+Test-Command: ip6tables-save
+Depends: @
+Restrictions: needs-root, isolation-container
+
+Test-Command: iptables-restore -h
+Depends: @
+Restrictions: needs-root, isolation-container, allow-stderr
+
+Test-Command: ip6tables-restore -h
+Depends: @
+Restrictions: needs-root, isolation-container, allow-stderr
+
+Test-Command: iptables-nft -h
+Depends: @
+Restrictions: needs-root, isolation-container
+
+Test-Command: ip6tables-nft -h
+Depends: @
+Restrictions: needs-root, isolation-container
+
+Test-Command: iptables-nft-save
+Depends: @
+Restrictions: needs-root, isolation-container, allow-stderr
+
+Test-Command: ip6tables-nft-save
+Depends: @
+Restrictions: needs-root, isolation-container
+
+Test-Command: iptables-nft-restore -h
+Depends: @
+Restrictions: needs-root, isolation-container, allow-stderr
+
+Test-Command: ip6tables-nft-restore -h
+Depends: @
+Restrictions: needs-root, isolation-container, allow-stderr
+
+Test-Command: arptables-nft -h
+Depends: @
+Restrictions: needs-root, isolation-container
+
+Test-Command: ebtables-nft -h
+Depends: @
+Restrictions: needs-root, isolation-container
+
+Test-Command: iptables-translate -h
+Depends: @
+Restrictions: needs-root, isolation-container
+
+Test-Command: ip6tables-translate -h
+Depends: @
+Restrictions: needs-root, isolation-container

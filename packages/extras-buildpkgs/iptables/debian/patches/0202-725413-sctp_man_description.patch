@@ -1,0 +1,11 @@
+Subject: add SCTP extension man page description
+From: Laurence J. Lane <ljlane@debian.org>
+Bug: http://bugs.debian.org/725413
+
+--- a/extensions/libxt_sctp.man
++++ b/extensions/libxt_sctp.man
+@@ -1,3 +1,4 @@
++This module matches Stream Control Transmission Protocol headers.
+ .TP
+ [\fB!\fP] \fB\-\-source\-port\fP,\fB\-\-sport\fP \fIport\fP[\fB:\fP\fIport\fP]
+ .TP

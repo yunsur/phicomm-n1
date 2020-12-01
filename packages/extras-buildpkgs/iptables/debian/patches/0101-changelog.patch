@@ -1,0 +1,3944 @@
+Author: ljlane
+Description: iptables source doesn't include a changelog.
+ This is a compilation of the external changelog files taken
+ from ftp.netfilter.org.
+
+--- /dev/null
++++ b/Changelog
+@@ -0,0 +1,3936 @@
++iptables v1.6.0 Changelog:
++======================================================================
++Changes from 1.4.21:
++
++Ana Rey (7):
++      xtables-standalone: call nft_fini in the error path
++      nft: fix memory leaks in nft_xtables_config_load
++      iptables: nft: fix memory leaks in nft_fini
++      extensions: libxt_devgroup: Fix the path of the group mappings file
++      iptables-compat: homogenize error messages
++      extensions: devgroup: fix showing and saving of dst-group
++      iptables-compat: homogenize error messages with 'R' option
++
++Andreas Herz (3):
++      extension: libip6t_ipv6header: fix wrong headername in ipv6header for protocols
++      extensions: icmp6: added missing icmpv6 dest-unreach codes
++      added missing icmpv6 codes in REJECT
++
++Anton Danilov (1):
++      xtables: SET target: Add mapping of meta informations (skbinfo ipset extension)
++
++Arturo Borrero (38):
++      iptables-compat: kill add_*() invflags parameter
++      nft-compat: create a separated object update type to rename chains
++      nft-bridge: fix printing of inverted protocols, addresses
++      nft-bridge: fix inversion of builtin matches
++      iptables: xtables-eb: delete extra 'policy' printf
++      iptables: xtables-eb: user-defined chains default policy is always RETURN
++      iptables: xtables-eb: fix renaming of chains
++      extensions: add ebt 802_3 extension
++      ebtables-compat: fix counter listing
++      ebtables-compat: fix printing of extension
++      ebtables-compat: fix segfault in rules w/o target
++      ebtables-compat: include /etc/ethertypes in tarball
++      ebtables-compat: fix ACCEPT printing by simplifying logic
++      include: cache copy of Linux header uapi/linux/netfilter_bridge/ebt_802_3.h
++      ebtables-compat: add nft rule compat information to bridge rules
++      ebtables-compat: prevent options overwrite
++      ebtables-compat: prevent same matches to be included multiple times
++      ebtables-compat: include rule counters in ebtables rules
++      ebtables-compat: fix nft payload bases
++      ebtables-compat: add 'ip' match extension
++      ebtables-compat: add mark_m match extension
++      extensions: cleanup commented code in ebtables-compat extensions
++      libxtables: search first for AF-specific extension
++      ebtables-compat: call extensions final checks
++      ebtables-compat: finish target infrastructure
++      ebtables-compat: add mark target extension
++      ebtables-compat: add watchers support
++      ebtables-compat: add log watcher extension
++      arptables-compat: add mangle target extension
++      libxt_quota: fix _save() invert syntax
++      ebtables-compat: support nflog extension
++      arptables-compat: add support for the CLASSIFY target
++      arptables-compat: delete extra space in target printing
++      ebtables-compat: add support for limit extension
++      ebtables-compat: add a bridge-specific exit_error function
++      ebtables-compat: fix rule deleting with -D in rules with no target
++      list: fix prefetch dummy
++      libxtables: find extensions based on family too
++
++Arturo Borrero Gonzalez (1):
++      ebtables-compat: fix misplaced function attribute on ebt_print_error()
++
++Dan Wilder (1):
++      libxtables: move some code to avoid cautions in vfork man page
++
++Daniel Borkmann (4):
++      iptables: snat: add randomize-full support
++      iptables: add libxt_cgroup frontend
++      cgroup, man: improve man-page bits
++      libxt_CT: add support for recently introduced zone options
++
++Domen Puncer (1):
++      libxtables: fix getaddrinfo return value usage
++
++Felix Janda (5):
++      consistently use <errno.h>
++      include: remove libc5 support code
++      include: Sync with ethernetdb.h from ebtables
++      include Use <stdint.h> types from xtables.h
++      include: Sync with upstream kernel headers
++
++Florian Westphal (15):
++      Merge branch 'stable-1.4.20'
++      iptables.8: --policy is either ACCEPT or DROP
++      extensions: libxt_connlabel: do not open config file from _init hook
++      man: string: document icase
++      tests: split into family and table specific files
++      tests: add test case for xt_recent regression
++      extensions: remove MIRROR
++      extensions: remove SAME target
++      extensions: remove 'unclean' match
++      extensions: add more test cases for iptables-test.py
++      extensions: SNPT,DNPT: fix save/print output
++      extensions/libxt_recent.t: add test case for 3.19 regression
++      extensions: libip6t_dst: make inversion work
++      tests: remove old test cases
++      man: using physdev match in OUTPUT is not supported anymore
++
++Giuseppe Longo (33):
++      nft: fix leak of rule and chain iterators
++      nft: fix leak of chain iterator in nft_rule_list
++      xtables: allow to zero chains via -Z
++      nft: break loop after found matching chain
++      nft: print counter issues
++      nft: fix another memleak in nft_rule_list_cb
++      xtables: nft: display rule by number via -L
++      nft: associate table configuration to handle via nft_init
++      nft: fix family operation lookup
++      nft: load only the tables of the current family
++      nft: refactoring parse operations for more genericity
++      xtables: bootstrap ARP compatibility layer for nftables
++      xtables: nft-arp: implements is_same op for ARP family
++      xtables: arp: add rule replacement support
++      xtables: arp: add delete operation
++      xtables: arp: zeroing chain counters
++      nft: arp: initialize flags in nft_arp_parse_meta
++      nft: arp: add parse_target to nft_family_ops_arp
++      nft: arp: fix possible string overflow
++      nft: adds save_matches_and_target
++      nft-arp: adds nft_arp_save_firewall
++      xtables-events: prints arp rules
++      nft-arp: fix is_same_interfaces arguments
++      nft-arp: wrong condition in parse_payload
++      nft: replace nft_rule_attr_get_u8
++      nft: save: fix the printing of the counters
++      nft-arp: remove wrong conditions
++      nft: compare layer 4 protocol in first place
++      nft: add nft_xt_ctx struct
++      nft: fix syntax error in nft_parse_cmp()
++      nft-ipv46: replace offset var with ctx->payload.offset
++      ebtables-compat: fix print_header
++      ebtables-compat: build ebtables extensions
++
++Gustavo Zacarias (1):
++      iptables-save: remove dlfcn.h include
++
++Harout Hedeshian (2):
++      extensions: libxt_socket: add --restore-skmark option
++      extensions: libxt_socket: update man pages and tests for --restore-skmark
++
++Jan Engelhardt (3):
++      iptables: link against libnetfilter_conntrack
++      build: resolve build error involving libnftnl
++      extensions: restore matching any SPI id by default
++
++Jiri Popelka (9):
++      iptables: fix version in iptables(8)
++      update FSF address in license text
++      iptables: missing bracket in iptables-save(8)
++      iptables-restore.8: missing -T in synopsis
++      iptables-restore.8: file to read from can be specified as argument
++      iptables-{save,restore}: warn that -b/--binary isn't implemented
++      iptables-save: actually parse -M/--modprobe option
++      iptables: add optional [seconds] argument to -w
++      libxt_tcp: manpage correction
++
++Jozsef Kadlecsik (1):
++      Alignment problem between 64bit kernel 32bit userspace
++
++Loganaden Velvindron (1):
++      extensions: libxt_TEE: Trim kernel struct to allow deletion
++
++Mart Frauenlob (2):
++      extensions: libxt_set: Add missing hyphen to --bytes-eq synopsis in manpage
++      libxtables: Print meaningful error message for an invalid MAC address string
++
++Martin Topholm (1):
++      extensions: libxt_SYNPROXY: initial manual page
++
++Mike Frysinger (4):
++      configure: fix 3rd arg w/AC_ARG_ENABLE
++      build: add finer module blacklisting
++      libiptc: fix fortify errors in debug code
++      iptables: update gitignore list
++
++Nicolas Dichtel (1):
++      iptables: fix compilation when lib[mnl|nftables] are not in standard path
++
++Pablo Neira Ayuso (186):
++      add iptables unit test infrastructure
++      extensions: libipt_ah: add unit test
++      extensions: libip6t_ah: add unit test
++      extensions: libipt_LOG: add unit test
++      extensions: libxt_addrtype: add unit test
++      extensions: libip6t_LOG: add unit test
++      extensions: libxt_cluster: add unit test
++      extensions: libxt_comment: add unit test
++      extensions: libxt_AUDIT: add unit test
++      extensions: libxt_CHECKSUM: add unit test
++      extensions: libxt_CLASSIFY: add unit test
++      extensions: libxt_connbytes: add unit test
++      extensions: libxt_connlimit: add unit test
++      extensions: libxt_connmark: add unit test
++      extensions: libxt_CONNMARK: add unit test
++      extensions: libxt_hashlimit: add unit test
++      extensions: libxt_time: add unit test
++      extensions: libxt_length: add unit test
++      extensions: libxt_udp: add unit test
++      extensions: libxt_tcp: add unit test
++      extensions: libxt_tos: add unit test
++      extensions: libxt_NFLOG: add unit test
++      extensions: libxt_dccp: add unit test
++      extensions: libxt_esp: add unit test
++      extensions: libxt_helper: add unit test
++      extensions: libipt_icmp: add unit test
++      extensions: libxt_NFQUEUE: add unit test
++      extensions: libipt_ttl.t: add unit test
++      extensions: libxt_pkttype: add unit test
++      extensions: libxt_CT: add unit test
++      extensions: libxt_state: add unit test
++      extensions: libxt_string: add unit test
++      extensions: libxt_rateest: add unit test
++      extensions: libxt_nfacct: add unit test
++      extensions: libxt_mark: add unit test
++      extensions: libipt_REJECT: add unit test
++      extensions: libxt_sctp: add unit test
++      extensions: libxt_NOTRACK: add unit test
++      extensions: libipt_MASQUERADE: add unit test
++      extensions: libxt_standard: add unit test
++      extensions: libipt_ECN: add unit test
++      extensions: libxt_TRACE: add unit test
++      extensions: libxt_TOS: add unit test
++      extensions: libxt_DSCP: add unit test
++      extensions: libip6t_eui64: add unit test
++      extensions: libxt_limit: add unit test
++      extensions: libxt_conntrack: add unit test
++      extensions: libipt_ULOG: add unit test
++      extensions: libxt_multiport: add unit test
++      extensions: libip6t_REJECT: add unit test
++      extensions: libxt_dscp: add unit test
++      extensions: libxt_cpu: add unit test
++      extensions: libxt_quota: add unit test
++      extensions: libxt_iprange: add unit test
++      extensions: libxt_physdev: add unit test
++      extensions: libxt_TEE: add unit test
++      extensions: libipt_SNAT: add unit test
++      extensions: libip6t_DNAT: add unit test
++      extensions: libxt_owner: add unit test
++      extensions: libxt_MARK: add unit test
++      build: don't include tests in released tarball
++      use nf_tables and nf_tables compatibility interface
++      automatic creation of built-in table and chains
++      rework automatic creation of built-in table and chains
++      iptables: nft: add -f support
++      nft: fix missing rule listing in custom chains with -L
++      headers: remove unused compatibility definitions
++      iptables: nft: move priority to chain instead of table
++      iptables: nft: remove __nft_check_rule
++      iptables: nft: use 64-bits handle
++      iptables: nft: use chain types
++      xtables-restore: add support for dormant tables
++      nft: adapt chain rename to recent Patrick's updates
++      xtables: fix crash due to using wrong globals
++      xtables-restore: fix custom user chain restoration
++      xtables: fix compilation warning
++      xtables: purge out user-define chains from the kernel
++      xtables-restore: support atomic commit
++      xtables: nft: add protocol and flags for xtables over nf_tables
++      xtables-restore: support test option `-t'
++      nft: fix crash if TRACE is used
++      xtables: ipv6: fix wrong error if -p is used
++      xtables: ipv6: add missing break in nft_parse_payload_ipv6
++      xtables: ipv6: fix -D with -p
++      add xtables-events
++      xtables-restore: add -4 and -6 support
++      xtables-save: add -4 and -6 support
++      nft: remove license for header file
++      xtables: fix missing xtables_exit_error definition
++      xtables-standalone: fix error message
++      xtables-config: priority has to be per-chain to support
++      nft: load tables and chains based on /etc/xtables.conf
++      xtables: support family in /etc/xtables.conf file
++      xtables-config: fix off by one in parsed strings from /etc/xtables.conf
++      xtables: fix missing protocol and invflags
++      xtables-config-parser: fix compilation warning
++      iptables: update .gitignore
++      xtables: add new container xtables_args structure
++      xtables: add new nft_ops->post_parse hook
++      xtables: remove unused leftover definitions
++      xtables: fix compilation due to missing autogenerated header
++      nft: don't call nft_init in nft_xtables_config_load
++      xtables-restore: output the same error message that iptables-restore uses
++      xtables: fix -p protocol
++      nft: fix leaks in nft_xtables_config_load
++      xtables: remove bogus comment on chain rename
++      xtables: nft: remove lots of useless debugging messages
++      xtables: do not proceed if nft_init fails
++      xtables: fix missing afinfo configuration
++      xtables: nft: display rule number via -S
++      xtables-events: print usage on wrong arguments
++      xtables-events: fix missing newline in table and chain events
++      nft: fix built-in chain ordering of the nat table
++      src: use nft_*_list_add_tail
++      nft: break chain listing if only one if looked for
++      nft: fix selective chain display via -S
++      xtables: add -I chain rulenum
++      xtables: remove bogus comment regarding rule replacement
++      nft: no need for rule lookup if no position specified via -I
++      xtables: fix typo in add_entry for the IPv6 case
++      nft: fix match revision lookup for IPv6
++      etc: add default IPv6 table and chain definitions
++      xtables: use xtables_rule_matches_free
++      nft: fix wrong flags handling in print_firewall_details
++      nft: use xtables_print_num
++      nft: generalize rule addition family hook
++      xtables: nft-arp: fix endianess in nft_arp_parse_payload
++      nft: consolidate nft_rule_find for ARP, IPv4 and IPv6
++      nft: consolidate nft_rule_new to support ARP
++      nft: consolidate nft_rule_* functions to support ARP
++      include: cache netfilter_arp kernel headers
++      nft: adapt nft_rule_expr_get to use uint32_t instead of size_t
++      xtables: batch rule-set updates into one single netlink message
++      xtables: fix missing ipt_entry for MASQUERADE target
++      nft: pass ipt_entry to ->save_firewall hook
++      nft: fix bad length when comparing extension data area
++      nft: fix interface wildcard matching
++      xtables-events: fix compilation due change in libnftables
++      nft: fix inversion of built-in selectors
++      nft: fix out of bound memory copy
++      nft: fix wrong function to release iterator
++      nft: fix inconsistent data type in NFT_EXPR_CMP_OP and NFT_EXPR_META_KEY
++      configure: fix wrong reference to the conntrack-tools
++      configure: rename --disable-xtables to --disable-nftables
++      configure: conditional dependencies for nftables-compat
++      xtables-restore: remove dependency with libip4tc
++      xtables: add xtables-compat-multi for the nftables compatibility layer
++      nft-compat: fix IP6T_F_GOTO flag handling
++      nft-compat: fix wrong protocol context in initialization
++      Merge branch 'nft-compat'
++      iptables.8: update coreteam members from manpage
++      Merge branch 'next-3.14'
++      iptables: nft: generalize batch infrastructure
++      iptables: nft: remove unused code
++      iptables: nft: add tables and chains to the batch
++      Makefile: fix static compilation iptables-compat without shared libraries
++      iptables-compat: fix address prefix
++      iptables-compat: nft: use nft_batch_begin and nft_batch_end from libnftnl
++      iptables-compat: fix use after free in the batch send path
++      iptables-compat: get rid of error reporting via perror
++      Merge branch 'tests'
++      iptables-compat: nft: fix user chain addition, deletion and rename
++      iptables-compat: nft: fix error reporting
++      arptables-compat: fix missing error reporting
++      arptables-compat: allow to not specify a target
++      arptables-compat: get output in sync with arptables -L -n --line-numbers
++      arptables-compat: remove save code
++      refresh nf_tables.h cached copy
++      iptables-compat: fix chain policy reset with iptables -L -n
++      iptables-compat: statify unused built-in table/chain functions
++      iptables-compat: assume chain policy NF_ACCEPT when creating built-in chains
++      iptables-compat: fix empty chains after first invocation of iptables-compat -L
++      Merge branch 'ipset'
++      nft: bootstrap ebtables-compat
++      ebtables-compat: use ebtables_command_state in bootstrap code
++      iptables: use flock() instead of abstract unix sockets
++      Merge branch 'ebtables-compat'
++      xshared: calm down compilation warning
++      xtables-compat: remove unused fields from bridge and arp families
++      iptables-compat: unset context flags in netlink delinearize step
++      Merge branch 'ipset-next'
++      extensions: fix several test errors
++      iptables-compat: use new symbols in libnftnl
++      iptables-compat: Keep xtables-config and xtables-events out from tree
++      iptables 1.6.0 release
++      iptables: fix static builds
++
++Phil Oester (1):
++      iptables-xml: fix segfault if missing space after -A
++
++Ronald Wahl (1):
++      libxtables: fix two off-by-one memory corruption bugs
++
++Thomas Woerner (2):
++      iptables-compat: Allow to insert into rule_count+1 position
++      iptables-compat: Increase rule number only for the selected table and chain
++
++Tomasz Bursztyka (41):
++      headers: Make nf_tables.h up to date
++      nft: Add support for chain rename options (-E)
++      iptables: nft: Fix -D chain rulenum option
++      iptables: nft: Refactor __nft_rule_check to return rule handle when relevant
++      iptables: nft: Add support for -R option
++      xtables: add IPv6 support
++      nft: Split nft core to become family independant
++      xtables: initialize xtables defaults even on listing rules
++      xtables: policy can be changed only on builtin chain
++      nft: Set the rule family when creating a new one
++      nft: Handle error on adding rule expressions
++      xtables: Remove useless parameter to nft_chain_list_find
++      nft: add function to test for a builtin chain
++      nft: Fix small memory leaks
++      xtables: Do not dump before command parsing has been finished
++      nft: Remove useless function
++      nft: Optimize rule listing when chain and rulenum are provided
++      nft: Make internal rule listing callback more generic
++      nft: Remove useless test on rulenum in nft_rule_list()
++      nft: Generalize nft_rule_list() against current family
++      nft: Print unknown target data only when relevant
++      nft: convert rule into a command state structure
++      xtables: allow to reset the counters of an existing rule
++      nft: Fix a minor compilation warning
++      nft: skip unset tables on table configuration emulation
++      xtables: arp: Store target entry properly and compare them relevantly
++      extensions: add arptables' libxt_mangle.c for xtables-arp
++      extensions: libxt_mangle: Fixes option issues
++      nft: Header inclusion missing
++      xtables: arp: Parse properly target options
++      nft: fix wrong target size
++      xtables: arp: Fix a compilation warning
++      xtables: arp: inhibit -l option so only a fixed 6 bytes length arhln can be used
++      include: Update nftables API header in sync with kernel's one
++      nft: Use new libnftnl library name against former libnftables
++      xtables: Add backward compatibility with -w option
++      nft: Add useful debug output when a builtin table is created
++      nft: A builtin chain might be created when restoring
++      nft: Initialize a table only once
++      nft: Remove useless error message
++      nft: Pass a line after printing out a debug message
++
++Ville SkyttÃ¤ (1):
++      iptables: Spelling fixes
++
++Willem de Bruijn (1):
++      include: add linux/filter.h
++
++fan.du (1):
++      iptables: Add IPv4/6 IPcomp match support
++
++
++iptables v1.4.21 Changelog:
++======================================================================
++Changes from 1.4.20:
++
++Eric Dumazet (1):
++      xt_socket: add --nowildcard flag
++
++Florian Westphal (3):
++      extensions: libxt_socket: update man page
++      doc: add libnetfilter_queue pointer to libxt_NFQUEUE.man
++      doc: merge ip6table man pages into ipv4 ones
++
++Jozsef Kadlecsik (1):
++      extensions: libxt_set, libxt_SET: check the set family too
++
++Kevin Cernekee (1):
++      ip6tables: Use consistent exit code for EAGAIN
++
++Laurence J. Lane (8):
++      iptables: libxt_hashlimit.man: correct address
++      iptables: libxt_conntrack.man extraneous commas
++      iptables: libip(6)t_REJECT.man default icmp types
++      iptables: iptables-xm1.1 correct man section
++      iptables: libxt_recent.{c,man} dead URL
++      iptables: libxt_string.man add examples
++      extensions: libxt_LOG: use generic syslog reference in manpage
++      iptables: extensions/GNUMakefile.in use CPPFLAGS
++
++Lutz Jaenicke (1):
++      iptables: correctly reference generated file
++
++Pablo Neira Ayuso (7):
++      Merge branch 'stable-1.4.20'
++      Merge branch 'stable-1.4.20'
++      ip[6]tables: fix incorrect alignment in commands_v_options
++      build: add software version to manpage first line at configure stage
++      extensions: libxt_cluster: add note on arptables-jf
++      utils: nfsynproxy: fix error while compiling the BPF filter
++      iptables 1.4.21 release
++
++Patrick McHardy (2):
++      extensions: add SYNPROXY extension
++      utils: add nfsynproxy tool
++
++Phil Oester (4):
++      iptables: state match incompatibilty across versions
++      libxtables: xtables_ipmask_to_numeric incorrect with non-CIDR masks
++      iptables: improve chain name validation
++      iptables: spurious error in load_extension
++
++stephen hemminger (1):
++      xtables: trivial spelling fix
++
++
++iptables v1.4.20 Changelog:
++======================================================================
++Changes from 1.4.19.1:
++
++
++Alexey Perevalov (1):
++      doc: clarify DEBUG usage macro
++
++Andy Spencer (1):
++      iptables: use autoconf to process .in man pages
++
++Eric Leblond (1):
++      configure: display summary
++
++Florian Westphal (2):
++      extensions: libipt_ULOG: man page should mention NFLOG as replacement
++      extensions: libxt_connlabel: use libnetfilter_conntrack
++
++Jozsef Kadlecsik (2):
++      Introduce a new revision for the set match with the counters support
++      libxt_CT: Add the "NOTRACK" alias
++
++Mart Frauenlob (7):
++      libip6t_mh: Correct command to list named mh types in manpage
++      extensions: libxt_DNAT: rename IPv4 manpage and tell about IPv6 support
++      extensions: libxt_REDIRECT: rename IPv4 manpage and tell about IPv6 support
++      extensions: libxt_NETMAP: rename IPv4 manpage and tell about IPv6 support
++      extensions: libxt_SNAT: rename IPv4 manpage and tell about IPv6 support
++      extensions: libxt_MASQUERADE: rename IPv4 manpage and tell about IPv6 support
++      extensions: libxt_LOG: rename IPv4 manpage and tell about IPv6 support
++
++Pablo Neira Ayuso (7):
++      extensions: libxt_LED: fix parsing of delay
++      Merge branch 'stable'
++      Merge branch 'stable'
++      ip{6}tables-restore: fix breakage due to new locking approach
++      libxt_recent: restore minimum value for --seconds
++      iptables-xml: fix parameter parsing (similar to 2165f38)
++      iptables 1.4.20 release
++
++Patrick McHardy (1):
++      extensions: add copyright statements
++
++Phil Oester (7):
++      xtables: improve get_modprobe handling
++      ip[6]tables: Add locking to prevent concurrent instances
++      iptables: Fix connlabel.conf install location
++      ip6tables: don't print out /128
++      libip6t_LOG: target output is different to libipt_LOG
++      build: additional include path required after UAPI changes
++      iptables: iptables-xml: Fix various parsing bugs
++
++Russell Senior (1):
++      libxt_recent: restore reap functionality to recent module
++
++Willem de Bruijn (1):
++      build: fail in configure on missing dependency with --enable-bpf-compiler
++
++holger@eitzenberger.org (1):
++      extensions: libxt_NFQUEUE: add --queue-cpu-fanout parameter
++
++
++
++iptables v1.4.19.1 Changelog:
++======================================================================
++Changes from 1.4.19:
++
++
++Florian Westphal (1):
++      Revert "extensions: add connlabel match" duplicate
++
++Michael Roth (1):
++      doc: mention SNAT in INPUT chain since kernel 2.6.36
++
++Pablo Neira Ayuso (2):
++      build: bump version to 1.4.19
++      iptables 1.4.19.1 release
++
++
++
++iptables v1.4.19 Changelog:
++======================================================================
++Changes from 1.4.18:
++
++
++Florian Westphal (3):
++      libxt_NFQUEUE: fix bypass option documentation
++      extensions: add connlabel match
++      extensions: add connlabel match
++
++Mart Frauenlob (3):
++      ip[6]tables: show --protocol instead of --proto in usage
++      libxt_recent: Fix missing space in manpage for --mask option
++      extensions: libxt_multiport: Update manpage to list valid protocols
++
++Nicolas Dichtel (1):
++      utils: nfnl_osf: use the right nfnetlink lib
++
++Pablo Neira Ayuso (11):
++      libip6t_NETMAP: Use xtables_ip6mask_to_cidr and get rid of libip6tc dependency
++      Revert "build: resolve link failure for ip6t_NETMAP"
++      libxt_osf: fix missing --ttl and --log in save output
++      libxt_osf: fix bad location for location in --genre
++      libip6t_SNPT: add manpage
++      libip6t_DNPT: add manpage
++      Merge branch 'stable'
++      utils: updates .gitignore to include nfbpf_compile
++      extensions: libxt_bpf: clarify --bytecode argument
++      libxtables: fix parsing of dotted network mask format
++      build: bump version to 1.4.19
++
++Patrick McHardy (1):
++      libxt_conntrack: fix state match alias state parsing
++
++Willem de Bruijn (2):
++      extensions: add libxt_bpf extension
++      utils: nfbpf_compile
++
++
++
++iptables v1.4.18 Changelog:
++======================================================================
++Changes from 1.4.17:
++
++
++Florian Westphal (1):
++      doc: rpfilter: invert option should have own paragraph
++
++Jan Engelhardt (11):
++      build: resolve link failure for ip6t_NETMAP
++      doc: fixup omissions in ip6tables-restore.8
++      doc: document iptables-restore's -t option
++      doc: document iptables-restore's -v option
++      doc: document iptables-restore's -M option
++      doc: document iptables-restore's -h option
++      doc: name the supported log levels for ipt_LOG
++      doc: mention -m in the manpage
++      doc: document the -4 and -6 options
++      extensions: S/DNPT: add missing save function
++      build: bump SONAME for libxtables
++
++Jozsef Kadlecsik (3):
++      Introduce match/target aliases
++      Add the "state" alias to the "conntrack" match
++      Merge branch 'master' of vishnu.netfilter.org:/data/git/iptables
++
++Pablo Neira Ayuso (7):
++      iptables: remove unused leftover definitions
++      libxtables: add xtables_rule_matches_free
++      libxtables: add xtables_print_num
++      Merge branch 'stable' into 'master'
++      doc: document nat table for IPv6
++      doc: iptables provides up to 5 independent tables
++      build: bump version to 1.4.18
++
++Ulrich Weber (3):
++      extensions: libip6t_DNPT: fix wording in DNPT target
++      extension: libip6t_DNAT: allow port DNAT without address
++      extensions: libip6t_DNAT: set IPv6 DNAT --to-destination
++
++
++
++
++iptables v1.4.17 Changelog:
++======================================================================
++Changes from 1.4.16.3:
++
++
++Florian Westphal (1):
++      libxt_time: add support to ignore day transition
++
++Jozsef Kadlecsik (1):
++      Manpage update: matches are evaluated in the order they are specified.
++
++Pablo Neira Ayuso (2):
++      Merge branch 'next' branch that contains new features scheduled for     Linux kernel 3.7
++      bump version to 1.4.17
++
++Patrick McHardy (7):
++      Convert the NAT targets to use the kernel supplied nf_nat.h header
++      extensions: add IPv6 MASQUERADE extension
++      extensions: add IPv6 SNAT extension
++      extensions: add IPv6 DNAT target
++      extensions: add IPv6 REDIRECT extension
++      extensions: add IPv6 NETMAP extension
++      extensions: add NPT extension
++
++Tom Eastep (1):
++      extensions: libxt_statistic: Fix save output
++
++
++
++iptables v1.4.16.3 Changelog:
++======================================================================
++Changes from 1.4.16.2:
++
++
++Jan Engelhardt (2):
++      build: remove symlink-only extensions from static object list
++      build: resolve compile abort in libxt_limit on RHEL5
++
++Pablo Neira Ayuso (1):
++      bump iptables to 1.4.16.3
++
++
++
++iptables v1.4.16.2 Changelog:
++======================================================================
++Changes from 1.4.16.1:
++
++
++Jan Engelhardt (1):
++      iptables: restore NOTRACK functionality, target aliasing
++
++Pablo Neira Ayuso (1):
++      bump version to 1.4.16.2
++
++
++
++iptables v1.4.16.1 Changelog:
++======================================================================
++Changes from 1.4.16:
++
++
++Pablo Neira Ayuso (2):
++      iptables: fix standard target
++      bump version to 1.4.16.1
++
++
++
++iptables v1.4.16 Changelog:
++======================================================================
++Changes from 1.4.15:
++
++Andreas Schwab (1):
++      libxt_tcp: print space before, not after "flags:"
++
++Jan Engelhardt (23):
++      iptables-restore: warn about -t in rule lines
++      doc: grammatical updates to libxt_SET
++      libxt_u32: do bounds checking for @'s operands
++      libxt_devgroup: consolidate devgroup specification parsing
++      libxt_devgroup: guard against negative numbers
++      libxt_LED: guard against negative numbers
++      libxt_*limit: avoid division by zero
++      Merge remote-tracking branch 'nf/stable'
++      build: support for automake-1.12
++      build: separate AC variable replacements from xtables.h
++      build: have `make clean` remove dep files too
++      libxtables: consolidate preference logic
++      iptables: support for target aliases
++      libxt_NOTRACK: replace as an alias to CT --notrack
++      iptables: support for match aliases
++      libxt_state: replace as an alias to xt_conntrack
++      Merge branch 'master' of git://git.inai.de/iptables
++      doc: clean up interpunction in state list for xt_conntrack
++      doc: deduplicate extension descriptions into a new manpage
++      doc: trim "state" manpage and reference conntrack instead
++      doc: have NOTRACK manpage point to CT instead
++      doc: mention iptables-apply in the SEE ALSO sections
++      Merge branch 'master' of git://git.inai.de/iptables
++
++Jozsef Kadlecsik (1):
++      New set match revision with --return-nomatch flag support
++
++Michal Kube¿ek (1):
++      libip6t_frag: match any frag id by default
++
++Pablo Neira Ayuso (6):
++      include: add missing linux/netfilter_ipv4/ip_queue.h
++      ip[6]tables-restore: cleanup to reduce one level of indentation
++      include: add missing linux/netfilter_ipv4/ip_queue.h
++      iptables: fix wrong error messages
++      extensions: libxt_addrtype: fix type in help message
++      bump version to 1.4.16
++
++
++
++iptables v1.4.15 Changelog:
++======================================================================
++Changes from 1.4.14:
++
++
++Denys Fedoryshchenko (1):
++      libxt_recent: add --mask netmask
++
++Eldad Zack (1):
++      libxt_recent: remove unused variable
++
++Florian Westphal (2):
++      libxt_devgroup: add man page snippet
++      libxt_hashlimit: add support for byte-based operation
++
++Hans Schillstrom (3):
++      extensions: add HMARK target
++      libxt_HMARK: fix output of iptables -L
++      libxt_HMARK: correct a number of errors introduced by Pablo's rework
++
++Pablo Neira Ayuso (6):
++      libxtables: add xtables_ip[6]mask_to_cidr
++      libxt_HMARK: fix ct case example
++      iptables-restore: move code to add_param_to_argv, cleanup (fix gcc-4.7)
++      Revert "iptables-restore: move code to add_param_to_argv, cleanup (fix gcc-4.7)"
++      iptables-restore: fix parameter parsing (shows up with gcc-4.7)
++      bump version to 1.4.15
++
++
++iptables v1.4.14 Changelog:
++======================================================================
++Changes from 1.4.13:
++
++
++Florian Westphal (3):
++      ip(6)tables-restore: make sure argv is NULL terminated
++      extensions: libxt_rateest: output all options in save hook
++      tests: add rateest match rules
++
++Miguel GAIO (1):
++      libiptc: fix retry path in TC_INIT
++
++Pablo Neira Ayuso (3):
++      libxt_CT: add --timeout option
++      libipt_ULOG: fix --ulog-cprange
++      Bump version to 1.4.14
++
++
++
++iptables v1.4.13 Changelog:
++======================================================================
++Changes from 1.4.12.2:
++
++
++Florian Westphal (1):
++      extensions: add rpfilter module
++
++Franz Flasch (2):
++      iptables: missing free() in function cache_add_entry()
++      iptables: missing free() in function delete_entry()
++
++Jonh Wendell (1):
++      libiptc: Returns the position the entry was inserted
++
++Maciej ¿enczykowski (1):
++      src: mark newly opened fds as FD_CLOEXEC (close on exec)
++
++Pablo Neira Ayuso (7):
++      Revert "libiptc: Returns the position the entry was inserted"
++      extensions: add nfacct match
++      Bump version to 1.4.13
++
++
++Patrick McHardy (1):
++      extensions: add IPv6 capable ECN match extension
++
++
++
++iptables v1.4.12.2 Changelog:
++======================================================================
++Changes from 1.4.12.1:
++
++
++Florian Westphal (2):
++      libxt_NFQUEUE: fix --queue-bypass ipt-save output
++      libxt_connbytes: fix handling of --connbytes FROM
++
++Jan Engelhardt (17):
++      xtoptions: fill in fallback value for nvals
++      libxt_statistic: link with -lm
++      libxt_RATEEST: link with -lm
++      build: scan for unreferenced symbols
++      iptables: move kernel version find routing into libxtables
++      Merge branch 'stable' of git://dev.medozas.de/iptables
++      Merge branch 'stable'
++      build: sort file list before build
++      doc: fix undesired newline in ip6tables-restore(8)
++      ip6tables-restore: implement missing -T option
++      doc: document iptables-restore's -T option
++      build: restore build order of modules
++      build: make check stage not fail when building statically
++      libipt_SAME: set PROTO_RANDOM on all ranges
++      doc: clarification on the meaning of -p 0
++      libiptc: provide separate pkgconfig files
++      nfnl_osf: add missing libnfnetlink_CFLAGS to compile process
++
++Pablo Neira Ayuso (1):
++      Bump version to 1.4.12.2
++
++Richard Weinberger (1):
++      xtoptions: simplify xtables_parse_interface
++
++Thomas Jarosch (1):
++      libxtables: Fix file descriptor leak in xtables_lmap_init on error
++
++Tom Eastep (2):
++      libxt_conntrack: improve error message on parsing violation
++      libxt_CONNSECMARK: fix spacing in output
++
++
++
++iptables v1.4.12.1 Changelog:
++======================================================================
++Changes from 1.4.12:
++
++
++Bernard Massot (1):
++      doc: fix typo in libxt_TRACE
++
++Dwight Davis (1):
++      libxt_string: fix space around arguments
++
++Fernando Luis Vázquez Cao (1):
++      libxt_TOS: update linux kernel version list for backported fix
++
++Jan Engelhardt (36):
++      extensions: use multi-target registration
++      libxt_TCPMSS: restore build with IPv6-less libcs
++      libxt_string: define _GNU_SOURCE for strnlen
++      build: workaround broken linux-headers on RHEL-5
++      build: strengthen check for overlong lladdr components
++      build: abort autogen on subcommand failure
++      libipq: add pkgconfig file
++      libxt_u32: fix missing allowance for inversion
++      libxt_set: update man page about kernel support on the feature
++      libxt_tcp: always print the mask parts
++      libxt_set: put differing variable names in directly
++      doc: clarify libxt_connlimit defaults
++      libxt_conntrack: remove one misleading comment
++      libxt_dccp: restore missing XTOPT_INVERT tags for options
++      libxt_dccp: fix deprecated intrapositional ordering of !
++      libxt_dccp: spell out option name on save
++      libxt_dccp: provide man pages options in short help too
++      libxt_dccp: fix random output of ! on --dccp-option
++      libxt_dscp: restore inversion support
++      libxt_hashlimit: default htable-expire must be in milliseconds
++      libxt_conntrack: fix --ctproto 0 output
++      xtoptions: flag use of XTOPT_POINTER without XTOPT_PUT
++      libip6t_frag: restore inversion support
++      libxt_hashlimit: remove inversion from hashlimit rev 0
++      libip6t_hbh: restore setting IP6T_OPTS_LEN flag
++      libip6t_dst: restore setting IP6T_OPTS_LEN flag
++      libipt_ttl: document that negation is available
++      libxt_owner: restore inversion support
++      libxt_physdev: restore inversion support
++      libxt_policy: remove superfluous inversion
++      tests: add negation tests for libxt_statistic
++      libxt_hashlimit: observe new default gc-expire time when saving
++      libxt_string: simplify hex output routine
++      libxt_string: replace hex codes by char equivalents
++      src: remove unused IPTABLES_MULTI define
++      libxt_string: escape the escaping char too
++
++Pablo Neira Ayuso (1):
++      Bump version to 1.4.12.1
++
++Patrick McHardy (1):
++      Merge branch 'master' of git://dev.medozas.de/iptables
++
++
++
++iptables v1.4.12 Changelog:
++======================================================================
++Changes from 1.4.11.1:
++
++
++Fernando Luis Vazquez Cao (1):
++      doc: document IPv6 TOS mangling bug in old Linux kernels
++
++Jakub Zawadzki (1):
++      doc: fix group range in libxt_NFLOG's man
++
++Jan Engelhardt (23):
++      doc: include matches/targets in manpage again
++      libipt_LOG: fix ignoring all but last flags
++      libxt_RATEEST: use guided option parser
++      iptables: consolidate target/match init call
++      extensions: support for per-extension instance "global" variable space
++      libxt_rateest: abolish global variables
++      libxt_RATEEST: abolish global variables
++      libip6t_HL: fix option names from ttl -> hl
++      libxt_state: fix regression about inversion of main option
++      libxt_hashlimit: use a more obvious expiry value by default
++      build: bump soversion for recent data structure change
++      build: attempt to fix building under Linux 2.4
++      doc: mention multiple verbosity flags
++      build: install modules in arch-dependent location
++      doc: fix version string in ip6tables.8
++      doc: the -m option cannot be inverted
++      iptables: restore negation for -f
++      libxtables: properly reject empty hostnames
++      libxtables: ignore whitespace in the multiaddress argument parser
++      option: remove last traces of intrapositional negation
++      libxtables: set clone's initial data to NULL
++      libxt_conntrack: restore network-byte order for v1,v2
++      libxt_conntrack: move more data into the xt_option_entry
++
++Jiri Popelka (5):
++      iptables: Coverity: DEADCODE
++      iptables: Coverity: NEGATIVE_RETURNS
++      iptables: Coverity: REVERSE_INULL
++      iptables: Coverity: VARARGS
++      iptables: Coverity: RESOURCE_LEAK
++
++Martin F. Krafft (1):
++      iptables-apply: select default rule file depending on call name
++
++Massimo Maggi (1):
++      libxt_RATEEST: fix userspacesize field
++
++Patrick McHardy (4):
++      Merge branch 'master' of git://dev.medozas.de/iptables
++      Merge branch 'master' of git://dev.medozas.de/iptables
++      Merge branch 'master' of git://dev.medozas.de/iptables
++      Bump version to 1.4.12
++
++
++
++iptables v1.4.11.1 Changelog:
++======================================================================
++Changes from 1.4.11:
++
++
++Elie De Brauwer (1):
++      doc: fix trivial typo in libipt_SNAT
++
++Jan Engelhardt (13):
++      libxt_owner: restore inversion support
++      build: remove dead code parts
++      build: fix installation of symlinks
++      build: fix absence of xml translator in IPv6-only builds
++      doc: update GPL license text
++      doc: iptables-xml should be in manpage section 1
++      build: move basic preprocessor flags to regular_CPPFLAGS
++      build: move kinclude's preprocessor flags to kinclude_CPPFLAGS
++      src: move all libiptc pieces into its directory
++      src: move all iptables pieces into a separate directory
++      tests: add some sample rulesets to test save-restore cycle
++      option: fix ignored negation before implicit extension loading
++      build: re-add missing CPPFLAGS for libiptc
++
++Maciej Å»enczykowski (1):
++      xtables-multi: fix absence of xml translator in IPv6-only builds
++
++Mike Frysinger (1):
++      build: move remaining preprocessor flags to CPPFLAGS
++
++Patrick McHardy (1):
++      Bump version to 1.4.11.1
++
++Vlad Dogaru (1):
++      doc: fix MASQUERADE section of man page
++
++
++
++iptables v1.4.11 Changelog:
++======================================================================
++Changes from 1.4.10:
++
++
++Changli Gao (1):
++      iptables: fix the dead loop when meeting unknown options
++
++Florian Westphal (3):
++      libxt_conntrack: fix --ctdir save/dump output format
++      libxt_time: fix random --datestart skips
++      extensions: libxt_NFQUEUE: add v2 revision with --queue-bypass option
++
++JP Abgrall (1):
++      libxt_quota: make sure uint64 is not truncated
++
++Jan Engelhardt (218):
++      libxtables: change option precedence order to be intuitive
++      libxt_TOS: avoid an undesired overflowing computation
++      iptables: fix longopt reecognition and workaround getopt(3) behavior
++      Revert "Revert "libxtables: change option precedence order to be intuitive""
++      Merge branch 'master' of git://dev.medozas.de/iptables into m2
++      iptables: reset options at the start of each command
++      iptables: do not emit orig_opts twice
++      include: update files with headers from Linux 2.6.37-rc1
++      TPROXY: add support for revision 1
++      socket: add support for revision 1
++      build: fix globbing of extensions in other locales
++      libxt_owner: output numeric IDs when save is requested
++      Merge commit 'v1.4.10'
++      build: stop on error in subcommand
++      src: const annotations
++      xt_comment: remove redundant cast
++      src: use C99/POSIX types
++      iptables: abort on empty interface specification
++      xtables: reorder num_old substraction for clarity
++      ip[6]tables: only call match's parse function when option char is in range
++      ip[6]tables: only call target's parse function when option char is in range
++      extensions: remove no longer necessary default: cases
++      libxt_sctp: fix a typo
++      libipt_CLUSTERIP: const annotations
++      libxtables: do some option structure checking
++      libxt_quota: print negation when it has been selected
++      libxt_connlimit: reword help text to say prefix length
++      libxt_connlimit: add a --connlimit-upto option
++      libxt_connlimit: support for dstaddr-supporting revision 1
++      libxt_connlimit: remove duplicate member that caused size change
++      libxt_quota: clarifications on matching
++      iptables: improve error reporting with extension loading troubles
++      libxt_u32: enclose argument in quotes
++      xtables: set custom opts to NULL on free
++      iptables: warn when parameter limit is exceeded
++      iptables: remove bogus address-of
++      iptables: remove more redundant casts
++      iptables: do not print trailing whitespaces
++      src: collect do_command variables in a struct
++      src: move large default: block from do_command6 into its own function
++      src: share iptables_command_state across the two programs
++      src: deduplicate find_proto function
++      src: move OPT_FRAGMENT to the end so the list can be shared
++      src: put shared option flags into xshared
++      src: deduplicate and simplify implicit protocol extension loading
++      src: unclutter command_default function
++      src: move jump option handling from do_command6 into its own function
++      src: move match option handling from do_command6 into its own functions
++      iptables: fix error message for unknown options
++      iptables: fix segfault target option parsing
++      ip6tables: spacing fixes for -o argument
++      libxt_devgroup: option whitespace update following v1.4.10-49-g7386635
++      extensions: fix indent of vtable
++      doc: fix wrong sentence about negation in xt_limit
++      doc: fix misspelling of "field"
++      extensions: remove redundant init functions
++      Remove unused CVS expanded keywords
++      libip6t_dst: remove unimplemented --dst-not-strict
++      libip6t_hbh: remove unimplemented --hbh-not-strict
++      extensions: add missing checks for specific flags
++      libipt_ECN: set proper option flags
++      doc: mention other possible nf_loggers for TRACE
++      doc: fix odd partial sentence in libipt_TTL
++      libxt_quota: require --quota to be specified
++      doc: rateest options can be optional
++      libxtables: fix memory scribble beyond end of array
++      iptables: fix an inversion
++      doc: add VERSION section to manpages
++      extensions: add missing checks for specific flags (2)
++      libxtables: guided option parser
++      libxt_CHECKSUM: use guided option parser
++      libxt_socket: use guided option parser
++      libxtables: provide better final_check
++      libxt_CONNSECMARK: use guided option parser
++      libxtables: XTTYPE_UINT32 support
++      libxt_cpu: use guided option parser
++      libxtables: min-max option support
++      libxt_cluster: use guided option parser
++      libxtables: XTTYPE_UINT8 support
++      libip[6]t_HL: use guided option parser
++      libip[6]t_hl: use guided option parser
++      libxtables: XTTYPE_UINT32RC support
++      libip[6]t_ah: use guided option parser
++      libip6t_frag: use guided option parser
++      libxt_esp: use guided option parser
++      libxtables: XTTYPE_STRING support
++      libip[6]t_REJECT: use guided option parser
++      libip6t_dst: use guided option parser
++      libip6t_hbh: use guided option parser
++      libip[6]t_icmp: use guided option parser
++      libip6t_ipv6header: use guided option parser
++      libipt_ECN: use guided option parser
++      libipt_addrtype: use guided option parser
++      libxt_AUDIT: use guided option parser
++      libxt_CLASSIFY: use guided option parser
++      libxt_DSCP: use guided option parser
++      libxt_LED: use guided option parser
++      libxt_SECMARK: use guided option parser
++      libxt_TCPOPTSTRIP: use guided option parser
++      libxt_comment: use guided option parser
++      libxt_helper: use guided option parser
++      libxt_physdev: use guided option parser
++      libxt_pkttype: use guided option parser
++      libxt_state: use guided option parser
++      libxt_time: use guided option parser
++      libxt_u32: use guided option parser
++      doc: avoid duplicate entries in manpage
++      libxtables: XTTYPE_MARKMASK32 support
++      libxt_MARK: use guided option parser
++      libxt_CONNMARK: use guided option parser
++      libxtables: XTTYPE_UINT64 support
++      libxt_quota: use guided option parser
++      libxtables: linked-list name<->id map
++      libxt_devgroup: use guided option parser
++      libipt_realm: use guided option parser
++      libxtables: XTTYPE_UINT16RC support
++      libxt_length: use guided option parser
++      libxt_tcpmss: use guided option parser
++      libxtables: XTTYPE_UINT8RC support
++      libxtables: XTTYPE_UINT64RC support
++      libxt_connbytes: use guided option parser
++      libxtables: XTTYPE_UINT16 support
++      libxt_CT: use guided option parser
++      libxt_NFQUEUE: use guided option parser
++      libxt_TCPMSS: use guided option parser
++      libxtables: pass struct xt_entry_{match,target} to x6 parser
++      libxt_string: use guided option parser
++      libxtables: XTTYPE_SYSLOGLEVEL support
++      libip[6]t_LOG: use guided option parser
++      libxtables: XTTYPE_ONEHOST support
++      libxtables: XTTYPE_PORT support
++      libxt_TPROXY: use guided option parser
++      libipt_ULOG: use guided option parser
++      build: bump libxtables ABI version
++      libxt_TEE: use guided option parser
++      xtoptions: respect return value in xtables_getportbyname
++      libxt_TOS: use guided option parser
++      libxt_tos: use guided option parser
++      extensions: remove unused TOS code
++      libxtables: XTTYPE_PORTRC support
++      libxt_udp: use guided option parser
++      libxt_dccp: use guided option parser
++      libxt_tos: add inversion support back again
++      libxtables: fix assignment in wrong offset (XTTYPE_UINT*RC)
++      libxt_u32: add missing call to xtables_option_parse
++      extensions: remove bogus use of XT_GETOPT_TABLEEND
++      libxt_owner: remove ifdef IPT_COMM_OWNER
++      libxtables: output name of extension on rev detect failure
++      extensions: const annotations
++      libxt_statistic: streamline and document possible placement of negation
++      libxt_statistic: increase precision on create and dump
++      libxtables: XTTYPE_DOUBLE support
++      libxt_statistic: use guided option parser
++      libxt_IDLETIMER: use guided option parser
++      libxt_NFLOG: use guided option parser
++      libxtables: support for XTTYPE_PLENMASK
++      libxt_connlimit: use guided option parser
++      libxt_recent: use guided option parser
++      libxtables: do not overlay addr and mask parts, and cleanup
++      libxtables: flag invalid uses of XTOPT_PUT
++      libxtables: XTTYPE_PLEN support
++      libxt_hashlimit: use guided option parser
++      libxtables: XTTYPE_HOSTMASK support
++      libxt_policy: use guided option parser
++      libxt_owner: use guided option parser
++      libxt_osf: use guided option parser
++      libxt_multiport: use guided option parser
++      libipt_NETMAP: use guided option parser
++      libxt_limit: use guided option parser
++      libxtables: XTTYPE_PROTOCOL support
++      libxt_ipvs: use guided option parser
++      doc: S/DNAT allows to omit IP addresses
++      libxt_conntrack: use guided option parser
++      libip6t_mh: use guided option parser
++      libip6t_rt: use guided option parser
++      libxtables: XTTYPE_ETHERMAC support
++      libxt_mac: use guided option parser
++      libipt_CLUSTERIP: use guided option parser
++      libxt_iprange: use guided option parser
++      libipt_DNAT: use guided option parser
++      libipt_SNAT: use guided option parser
++      libipt_MASQUERADE: use guided option parser
++      libipt_REDIRECT: use guided option parser
++      libipt_SAME: use guided option parser
++      src: replace old IP*T_ALIGN macros
++      src: combine default_command functions
++      libxt_policy: option table fixes, improved error tracking
++      libxtables: avoid running into .also checks when option not used
++      libxt_policy: use XTTYPE_PROTOCOL type
++      libxtables: collapse double protocol parsing
++      libipt_[SD]NAT: flag up module name on error
++      libipt_[SD]NAT: avoid false error about multiple destinations specified
++      libxt_conntrack: correct printed module name
++      libxt_conntrack: fix assignment to wrong member
++      libxt_conntrack: resolve erroneous rev-2 port range message
++      libip6t_rt: rt-0-not-strict should take no arg
++      libxtables: retract _NE types and use a flag instead
++      libxt_quota: readd missing XTOPT_PUT request
++      libxtables: check for negative numbers in xtables_strtou*
++      libxt_rateest: streamline case display of units
++      doc: add some coded option examples to libxt_hashlimit
++      doc: make usage of libxt_rateest more obvious
++      doc: clarify that -p all is a special keyword only
++      doc: use .IP list for TCPMSS
++      doc: remove redundant .IP calls in libxt_time
++      libxt_ipvs: restore network-byte order
++      libxt_u32: --u32 option is required
++      libip6t_rt: restore --rt-type storing
++      libxtables: more detailed error message on multi-int parsing
++      libxtables: use uintmax for xtables_strtoul
++      libxtables: make multiint parser have greater range
++      libxtables: unclutter xtopt_parse_mint
++      libxtables: have xtopt_parse_mint interpret partially-spec'd ranges
++      libxt_NFQUEUE: avoid double attempt at parsing
++      libxt_NFQUEUE: add mutual exclusion between qnum and qbal
++      libxt_time: always ignore libc timezone
++      libxt_time: --utc and --localtz are mutually exclusive
++      libxt_time: deprecate --localtz option, document kernel TZ caveats
++
++Jozsef Kadlecsik (3):
++      Fix listing/saving the new revision of the SET target
++      Fix set match/target direction parser
++      SET target revision 2 added
++
++Li Yewang (1):
++      xtables: fix typo in error message of xtables_register_match()
++
++Lutz Jaenicke (2):
++      libipt_REDIRECT: "--to-ports" is not mandatory
++      libxt_devgroup: actually set XT_DEVGROUP_OPT_???GROUP flags
++
++Maciej Zenczykowski (20):
++      man pages: allow underscores in match and target names
++      mark newly opened fds as FD_CLOEXEC (close on exec)
++      xtables_ip6addr_to_numeric: fix typo in comment
++      xtables: delay (statically built) match/target initialization
++      v4: rename init_extensions() to init_extensions4()
++      v6: rename init_extensions() to init_extensions6()
++      xtables.h: init_extensions() no longer exists
++      v4: rename for_each_chain() to for_each_chain4()
++      v6: rename for_each_chain() to for_each_chain6()
++      v4: rename flush_entries() to flush_entries4()
++      v6: rename flush_entries() to flush_entries6()
++      v4: rename delete_chain() to delete_chain4()
++      v6: rename delete_chain() to delete_chain6()
++      v4: rename print_rule() to print_rule4()
++      v6: rename print_rule() to print_rule6()
++      v4: rename do_command() to do_command4()
++      v6: rename do_command() to do_command6()
++      move 'int line' definition from ip6?tables.c into xtables.c
++      convert ip6?tables-multi to actually use their own header files
++      Don't load ip6?_tables module when already loaded
++
++Maciej Å»enczykowski (3):
++      Add --ipv4/-4 and --ipv6/-6 support to ip6?tables{,-restore}.
++      Move common parts of libext{4,6}.a into libext.a
++      combine ip6?tables-multi into xtables-multi
++
++Mark Montague (1):
++      iptables: documentation for iptables and ip6tables "security" tables
++
++Max Kellerman (1):
++      xtables: use strspn() to check if string needs to be quoted
++
++Pablo Neira Ayuso (1):
++      libxt_cluster: fix inversion in the cluster match
++
++Patrick McHardy (16):
++      Revert "libxtables: change option precedence order to be intuitive"
++      Merge branch 'master' of git://dev.medozas.de/iptables
++      extensions: libxt_conntrack: add support for specifying port ranges
++      extensions: add extension for devgroup match
++      Merge branch 'master' of git://dev.medozas.de/iptables
++      Merge branch 'master' of vishnu.netfilter.org:/data/git/iptables
++      Merge branch 'opts' of git://dev.medozas.de/iptables
++      Merge branch 'opts' of git://dev.medozas.de/iptables
++      Merge branch 'floating/opts' of git://dev.medozas.de/iptables
++      Merge branch 'opts' of git://dev.medozas.de/iptables
++      Merge branch 'opts' of git://dev.medozas.de/iptables
++      Merge branch 'master' of git://dev.medozas.de/iptables
++      Merge branch 'opts' of git://dev.medozas.de/iptables
++      Merge branch 'floating/opts' of git://dev.medozas.de/iptables
++      Merge branch 'master' of git://dev.medozas.de/iptables
++      Bump version to 1.4.11
++
++Rob Leslie (1):
++      iptables-restore: resolve confusing policy error message
++
++Stefan Tomanek (2):
++      ip(6)tables-multi: unify subcommand handling
++      iptables: add -C to check for existing rules
++
++Stephen Beahm (1):
++      libipt_REDIRECT: avoid dereference of uninitialized pointer
++
++Thomas Graf (2):
++      libxt_AUDIT: add AUDIT target
++      iptables: add manual page section for AUDIT target
++
++Wes Campaigne (4):
++      libxtables: avoid confusing use of ai_protocol=IPPROTO_IPV6
++      xtables: fix excessive memory allocation in host_to_ipaddr
++      xtables: fix the broken detection/removal of redundant addresses
++      xtables: use all IPv6 addresses resolved from a hostname
++
++
++
++iptables v1.4.10 Changelog:
++======================================================================
++Changes from 1.4.9:
++
++
++Changli Gao (1):
++      libxt_quota: don't ignore the quota value on deletion
++
++Eric Dumazet (2):
++      extensions: REDIRECT: add random help
++      extension: add xt_cpu match
++
++Hannes Eder (1):
++      libxt_ipvs: user-space lib for netfilter matcher xt_ipvs
++
++Jan Engelhardt (11):
++      doc: let man(1) autoalign the text in xt_cpu
++      doc: remove extra empty line from xt_cpu
++      doc: minimal spelling updates to xt_cpu
++      all: consistent syntax use in struct option
++      doc: consistent use of markup
++      xtables: remove unnecessary cast
++      build: fix static linking
++      iptables-xml: resolve compiler warnings
++      iptables: limit chain name length to be consistent with targets
++      libiptc: build with -Wl,--no-as-needed
++      libiptc: add Libs.private to pkgconfig files
++
++Luciano Coelho (2):
++      extensions: add idletimer xt target extension
++      extensions: libxt_IDLETIMER: use xtables_param_act when checking options
++
++Michael S. Tsirkin (1):
++      extensions: libxt_CHECKSUM extension
++
++Patrick McHardy (6):
++      extensions: libipt_LOG/libip6t_LOG: support macdecode option
++      extensions: fix compilation of the new CHECKSUM target
++      Merge branch 'master' into iptables-next
++      Merge branch 'master' into iptables-next
++      Merge branch 'iptables-next'
++      Bump version to 1.4.10
++
++
++
++iptables v1.4.9 Changelog:
++======================================================================
++Changes from 1.4.8:
++
++
++Adam Nielsen (1):
++      extensions: add the LED target
++
++Eric Dumazet (1):
++      extensions: REDIRECT: add random help
++
++Jan Engelhardt (10):
++      utils: add missing include flags to Makefile
++      doc: xt_string: correct copy-and-pasting in manpage
++      doc: xt_hashlimit: fix a typo
++      doc: xt_LED: nroff formatting requirements
++      includes: sync header files from Linux 2.6.35-rc1
++      xtables: another try at chain name length checking
++      xtables: remove xtables_set_revision function
++      libxt_hashlimit: always print burst value
++      libxt_conntrack: do print netmask
++      xt_quota: also document negation
++
++Jozsef Kadlecsik (1):
++      libxt_set: new revision added
++
++Luciano Coelho (2):
++      extensions: libxt_rateest: fix typo in the man page
++      extensions: libxt_rateest: fix bps options for iptables-save
++
++Patrick McHardy (5):
++      Revert "Revert "Merge branch 'iptables-next'""
++      Merge branch 'master' of git://dev.medozas.de/iptables
++      Merge branch 'master' of git://dev.medozas.de/iptables
++      Merge branch 'master' of vishnu.netfilter.org:/data/git/iptables
++      Bump version to 1.4.9
++
++Samuel Ortiz (1):
++      extensions: libxt_quota.c: Support option negation
++
++Shan Wei (2):
++      xt_sctp: Trace DATA chunk that supports SACK-IMMEDIATELY extension
++      xt_sctp: support FORWARD_TSN chunk type
++
++
++
++iptables v1.4.8 Changelog:
++======================================================================
++Changes from 1.4.7:
++
++
++Dmitry V. Levin (3):
++      extensions: REDIRECT: fix --to-ports parser
++      iptables: add noreturn attribute to exit_tryhelp()
++      extensions: MASQUERADE: fix --to-ports parser
++
++Jan Engelhardt (9):
++      libxt_comment: avoid use of IPv4-specific examples
++      libxt_CT: add a manpage
++      iptables: correctly check for too-long chain/target/match names
++      doc: libxt_MARK: no longer restricted to mangle table
++      doc: remove claim that TCPMSS is limited to mangle
++      libxt_recent: add a missing space in output
++      doc: add manpage for libxt_osf
++      libxt_osf: import nfnl_osf program
++      extensions: add support for xt_TEE
++
++Karl Hiramoto (1):
++      iptables: optionally disable largefile support
++
++Pablo Neira Ayuso (1):
++      CT: fix --ctevents parsing
++
++Patrick McHardy (7):
++      extensions: add CT extension
++      libxt_CT: print conntrack zone in ->print/->save
++      Merge branch 'master' of git://dev.medozas.de/iptables into iptables-next
++      xtables: fix compilation when debugging is enabled
++      Merge branch 'iptables-next'
++      Revert "Merge branch 'iptables-next'"
++      Bump version to 1.4.8
++
++Simon Lodal (1):
++      libxt_conntrack: document --ctstate UNTRACKED
++
++Vincent Bernat (1):
++      iprange: fix xt_iprange v0 parsing
++
++
++
++iptables v1.4.7 Changelog:
++======================================================================
++Changes from 1.4.6:
++
++
++Dmitry V. Levin (1):
++      libip4tc: Add static qualifier to dump_entry()
++
++Jan Engelhardt (8):
++      libipq: build as shared library
++      recent: reorder cases in code (cosmetic cleanup)
++      doc: fix recent manpage to reflect actual supported syntax
++      doc: fix limit manpage to reflect actual supported syntax
++      doc: mention requirement of additional packages for ipset
++      policy: fix error message showing wrong option
++      includes: header updates
++      Lift restrictions on interface names
++
++Patrick McHardy (1):
++      iptables 1.4.7
++
++
++
++iptables v1.4.6 Changelog:
++======================================================================
++Changes from 1.4.5:
++
++
++Jan Engelhardt (20):
++      iptables: manpage updates for augmented -Z syntax
++      doc: mention maximum mark size in manpages
++      Support for nommu arches
++      realm: remove static initializations
++      libiptc: remove unused functions
++      libiptc: avoid strict-aliasing warnings
++      iprange: do accept non-ranges for xt_iprange v1
++      iprange: warn on reverse range
++      iprange: roll address parsing into a loop
++      iprange: do accept non-ranges for xt_iprange v1 (log)
++      iprange: warn on reverse range (log)
++      libiptc: fix wrong maptype of base chain counters on restore
++      iptables: fix undersized deletion mask creation
++      style: reduce indent in xtables_check_inverse
++      libxtables: hand argv to xtables_check_inverse
++      iptables/extensions: make bundled options work again
++      CONNMARK: print mark rules with mask 0xffffffff as set instead of xset
++      iptables: take masks into consideration for replace command
++      doc: explain experienced --hitcount limit
++      doc: name resolution clarification
++
++Mohit Mehta (1):
++      iptables: expose option to zero packet/byte counters for a specific rule
++
++Olaf Rempel (1):
++      build: restore --disable-ipv6 functionality on system w/o v6 headers
++
++Patrick McHardy (7):
++      Merge branch 'zero' of git://dev.medozas.de/iptables
++      MARK: print mark rules with mask 0xffffffff as --set-mark instead of --set-xmark
++      DNAT: fix incorrect check during parsing
++      extensions: add osf extension
++      conntrack: fix --expires parsing
++      Merge branch 'master' of git://dev.medozas.de/iptables
++      Bump version to v1.4.6
++
++Tim Small (1):
++      doc: update TCPMSS manpage with Linux 2.6.25 changes
++
++sobtwmxt (1):
++      doc: fix typo in length manpage
++
++
++
++iptables v1.4.5 Changelog:
++======================================================================
++Changes from 1.4.4:
++
++
++Florian Westphal (1):
++      libxt_NFQUEUE: add new v1 version with queue-balance option
++
++Jan Engelhardt (18):
++      xt_conntrack: revision 2 for enlarged state_mask member
++      libxt_helper: fix invalid passed option to check_inverse
++      libiptc: split v4 and v6
++      extensions: collapse registration structures
++      iptables: allow for parse-less extensions
++      iptables: allow for help-less extensions
++      extensions: remove empty help and parse functions
++      xtables: add multi-registration functions
++      extensions: collapse data variables to use multi-reg calls
++      xtables: warn of missing version identifier in extensions
++      COMMIT_NOTES: notice to check for soversion bumps
++      build: order of dependent libs is sensitive
++      multi binary: allow subcommand via argv[1]
++      build: fix struct size mismatch
++      build: combine iptables-multi and iptables-static
++      build: build only iptables-multi
++      Merge branch 'stable'
++      manpages: more fixes to minuses, hyphens, dashes
++
++Laurence J. Lane (1):
++      manpage: fix lintian warnings
++
++Michael Granzow (1):
++      iptables: accept multiple IP address specifications for -s, -d
++
++Patrick McHardy (2):
++      man: fix incorrect plural in libipt_set.man
++      Bump version number to 1.4.5
++
++Trent W. Buck (1):
++      ipt_set: fix a typo in the manpage
++
++
++iptables v1.4.4 Changelog:
++======================================================================
++Changes from 1.4.3.2:
++
++
++Frank Tobin (1):
++      libxt_tcp: fix a manpage syntax typo
++
++Ian Bruce (1):
++      libxt_tcp: manpage corrections and suggestions
++
++Jan Engelhardt (15):
++      Add new COMMIT_NOTES document
++      xtables: use extern "C"
++      extensions: add const qualifiers in print/save functions
++      iptables: replace open-coded sizeof by ARRAY_SIZE
++      addrtype: fix one manpage type
++      manpages: do not include v4-only modules in ip6tables manpage
++      libip6t_policy: remove redundant functions
++      policy: use direct xt_policy_info instead of ipt/ip6t
++      policy: merge ipv6 and ipv4 variant
++      build: fix manpage collection
++      extensions: use NFPROTO_UNSPEC for .family field
++      DNAT/SNAT: add manpage documentation for --persistent flag
++      extensions: remove redundant casts
++      iptables: close open file descriptors
++      manpages: markup corrections
++
++Jozsef Kadlecsik (1):
++      Updated set/SET match and target to support multiple ipset protocols.
++
++Pablo Neira Ayuso (2):
++      extensions: add `cluster' match support
++      xtables: fix segfault if incorrect protocol name is used
++
++Patrick McHardy (3):
++      SNAT/DNAT: add support for persistent multi-range NAT mappings
++      Merge branch 'stable' of git://dev.medozas.de/iptables
++      Bump version
++
++kd6lvw (1):
++      libxt_connlimit: initialize v6_mask
++
++
++
++iptables v1.4.3.2 Changelog:
++======================================================================
++Changes from 1.4.3.1:
++
++
++Jan Engelhardt (12):
++      libxt_tcpmss: fix an inversion while parsing --mss
++      iptables-multi: support "iptables-static" as a callable name
++      libxtables: reorder .version member
++      build: do not run ldconfig for DESTDIR installations
++      build: add configure option to disable ip6tables
++      build: add configure option to disable ipv4 iptables
++      libxtables: provide IPv6 zero address variable
++      iptables: print negation extrapositioned
++      Merge commit 'v1.4.3'
++      Merge branch 'plus'
++      CLASSIFY: document non-standard interpretation behavior
++      libxt_conntrack: properly output negation symbol
++
++Pablo Neira Ayuso (1):
++      build: bump version to 1.4.3.2
++
++
++iptables v1.4.3.1 Changelog:
++======================================================================
++Changes from 1.4.3:
++
++
++Jan Engelhardt (2):
++      iptables-save: minor corrections to the manpage markup
++      libxt_hashlimit: add missing space for iptables-save output
++
++Pablo Neira Ayuso (2):
++      build: bump version to 1.4.3.1
++      iptables: refer to dmesg if we hit EINVAL
++
++Peter Volkov (2):
++      libxtables: fix compile error due to incomplete change
++      build: fix linker issue when LDFLAGS contains --as-needed
++
++
++
++iptables v1.4.3 Changelog:
++======================================================================
++Changes from 1.4.2:
++
++
++Bart De Schuymer (1):
++      man: fix physdev manpage
++
++Christian Perle (1):
++      libxt_policy: cannot set spi/reqid numbers higher than 0x7fffffff
++
++Christoph Paasch (1):
++      libiptc: avoid compile warnings for iptc_insert_chain
++
++Daniel Drake (1):
++      libxt_owner: add more spaces to output
++
++Eric Leblond (1):
++      xt_NFLOG: Set default NFLOG qthreshold to 0
++
++Jamal Hadi Salim (12):
++      libxtables: Introduce global params structuring
++      libxtables: define xtables_free_opts()
++      libxtables: Add exit_error cb to xtables_globals
++      libxtables: Make ip6tables, iptables and iptables-xml use xtables_globals
++      libxtables: Replace direct exit_error() calls inside libxtables
++      libxtables: simple aliasing macro for exit_error
++      libxtables: set names of programs
++      libxtables: add xtables_set_revision
++      libxtables: make iptables and ip6tables use xtables_free_opts
++      libxtables: consolidate merge_options into xtables_merge_options
++      libxtables: consolidate init calls into one function
++      libxtables: general follow-up cleanup
++
++Jan Engelhardt (84):
++      Move libipt_recent to libxt_recent
++      libxt_recent: add IPv6 support
++      manpage: use separate paragraphs for command syntax
++      manpage: explain what rule-specification is
++      libiptc: remove typedef indirection
++      libiptc: remove indirections
++      libiptc: remove unused iptc_get_raw_socket and iptc_check_packet
++      libiptc: use hex output for hookmask
++      libxt_conntrack: respect -n option during ruledump
++      libiptc: make sockfd a per-handle thing
++      libxt_conntrack: dump ctdir
++      src: reuse the global modprobe_program variable
++      src: use NFPROTO_ constants
++      src: remove inclusion of iptables.h
++      doc: fix a typo in libip6t_REJECT.man
++      libiptc: guard chain index allocation for different malloc implementations
++      src: remove unused include files
++      iptables-save: output ! in position according to manpage
++      rateest: guard against segfault
++      env: augment deprecation notice
++      build: resolve autotools suggestions
++      doc: put iptables version into manpage
++      doc: resynchronize markup in iptables,ip6tables.8.in
++      doc: escape minus sign in manpages
++      build: use regular = assignments in Makefile
++      build: remove non-portable rule
++      doc: escape minus sign in manpage (2)
++      doc: augment ICMP manpage by type/code syntax
++      src: remove redundant returns at end of void-returning functions
++      src: remove redundant casts
++      libxt_owner: use correct UID/GID boundaries
++      extensions: use UINT_MAX constants over open-coded bits (1/2)
++      extensions: use UINT_MAX constants over open-coded numbers (2/2)
++      libxtables: prefix/order - fw_xalloc
++      libxtables: prefix/order - modprobe and xtables.ko loading
++      libxtables: prefix/order - match/target loading
++      libxtables: prefix/order - libdir
++      libxtables: prefix/order - strtoui
++      libxtables: prefix/order - program_name
++      libxtables: prefix/order - param_act
++      libxtables: prefix/order - ipaddr/ipmask to ascii output
++      libxtables: prefix/order - ascii to ipaddr/ipmask input
++      libxtables: prefix - misc functions
++      libxtables: prefix - parse and escaped output func
++      libxtables: prefix/order - move check_inverse to xtables.c
++      libxtables: prefix/order - move parse_protocol to xtables.c
++      libbxtables: prefix names and order it #1
++      libxtables: prefix names and order it #2
++      libxtables: prefix names and order #3
++      libxtables: move afinfo around
++      Merge branch 'origin/master'
++      libxtables: recognize IP6TABLES_LIB_DIR old-style environment variable
++      build: move -ldl to proper LDADD
++      libxtables: remove unused XT_LIB_DIR macro
++      libxtables: decouple non-xtables parts from header
++      src: remove iptables_rule_match indirection macro
++      src: remove unused ipt_tryload macro
++      libxtables: move compat defines to xtables.c
++      src: consolidate duplicate code in iptables/internal.h
++      libxtables: use const for vars holding literals
++      libxt_string: fix undefined behavior/incorrect patlen calculation
++      libxtables: flush before fork
++      libipq: add missing doc for NF_ values
++      build: restructure Makefile for include/ directory
++      libipq: fix compile error
++      build: remove unneeded -ldl from iptables_xml_LDADD
++      libiptc: make library available as a shared library
++      build: trigger reconfigure when extensions/GNUmakefile.in changes
++      doc: do not put IPv4 doc into ip6tables.8
++      doc: resynchronize manpage with in-code help
++      libxtables: inline and remove unused OPTION_OFFSET macro
++      libxtables: prefix exit_error to xtables_error
++      extensions: remove unwanted/add needed includes for IPv6 exts
++      extensions: remove unwanted/add needed includes for IPv4 exts
++      libxt_policy: use bounded strtoui
++      include: resynchronize headers with 2.6.29-rc5
++      extensions: add missing limits.h include
++      iptables: turn deprecation warning into enforcing mode
++      Merge commit 'nf/master'
++      libxt_connbytes: minor manpage adustments
++      libxt_connbytes: document nf_ct_acct behavior
++      libxtables: add -I/-L flags to pkgconfig files
++      libxt_comment: output quotes must be escaped in
++      iptables-save: module loading corrections
++
++Jesper Dangaard Brouer (3):
++      libiptc: fix chain rename bug in libiptc
++      libiptc: fix whitespaces and typos
++      libiptc: give credits to my self
++
++Jirí Moravec (1):
++      libxt_TOS: fix compilation error
++
++KOVACS Krisztian (2):
++      Add iptables support for the TPROXY target
++      Add iptables support for the socket match
++
++Marc Fournier (1):
++      doc: fix option typo in libxt_multiport
++
++Pablo Neira Ayuso (5):
++      iptables: fix error reporting with wrong/missing arguments
++      state: report spaces in the state list parsing
++      iptables: refer to dmesg when we hit error
++      string: fix wrong pattern length calculation
++      iptables: fix broken options-merging during libxtables rework
++
++Patrick McHardy (5):
++      Add SCTP/DCCP support to NAT targets
++      Bump version to 1.4.3-rc1
++      Merge branch 'master' of git://dev.medozas.de/iptables
++      Merge branch 'master' of git://dev.medozas.de/iptables
++      Bump version to 1.4.3
++
++Shaul Karl (1):
++      doc: fix one layout issue in iptables-restore.8
++
++Stephen Hemminger (1):
++      iptables: Add limits.h to get INT_MIN, INT_MAX, ...
++
++Thomas Jarosch (2):
++      Fix compile error in libxt_iprange.c using gcc 4.3.2
++      Fix compile warnings using gcc 4.3.2
++
++
++iptables v1.4.2 Changelog:
++======================================================================
++Changes from 1.4.2-rc1:
++
++Jan Engelhard (1):
++	build: fix iptables-static build
++
++Jan Engelhardt (26):
++	build: do not install ip{,6}tables.h
++	Merge branch 'master' of vishnu.netfilter.org:/data/git/iptables
++	manpages: name and markup fixes
++	src: remove dependency on libiptc headers
++	src: drop libiptc from installation
++	iptables-restore: fix segmentation fault with -tanything
++	libxt_recent: do not allow both --set and --rttl
++	Put xtables.c into its own library, libxtables.so
++	manpages: correct erroneous markup
++	physdev: remove extra space in output
++	Warn about use of DROP in nat table
++	Synchronize invert flag order with manpages
++	build: fix dependency tracking for xtables.h.in
++	build: fix initext.c dependency
++	manpages: add missing --rsource,--rdest options to libxt_recent.man
++	manpages: add missing rateest documentation
++	manpages: add missing rateest match documentation
++	libxt_mac: flatten casts in libxt_mac
++	libxt_iprange: fix option names
++	src: use regular includes
++	src: Update comments
++	build: prepare make tarball for git 1.6.0
++	libxt_recent: do allow --rttl for --update
++	src: update comments part II
++	build: run ldconfig on `make install`
++	doc: remove mentions of NAT in ip6tables manpage
++
++Jesper Dangaard Brouer (1):
++	libiptc: remove old fixme
++
++Pablo Sebastian Greco (1):
++	mark: fix invalid iptables-save output
++
++Patrick McHardy (2):
++	manpages: fix another typo in tcp manpage
++	v1.4.2
++
++Phil Oester (3):
++	iptables-save: fix hashlimit output
++	libxt_dscp: fix save of negated dscp match rules
++	src: Missing limits.h includes
++
++WANG Cong (1):
++	manpages: Fix a typo in tcp man page
++
++
++
++iptables v1.4.1-rc1 Changelog:
++======================================================================
++Changes from 1.4.0:
++
++Peter Warasin:
++	Fix CONNMARK mask initialisation
++
++Jesper Dangaard Brouer:
++	Inline functions iptcc_is_builtin() and set_changed()
++	Introduce a counter for number of user defined chains
++	Solving scalability issue: for chain list "name" searching
++
++Patrick McHardy:
++	Add RATEEST target extension
++	Add rateest match extension
++	Remove obsolete file
++	Add netfilter.h
++	Remove compiler.h inclusions
++	Retry ruleset dump when kernel returns EAGAIN
++
++Pablo Neira Ayuso:
++	Cleanup several code wraparounds
++	Check for malloc() return value in merge_opts()
++	Check for merge_opts() return value
++
++Jan Engelhardt:
++	Converts the iptables build infrastructure to autotools
++	Introduce strtonum()
++	Introduce common error messages
++	Add libxt_owner
++	Add libxt_tos
++	Add libxt_TOS
++	Add libxt_MARK r2
++	Add libxt_connmark r1
++	Print warning when dlopen fails
++	Add libxt_conntrack r0
++	Bunch o' renames
++	Rename overlapping function names
++	Add more libxt_hashlimit checks
++	Add libxt_mark r1
++	Add libxt_iprange r0
++	Add libxt_iprange r1
++	Give preference to iptables header files
++	Build adjustments
++	Add libxt_CONNMARK revision 1
++	Add libxt_conntrack revision 1
++	libxt_owner: UID/GID range support
++	Fix compilation of iptables-static build
++	Correct the family member value of libxt_mark revision 1
++	Makefile: add a "tarball" target
++	Drop -W from CFLAGS and some tiny code cleanups
++	Fix -Wshadow warnings and clean up xt_sctp.h
++	Update the libxt_owner manpage with the UID/GID-range feature
++	Fix all remaining warnings (missing declarations, missing prototypes)
++	xtables.h: move non-exported parts to internal.h
++	Add support for xt_hashlimit match revision 1
++	Combine IP{,6}T_LIB_DIR into XTABLES_LIBDIR
++	manpages: fix broken markup (missing close tags)
++	manpages: grammar and spelling
++	manpages: update to reflect fine-grained control
++	configure: split --enable-libipq from --enable-devel
++	Import iptables-apply
++	Add all necessary header files - compilation fix for various cases
++	Install libiptc header files because xtables.h depends on it
++	iptables: use C99 lists for struct options
++	RATEEST: add manpage
++	Implement AF_UNSPEC as a wildcard for extensions
++	Combine ipt and ip6t manpages
++	Resolve warnings on 64-bit compile
++	Wrap dlopen code into NO_SHARED_LIBS
++	Remove support for compilation of conditional extensions
++	Resolve libipt_set warnings
++	Update documentation about building the package
++	configure.ac: AC_SUBST must be separate
++	Dynamically create xtables.h.in with version
++	configure.ac: remove already-defined variables
++	Remove old functions, constants
++	Properly initialize revision for ip6tables targets
++	Makefile.am: use PACKAGE_TARNAME
++	iptables out-of-tree build directory
++
++Sven Schnelle:
++	Add libxt_TCPOPTSTRIP
++
++Max Kellermann:
++	Fix REDIRECT manpage
++	Whitespace cleanup
++	Use size_t
++	Escape strings
++	Unescape parameters
++	Allow empty strings in argument parser
++	Fix gcc warnings
++
++Naohiro Ooiwa:
++	Fix define value of SCTP chunk type
++
++Filippo Zangheri:
++	Remove useless white spaces from iptables-xml manpages
++
++James King:
++	libxt_iprange: Fix IP validation logic
++
++Shan Wei:
++	iptables-save: remove unnecessary code
++
++Henrik Nordstrom:
++	Make iptables-restore usable over a pipe
++	Add support for --set-counters to iptables -P
++	iptables --list-rules command
++	iptables --list chain rulenum
++	Make --set-counters (-c) accept comma separated counters
++
++Jamie Strandboge:
++	Fix ip6tables dest address printing
++
++
++
++iptables v1.4.1.1 Changelog
++=====================================================================
++
++Henrik Nordstrom (1):
++	iptables: fix printing of line numbers with --line-numbers arg
++
++Jan Engelhardt (3):
++	ip6tables: fix printing of ipv6 network masks
++	build: fix `make install` when --disable-shared is used
++	iprange: kernel flags were not set
++
++Patrick McHardy (1):
++	v1.4.1.1
++
++
++
++iptables v1.4.1 Changelog
++======================================================================
++
++Filippo Zangheri (1):
++	removes useless white spaces from iptables-xml manpages.
++
++Gáspár Lajos (1):
++	iptables: use C99 lists for struct options
++
++Henrik Nordstrom (5):
++	Make iptables-restore usable over a pipe
++	Add support for --set-counters to iptables -P
++	iptables --list-rules command
++	iptables --list chain rulenum
++	Make --set-counters (-c) accept comma separated counters
++
++James King (1):
++	[IPTABLES]: libxt_iprange: Fix IP validation logic
++
++Jamie Strandboge (1):
++	fix ip6tables dest address printing
++
++Jan Engelhardt (55):
++	Converts the iptables build infrastructure to autotools.
++	Introduce strtonum(), which works like string_to_number(), but passes
++	common error messages
++	libxt_owner
++	libxt_tos
++	libxt_TOS
++	libxt_MARK r2
++	libxt_connmark r1
++	print warning when dlopen fails
++	libxt_conntrack r0
++	bunch o' renames
++	rename overlapping function names
++	libxt_hashlimit checks
++	libxt_mark r1
++	libxt_iprange r0
++	libxt_iprange r1
++	Give preference to iptables header files
++	Build adjustments
++	libxt_CONNMARK revision 1
++	[IPTABLES]: libxt_conntrack revision 1
++	[IPTABLES]: libxt_owner: UID/GID range support
++	Fix compilation of iptables-static build
++	Correct the family member value of libxt_mark revision 1
++	Makefile: add a "tarball" target
++	Drop -W from CFLAGS and some tiny code cleanups
++	Fix -Wshadow warnings and clean up xt_sctp.h
++	Update the libxt_owner manpage with the UID/GID-range feature
++	Fix all remaining warnings (missing declarations, missing prototypes)
++	xtables.h: move non-exported parts to internal.h
++	Add support for xt_hashlimit match revision 1
++	Combine IP{,6}T_LIB_DIR into XTABLES_LIBDIR
++	manpages: fix broken markup (missing close tags)
++	manpages: grammar and spelling
++	manpages: update to reflect fine-grained control
++	configure: split --enable-libipq from --enable-devel
++	Add all necessary header files - compilation fix for various cases
++	Install libiptc header files because xtables.h depends on it
++	RATEEST: add manpage
++	Implement AF_UNSPEC as a wildcard for extensions
++	Combine ipt and ip6t manpages
++	Resolve warnings on 64-bit compile
++	Wrap dlopen code into NO_SHARED_LIBS
++	Remove support for compilation of conditional extensions
++	Resolve libipt_set warnings
++	Update documentation about building the package
++	configure.ac: AC_SUBST must be separate
++	Dynamically create xtables.h.in with version
++	configure.ac: remove already-defined variables
++	Remove old functions, constants
++	Makefile.am: use PACKAGE_TARNAME
++	iptables out-of-tree build directory
++	Update .gitignore
++	build: check for missing feature files
++	libxt_owner: add spaces to output
++	manpage updates
++
++Jesper Dangaard Brouer (3):
++	Inline functions iptcc_is_builtin() and set_changed().
++	Introduce a counter for number of user defined chains.
++	Solving scalability issue: for chain list "name"	searching.
++
++Kristof Provost (1):
++	REDIRECT: Allow symbolic port in REDIRECT --to-port
++
++Laszlo Attila Toth (1):
++	addrtype match: added revision 1
++
++Lutz Jaenicke (1):
++	Fix iptables-save output of libxt_owner match
++
++Martin F. Krafft (1):
++	Import iptables-apply
++
++Max Kellermann (7):
++	Fix REDIRECT manpage
++	whitespace cleanup
++	use size_t
++	escape strings
++	unescape parameters
++	allow empty strings in argument parser
++	fix gcc warnings
++
++Naohiro Ooiwa (1):
++	Fix define value of SCTP chunk type.
++
++Pablo Neira Ayuso (2):
++	- cleanup several code wraparounds
++	bump iptables version to prepare 1.4.1 release
++
++Patrick McHardy (16):
++	Add RATEEST target extension
++	Add rateest match extension
++	Remove obsolete file
++	Add netfilter.h
++	Remove compiler.h inclusions.
++	Retry ruleset dump when kernel returns EAGAIN.
++	Properly initialize revision for ip6tables targets
++	Bump version to 1.4.1-rc1
++	iptables 1.4.1-rc2
++	manpages: consistent syntax
++	Resync header files with kernel
++	Bump version
++	libiptc: move variable definitions to head of function
++	iptables-xml: sparse fixes
++	sparse warning fixes: integer used as pointer
++	v1.4.1
++
++Peter Warasin (1):
++	Fix CONNMARK mask initialisation
++
++Shan Wei (1):
++	iptables-save:remove unnecessary code.
++
++Sven Schnelle (1):
++	libxt_TCPOPTSTRIP
++
++Thomas Jacob (1):
++	Don't assume /bin/sh is bash
++
++Thomas Jarosch (1):
++	Add xtables version defines.
++
++Yasuyuki Kozakai (1):
++	Use s6_addr32 to access bits in int6_addr instead of incompatible name
++
++
++
++iptables v1.4.0 Changelog
++======================================================================
++Changes from 1.4.0rc1:
++
++- Don't use dlfcn.h if NO_SHARED_LIBS is defined
++	[ Mike Frysinger ]
++
++- Fix showing help text for matches/targets with revision as user
++	[ Patrick McHardy ]
++
++- Print warnings to stderr
++	[ Max Kellermann ]
++
++- Fix sscanf type errors
++	[ Patrick McHardy ]
++
++- Always print mask in iptables-save
++	[ Jan Engelhardt ]
++
++- Don't silenty exit on failure to open /proc/net/{ip,ip6}_tables_names
++	[ Victor Stinner ]
++
++- Adds --table to iptables-restore
++	[ Peter Warasin ]
++
++- Make DO_MULTI=1 work for ip6tables* binaries
++	[ Hann-huei Chiou ]
++
++- Add ip6tables-{save,restore} to non-experimental target, fix strict aliasing
++warnings
++	[ Patrick McHardy ]
++
++- Introducing libxt_*.man files. Sorted matches and modules
++	[ Laszlo Attila Toth ]
++
++- Install ip6tables-{save,restore} manpages
++	[ Patrick McHardy ]
++
++- Performance optimization in sorting chain during pull-out
++	[ Jesper Dangaard Brouer ]
++
++- Fix sockfd use accounting for kernels without autoloading
++	[ Patrick McHardy ]
++
++- use <linux/types.h>
++	[ Jan Engelhardt ]
++
++- Fix make/compile error for iptables-1.4.0rc1
++	[ Jesper Dangaard Brouer ]
++
++- Fix for --random option in DNAT and REDIRECT
++	[ Tom Eastep ]
++
++- Document xt_statistic
++	[ Stefano Sabatini ]
++
++- sctp: fix - mistake to pass a pointer where array is required
++	[ Li Zefan ]
++
++- Fix connlimit output for inverted --connlimit-above: ! > is <=, not <
++	[ Patrick McHardy ]
++
++- Add NFLOG manpage
++	[ Patrick McHardy ]
++
++- Move libipt_DSCP.man to libxt_DSCP.man for ip6tables.8
++	[ Yasuyuki Kozakai ]
++
++- Unifies libip[6]t_CONNSECMARK.man to libxt_CONNSECMARK.man
++	[ Yasuyuki Kozakai ]
++
++- Moves libipt_CLASSYFY.man to libxt_CLASSYFY.man for ip6tables.8
++	[ Yasuyuki Kozakai ]
++
++- fix check_inverse() call
++	[ Jan Engelhardt ]
++
++- Bump version to 1.4.0 final
++	[ Pablo Neira Ayuso ]
++
++
++
++iptables v1.4.0rc1 Changelog
++======================================================================
++Changes from 1.3.8:
++
++- Add support for generic xtables infrastructure (improved IPv6 support!)
++	[ Yasuyuki Kozakai ]
++
++- Deletes empty ->final_check() functions
++	[ Jan Engelhardt ]
++
++- Fix sparse warnings: non-C99 array declaration, incorrect function prototypes
++	[ Patrick McHardy ]
++
++- Remove last vestiges of NFC
++	[ Peter Riley ]
++
++- Make @msg argument a const char *, just like printf
++	[ Jan Engelhardt ]
++
++- Makes it possible to omit extra_opts of matches/targets if unnecessary
++	[ Jan Engelhardt ]
++
++- Fix "iptables getsockopt failed strangely" when querying revisions for non-existant matches and targets
++	[ Patrick McHardy]
++
++- Introduces DEST_IPT_LIBDIR in Makefile
++	[ Yasuyuki Kozakai ]
++
++- Change default KERNEL_DIR location and add KBUILD_OUTPUT
++	[ Sven Wegener ]
++
++- Removes obsolete KERNEL_64_USERSPACE_32 definitions
++	[ Yasuyuki Kozakai ]
++
++- Fix unused function warning
++	[ Patrick McHardy ]
++
++
++
++iptables v1.3.8 Changelog
++======================================================================
++
++- Fix build error of conntrack match
++	[Yasuyuki Kozakai]
++
++- Remove whitespace in ip6tables.c
++	[Yasuyuki Kozakai]
++
++- `-p all' and `-p 0' should be allowed in ip6tables
++	[Yasuyuki Kozakai]
++
++- hashlimit doc update
++	[Jan Engelhardt]
++
++- add --random option to DNAT and REDIRECT
++	[Patrick McHardy]
++
++- Makefile uses POSIX conform directory check
++	[Roy Marples]
++
++- Fix missing newlines in iptables-save/restore output
++	[Pavol Rusnak]
++
++- Update quota manpage for SMP
++	[Phil Oester]
++
++- Output for unspecified proto is `all' instead of `0'
++	[Phil Oester]
++
++- Fix iptables-save with --random option
++	[Patrick McHardy]
++
++- Remove unnecessary IP_NAT_RANGE_PROTO_RANDOM ifdefs
++	[Patrick McHardy]
++
++- Remove libnsl from LDLIBS
++	[Patrick McHardy]
++
++- Fix problem with iptables-restore and quotes
++	[Pablo Neira Ayuso]
++
++- Remove unnecessary includes
++	[Patrick McHardy]
++
++- Fix --modprobe parameter
++	[Maurice van der Pot]
++
++- ip6tables-restore should output error of modprobe after failed to load
++	[Yasuyuki Kozakai]
++
++- Add random option to SNAT
++	[Eric Leblond]
++
++- Fix missing space in error message
++	[Patrick McHardy]
++
++- Fixes for manpages of tcp, udp, and icmp{,6}
++	[Yasuyuki Kozakai]
++
++- Add ip6tables mh extension
++	[Masahide Nakamura]
++
++- Fix tcpmss manpage
++	[Patrick McHardy]
++
++- Add ip6tables TCPMSS extension
++	[Arnaud Ebalard]
++
++- Add UDPLITE multiport support
++	[Patrick McHardy]
++
++- Fix missing space in ruleset listing
++	[Patrick McHardy]
++
++- Remove extensions for unmaintained/obsolete patchlets
++	[Patrick McHardy]
++
++- Fix greedy debug grep
++	[Patrick McHardy]
++
++- Fix type in manpage
++	[Thomas Aktaia]
++
++- Fix compile/install error for iptables-xml with DO_MULTI=1
++	[Lutz Jaenicke]
++
++
++
++iptables v1.3.7 Changelog
++======================================================================
++
++Bugs fixed since 1.3.6:
++
++- Fix compilation error with linux 2.6.19
++	[ Patrick McHardy ]
++
++- Fix LOG target segfault with --log-prefix ""
++	[ Mike Frysinger, Bugzilla #516 ]
++
++- Fix conflicting getsockopt optname values for IP6T_SO_GET_REVISION_{MATCH,TARGET}
++	[ Yasuyuki KOZAKAI ]
++
++- Fix -E (rename) in iptables/ip6tables
++	[ Krzysztof Piotr Oledzki ]
++
++- Fix /etc/network usage
++	[ Pablo Neira ]
++
++- Fix iptables-save not printing -s/-d ! 0/0
++	[ Patrick McHardy ]
++
++- Fix ip6tables-save unnecessarily printing -s/-d options for zero prefix length
++	[ Daniel De Graaf ]
++
++New features since 1.3.6:
++
++- Add revision support for ip6tables
++	[ R?mi Denis-Courmont ]
++
++- Add port range support for ip6tables multiport match
++	[ R?mi Denis-Courmont ]
++
++- Add sctp match extension for ip6tables
++	[ Patrick McHardy ]
++
++- Add iptables-xml tool
++	[ Amin Azez ]
++
++- Add hashlimit support for ip6tables (needs kernel > 2.6.19)
++	[ Patrick McHardy ]
++
++- Use /limodules/$(shell uname -r)/build instead of /usr/src/linux to look for kernel source
++	[ Patrick McHardy ]
++
++- Add NFLOG target extension for iptables/ip6tables (needs kernel > 2.6.19)
++	[ Patrick McHardy ]
++
++
++
++iptables v1.3.6 Changelog
++======================================================================
++
++Bugs fixed since 1.3.5:
++
++- Fix segfault on loading of invalid counters in ip[6]tables-restore
++	[ Bugzilla #437, Olaf Rempel ]
++
++- Fix double-free if a single match is used multiple times within a single rule
++	[ Bugzilla #440, Harald Welte ]
++
++- Don't try to resolve "-p all" using getprotoent()
++	[ Bugzilla #446, Harald Welte ]
++
++- Refuse never matching protocol specifications for ip6tables
++	[ Yasuyuki Kozakai ]
++
++- Fix iptables-save output of osf match
++	[ Daniel De Graaf ]
++
++- Fix esp/connbytes detection with newer kernels (x_tables)
++	[ Harald Welte ]
++
++- Fix loading of IPCMv6 match shared library
++	[ Yasuyuki Kozakai ]
++
++- Refuse invalid esp match SPI ranges
++	[ Yasuyuki Kozakai ]
++
++- Fix out-of-bounds memory access when the unsupported "check" command was used
++	[ Bugzilla #463, Larry Stefani, Harald Welte ]
++
++- Fix out-of-bounds memory access when the "-c" option was used
++	[ Bugzilla #462, Larry Stefani, Harald Welte ]
++
++- Fix "Unknown error 4294967295" message
++	[ Bugzilla #460, Patrick McHardy ]
++
++- Use lower-case letters for realm match output
++	[ Simon Lodal ]
++
++- Fix example in connlimit manpage
++	[ Phil Oester ]
++
++- Refuse IP addresses as arguments to REDIRECT target
++	[ Bugzilla #482, Phil Oester ]
++
++- Fix set match negation
++	[ Jozsef Kadlecsik ]
++
++- Fix some compiler warnings
++	[ Bugzilla #457, Phil Oester ]
++
++- Refuse port ranges in ip6tables multiport match
++	[ Bugzilla #451, Phil Oester ]
++
++- Force user to specify --ipcmv6-type if ipcmv6 match is used
++	[ Bugzilla #461, Yasuyuki Kozakai ]
++
++- Fix libiptc symbol clash
++	[ Bugzilla #456, Phil Oester ]
++
++- Remove "hoho" message
++	[ Pierre-Yves Ritschard ]
++
++- Handle CIDR notation more sanely
++	[ Bugzilla #422, Phil Oester ]
++
++- Fix chain reference increment bug
++	[ Jesper Brouer ]
++
++- Fix counter clearing for policy counters
++	[ Bugzilla #502, Andy Gay ]
++
++- Remove warnings about interface names with non-alphanumeric characters
++	[ Patrick McHardy ]
++
++New features since 1.3.5:
++
++- Support multiple matches of the same type within a single rule
++	[ Jozsef Kadlecsik ]
++
++- DCCP/SCTP support for multiport match (needs kernel >= 2.6.18)
++	[ Patrick McHardy ]
++
++- SELinux SECMARK target (needs kernel >= 2.6.18)
++	[ James Morris ]
++
++- SELinux CONNSECMARK target (needs kernel >= 2.6.18)
++	[ James Morris ]
++
++- Add documentation for DNAT target :<port> syntax
++	[ Evan Miller ]
++
++- Add new exit value to indicate concurrency issues
++	[ Jesper Dangaard Brouer ]
++
++- Use gcc to build shared objects
++	[ Bugzilla #454, Phil Oester ]
++
++- Update quota match for version in current kernel, fix -D (needs kernel >= 2.6.18)
++	[ Phil Oester ]
++
++- Update MARK target documentation to include --and-mask/--or-mask
++	[ Eric Leblond ]
++
++- Add support for statistic match (needs kernel >= 2.6.18)
++	[ Patrick McHardy ]
++
++- Optionally read realm values from /etc/iproute2/rt_realms
++	[ Simon Lodal ]
++
++iptables v1.3.5 Changelog
++======================================================================
++This version requires kernel >= 2.4.0
++This version recommends kernel >= 2.4.18
++
++Bugs fixed from 1.3.4:
++
++- Fix conntrack --ctproto option in iptables-save
++	[ Phil Oester ]
++
++- Fix string match '--from' option in iptables-save
++	[ Michael Rash ]
++
++- Fix option parser of ttl match
++	[ Patrick McHardy ]
++
++- Get rid of gcc-4 warnings
++	[ Patrick McHardy ]
++
++- Fix spelling of 'address' in DNAT/SNAT manpage section
++	[ MJ Anthony ]
++
++- Fix 'tcp-rst' parsing in REJECT target
++	[ Torsten Hilbrich ]
++
++- Fix probing for supported revisions
++	[ Jones Desougi ]
++
++- Fix compilation of iptables on [old] systems that don't have IPT_F_GOTO
++	[ Harald Welte ]
++
++- Only set revisions on real targets, not on jumps
++	[ Pablo Neira ]
++
++- Fix memory leak in TC_COMMIT() of libiptc
++	[ Markus Sundberg ]
++
++- Correctly propagate errors of setsockopt to calling function
++	[ Harald Welte ]
++
++- Fix connbytes match iptables-save
++	[ Unknown ]
++
++- Fix sctp match compilation against recent kernel headers
++	[ Harald Welte ]
++
++- Fix conntrack match compilation against 2.4.0 kernel headers
++	[ Harald Welte ]
++
++Changes from 1.3.4:
++
++- Add support for ip6tables connmark match and target
++	[ Harald Welte ]
++
++- Add support for ip6tables state match
++	[ Harald Welte ]
++
++- Add support for new policy ip[6]tables match
++	[ Patrick McHardy ]
++
++- Major manpage update
++	[ Yasuyuki Kozakai ]
++
++- Remove ippool support, it has been deprecated by ipset long time ago
++	[ Harald Welte ]
++
++Please note: Since version 1.2.7a, patch-o-matic is now no longer part of
++iptables but rather distributed as a seperate package
++(ftp://ftp.netfilter.org/pupatch-o-matic-ng/snapshot)
++
++
++iptables v1.3.4 Changelog
++======================================================================
++This version requires kernel >= 2.4.0
++This version recommends kernel >= 2.4.18
++
++Bugs fixed from 1.3.3:
++
++- Fix parsing of NFQUEUE queue numbers
++	[ Eric Leblond ]
++
++- Add documentation of --queue-num parameter to NFQUEUE manpage
++	[ Eric Leblond ]
++
++- Fix 'hash-init' parameter of CLUSTERIP target
++	[ KOVACS Krisztian ]
++
++- Fix CONNMARK match and target: Marks are now always 32bit
++	[ Deti Fliegl ]
++
++- Print error message when multiple "--to" DNAT/SNAT args are used
++	with kernel >= 2.6.10
++		[ Phil Oester ]
++
++- Fix compilation of connbytes match with 2.6.14 kernel
++	[ Harald Welte ]
++
++- Fix address inversion of conntrack match
++	[ Tom Eastep ]
++
++- Fix sorting of chain names
++	[ Robert de Barth ]
++
++Changes from 1.3.2:
++
++- Add support for DCCP port and type matching
++	[ Harald Welte ]
++
++- Add support for new in-kernel string match
++	[ Pablo Neira ]
++
++Please note: Since version 1.2.7a, patch-o-matic is now no longer part of
++iptables but rather distributed as a seperate package
++(ftp://ftp.netfilter.org/pupatch-o-matic-ng/snapshot)
++
++
++iptables v1.3.3 Changelog
++======================================================================
++This version requires kernel >= 2.4.0
++This version recommends kernel >= 2.4.18
++
++Bugs fixed from 1.3.2:
++
++- Fix use-after-free in merge_options()
++	[ Markus Sundberg ]
++
++- Fix support for SNAT and DNAT to ICMP ID ranges
++	[ Patrick McHardy ]
++
++Changes from 1.3.2:
++
++- Add support for new NFQUEUE targets for IPv4 and IPv6
++	[ Harald Welte ]
++
++- Minor manpage updates
++	[ Harald Welte ]
++
++- Fix numberous gcc-4 warnings throughout the code
++	[ Harald Welte ]
++
++Please note: Since version 1.2.7a, patch-o-matic is now no longer part of
++iptables but rather distributed as a seperate package
++(ftp://ftp.netfilter.org/pupatch-o-matic-ng/snapshot)
++
++
++iptables v1.3.2 Changelog
++======================================================================
++This version requires kernel >= 2.4.0
++This version recommends kernel >= 2.4.18
++
++Bugs fixed from 1.3.1:
++
++- Fix TCPLAG version
++	[ Torsten Luettgert ]
++
++- More error checking in SET target
++	[ Michal Pokrywka ]
++
++- Fix optflags value for OPT_LINENUMBERS
++	[ Jonas Berlin ]
++
++- Allow NULL init function in ip6tables plugins
++	[ Jonas Berlin ]
++
++- Don't allow newlines in LOG prefix
++	[ Phil Oester ]
++
++- Introduce ip_conntrack_old_tuple to userspace header copy
++	[ Pablo Neira ]
++
++- Fix connbytes command line parsing bug
++	[ Piotrek Kaczmarek ]
++
++- Ignore unknown arguments in libipt_ULOG
++	[ Patrick McHardy ]
++
++- Correct error in multiport manpage wrt. "--ports"
++	[ Rusty Russell ]
++
++- Fix CONNMARK save/restore
++	[ Tom Eastep, Pawel Sikora ]
++
++- Make sure chain name doesn't start with '!'
++	[ Yasuyuki Kozakai ]
++
++- Prevent user to specify negative ports in SNAT/DNAT
++	[ Yasuyuki Kozakai ]
++
++- Fix deletion of targets where kernel size != userspace size
++	[ Pablo Neira ]
++
++- Fix save/restore of '! --uid-owner squid' problem in ip6t_owner
++	[ Harald Welte ]
++
++Changes from 1.3.1:
++
++- Add ``--log-uid'' option to ip6t_LOG target
++	[ Patrick McHardy ]
++
++- Improve REDIRECT manpage
++	[ Jonas Berlin ]
++
++- Add a number of missing manpage snippets
++	[ Jonas Berlin ]
++
++- Include FIN bit in mask of "--syn" bits
++	[ Harald Welte ]
++
++- Release previously merged options from merge_opts(), reduces memory-usage of
++	ipt ables-restore dramatically
++	[ Pablo Neira ]
++
++- OSF: changes to support connector notifications
++	[ Evgeniy Polyakov ]
++
++- Reduce code replication of parse_interface()
++	[ Yasuyuki Kozakai ]
++
++Please note: Since version 1.2.7a, patch-o-matic is now no longer part of
++iptables but rather distributed as a seperate package
++(ftp://ftp.netfilter.org/pupatch-o-matic-ng/snapshot)
++
++
++iptables v1.3.1 Changelog
++======================================================================
++This version requires kernel >= 2.4.4
++This version recommends kernel >= 2.4.18
++
++Bugs fixed from 1.3.0:
++
++- Fix CLUSTERIP rule deletion
++	[ Pablo Neira ]
++
++- Fix libip6t_random compilation
++	[ Harald Welte ]
++
++- Fix CONNMARK on 32bit userspace / 64bit kernel archs
++	[ Pablo Neira ]
++
++Changes from 1.3.0:
++
++- remove bogus NFC_* stuff in iptables
++	[ Pablo Neira ]
++
++- libiptc: don't sort builtin chains, restores iptables-1.2.x sort order
++	[ Olaf Rempel ]
++
++
++Please note: Since version 1.2.7a, patch-o-matic is now no longer part of
++iptables but rather distributed as a seperate package
++(ftp://ftp.netfilter.org/pupatch-o-matic-ng/snapshot)
++
++
++iptables v1.3.0 Changelog
++======================================================================
++This version requires kernel >= 2.4.4
++This version recommends kernel >= 2.4.18
++
++Bugs fixed from 1.3.0rc1:
++
++- Fix realm match save/restore issue
++	[ Harald Welte ]
++
++- Fix hashlimit rule deletion from userspace
++	[ Samuel Jean ]
++
++- Fix hashlimit parameter handling / iptables-save
++	[ Nikolai Malykh ]
++
++- Fix multiport inversion
++	[ Phil Oester ]
++
++Bugs fixed from 1.2.11:
++
++- Fix compilation on systems where /bin/sh != bash
++	[ Jozsef Kadlecsik ]
++
++- Fix setting lib_dir in ip*tables-{save,restore}
++	[ Martin Josefsson ]
++
++- Fix module-autoloading in certain cases
++	[ Harald Welte ]
++
++- libipt_TTL: limit range of valid TTL to 0-255
++	[ Maciej Soltysiak ]
++
++- libip6t_HL: limit range of valid HL to 0-255
++	[ Maciej Soltysiak ]
++
++- libip{6}t_limit: Fix half-working limit invert check
++	[ Phil Oester ]
++
++- libipt_connbytes: Update to use the IP_CONNTRACK_ACCT counters
++	[ Harald Welte ]
++
++- libipt_conntrack: Fix typo
++	[ Phil Oester ]
++
++- libipt_dstlimit: Fix half-working invert check
++	[ Phil Oester ]
++
++- libipt_helper: Prevent user from using --helper multiple times
++	[ Nicolas Bouliane ]
++
++- libipt_iprange: Print error message if --dst-range used twice
++	[ Nicolas Bouliane ]
++
++- libipt_nth: Fix help message syntax
++	[ Harald Welte ]
++
++- libipt_psd: Fix option parsing
++	[ Pablo Neira ]
++
++- libipt_random: Fix help message syntax
++	[ Harald Welte ]
++
++- libipt_realm: Fix inversion of options
++	[ Simon Lodal ]
++
++- libipt_time: Fix C++ style delayed variable definition
++	[ Olivier Clerget ]
++
++- libipt_time: Print message about time match not adhering daylight saving
++	[ Phil Oester ]
++
++- libipt_tos: Print Error message if --tos is specified twice
++	[ Nicolas Bouliane ]
++
++- libipt_ttl: Cleanup ttl option parsing
++	[ Phil Oester ]
++
++- libipt_u32: Fix option parsing
++	[ Piotr Gasid'o ]
++
++
++Changes from 1.2.11:
++
++- libiptc: complete rewrite for performance reasons
++	[ Harald Welte, Martin Josefsson ]
++
++- introduce "DO_MULTI=1" mode to build a muilti-call binary
++	[ Bastiaan Bakker ]
++
++- code cleanup, use C99 initializers
++	[ Harald Welte, Pablo Neira ]
++
++- Extension revision number support (if kernel supports the getsockopts).
++	[ Rusty Russell ]
++
++- Don't need ipt_entry_target()/ip6t_entry_target().
++	[ Rusty Russell ]
++
++- Don't re-initialize libiptc/libip6t unless modprobe attempt succeeds.
++	[ Rusty Russell ]
++
++- Implement IPTABLES_LIB_DIR and IP6TABLES_LIB_DIR environment variables
++	[ Rusty Russell ]
++
++- Add manpage section about 'raw' table
++	[ Harald Welte ]
++
++
++- libip{6}t_ROUTE: add ROUTE --tee mode
++	[ Patrick Schaaf ]
++
++- libip{6}t_multiport: Print Error message when `!' is used
++	[ Patrick McHardy, Phil Oester ]
++
++- New libip6t_physdev Match
++	[ Bart De Schuymer ]
++
++- libipt_CLUSTERIP: Fix compiler warning about const
++	[ Harald Welte ]
++
++- libipt_DNAT: Print Error message if `:' is used for port range
++- libipt_SNAT: Print Error message if `:' is used for port range
++	[ Phil Oester ]
++
++- libipt_LOG: Add --log-uid option
++	[ John Lange ]
++
++- libipt_MARK: add bitwise operators
++	[ Henrik Nordstrom, Rusty Russell ]
++
++- libipt_SET: Update to ipset2
++	[ Jozsef Kadlecsik ]
++
++- libipt_account: Update to 0.1.16
++	[ Piotr Gasid'o ]
++
++- New libipt_comment Match
++	[ Brad Fisher ]
++
++- New libipt_hashlimit Match, supersedes dstlimit
++	[ Harald Welte ]
++
++- libipt_ttl: Use string_to_number()
++	[ Rusty Russell ]
++
++
++Please note: Since version 1.2.7a, patch-o-matic is now no longer part of
++iptables but rather distributed as a seperate package
++(ftp://ftp.netfilter.org/pupatch-o-matic-ng/snapshot)
++
++
++iptables v1.2.11 Changelog
++======================================================================
++This version requires kernel >= 2.4.4
++This version recommends kernel >= 2.4.18
++
++
++Bugx Fixed from 1.2.10:
++
++- fix compilation on systems where /bin/sh != bash
++	[ Jozsef Kadlecsik ]
++
++Bugs Fixed from 1.2.9:
++
++- physdev match: fix new structure layout for kernel > 2.6.0-test8
++	[ Bart De Schuymer ]
++
++- Better 64bit / 32bit split architecture detection
++- IPv6 LOG target: Fix compiler warnings on 64bit
++- LOG target: Fix compiler warnings on 64bit
++- IPv6 MARK target: Use full 64bit mark on 64bit archs
++- MARK target: Use full 64bit mark on 64bit archs
++- SAME target: Fix 64bit/32bit splitarch problems
++- ULOG target: Fix 64bit/32bit splitarch problems
++- conntrack match: Fix 64bit/32bit splitarch problem
++- IPv6 limit match: Fix 64bit/32bit splitarch problem
++- limit match: Fix 64bit/32bit splitarch problem
++- IPv6 mark match: Use full 64bit mark on 64bit archs
++- mark match: Use full 64bit mark on 64bit archs
++- owner match: Fix compiler warnings on 64bit
++	[ Martin Jofsefsson ]
++
++- connbytes match: Fix signedness / unsigned issue
++	[ Martin Josefsson ]
++
++- connlimit match: Fix '/0' netmask
++	[ David Ahern ]
++
++- ipv6 owner match: fix possibly not zero terminated string
++- helper match: fix possibly not zero terminated string
++- recent match: fix possibly not zero terminated string
++	[ Karsten Desler ]
++
++- ICMP match: fix '--icmp-type any' case
++	[ Harald Welte ]
++
++- CONNMARK target: major update (add mark/mask matching)
++	[ Henrik Nordstrom ]
++
++- DSCP target: Fix cosmetic help message problem
++	[ Maciej Soltysiak ]
++
++- string match: Fix iptables-save/restore for ascii strings with spaces
++	[ Michael Rash ]
++
++- ip(6)tables-restore: Make sure matches are used in the same order
++	[ Martin Josefsson ]
++
++- ip(6)tables-restore: Fix '--verbose' option
++- ip(6)tables-restore: Add '--test' option
++- ip(6)tables-restore: Complain about missing 'COMMIT'
++	[ Martin Josefsson ]
++
++- ip(6)tables-restore: Allow embedding of quote character in quoted strings
++	[ Michael Rash ]
++
++- libipq: Protect against spoofed queue messages (check if sender is kernel)
++	[ Harald Welte ]
++
++
++Changes from 1.2.9:
++
++- time match: add 'datestart' and 'datestop' parameters
++	[ Fabrice Marie ]
++
++- modular manpage build, depending on actually compiled-in features
++	[ Henrik Nordstrom ]
++
++- additional documentation in manpage snippets formerly missing
++	[ Harald Welte ]
++
++- support new CLUSTERIP Target
++	[ Harald Welte ]
++
++- support new account match
++	[ Piotr Gasid'o ]
++
++- support new connrate match
++	[ Nuuti Kotivuori ]
++
++- support new dstlimit match
++	[ Harald Welte ]
++
++- support new 'set' match / 'SET' target
++	[ Jozsef Kadlecsik ]
++
++- osf match: add support for netlink reporting
++	[ Evgeniy Polyakov ]
++
++- new SCTP protocol match
++	[ Kiran Kumar ]
++
++
++Please note: Since version 1.2.7a, patch-o-matic is now no longer part of
++iptables but rather distributed as a seperate package
++(ftp://ftp.netfilter.org/pupatch-o-matic/)
++
++Please also note: Since Kernel 2.6.x is out, we now use patch-o-matic-ng,
++distributed as seperate package: (ftp://ftp.netfilter.org/pupatch-o-matic-ng)
++
++
++iptables v1.2.10 Changelog
++======================================================================
++This version requires kernel >= 2.4.4
++This version recommends kernel >= 2.4.18
++
++Bugs Fixed from 1.2.9:
++
++- physdev match: fix new structure layout for kernel > 2.6.0-test8
++	[ Bart De Schuymer ]
++
++- Better 64bit / 32bit split architecture detection
++- IPv6 LOG target: Fix compiler warnings on 64bit
++- LOG target: Fix compiler warnings on 64bit
++- IPv6 MARK target: Use full 64bit mark on 64bit archs
++- MARK target: Use full 64bit mark on 64bit archs
++- SAME target: Fix 64bit/32bit splitarch problems
++- ULOG target: Fix 64bit/32bit splitarch problems
++- conntrack match: Fix 64bit/32bit splitarch problem
++- IPv6 limit match: Fix 64bit/32bit splitarch problem
++- limit match: Fix 64bit/32bit splitarch problem
++- IPv6 mark match: Use full 64bit mark on 64bit archs
++- mark match: Use full 64bit mark on 64bit archs
++- owner match: Fix compiler warnings on 64bit
++	[ Martin Jofsefsson ]
++
++- connbytes match: Fix signedness / unsigned issue
++	[ Martin Josefsson ]
++
++- connlimit match: Fix '/0' netmask
++	[ David Ahern ]
++
++- ipv6 owner match: fix possibly not zero terminated string
++- helper match: fix possibly not zero terminated string
++- recent match: fix possibly not zero terminated string
++	[ Karsten Desler ]
++
++- ICMP match: fix '--icmp-type any' case
++	[ Harald Welte ]
++
++- CONNMARK target: major update (add mark/mask matching)
++	[ Henrik Nordstrom ]
++
++- DSCP target: Fix cosmetic help message problem
++	[ Maciej Soltysiak ]
++
++- string match: Fix iptables-save/restore for ascii strings with spaces
++	[ Michael Rash ]
++
++- ip(6)tables-restore: Make sure matches are used in the same order
++	[ Martin Josefsson ]
++
++- ip(6)tables-restore: Fix '--verbose' option
++- ip(6)tables-restore: Add '--test' option
++- ip(6)tables-restore: Complain about missing 'COMMIT'
++	[ Martin Josefsson ]
++
++- ip(6)tables-restore: Allow embedding of quote character in quoted strings
++	[ Michael Rash ]
++
++- libipq: Protect against spoofed queue messages (check if sender is kernel)
++	[ Harald Welte ]
++
++
++Changes from 1.2.9:
++
++- time match: add 'datestart' and 'datestop' parameters
++	[ Fabrice Marie ]
++
++- modular manpage build, depending on actually compiled-in features
++	[ Henrik Nordstrom ]
++
++- additional documentation in manpage snippets formerly missing
++	[ Harald Welte ]
++
++- support new CLUSTERIP Target
++	[ Harald Welte ]
++
++- support new account match
++	[ Piotr Gasid'o ]
++
++- support new connrate match
++	[ Nuuti Kotivuori ]
++
++- support new dstlimit match
++	[ Harald Welte ]
++
++- support new 'set' match / 'SET' target
++	[ Jozsef Kadlecsik ]
++
++- osf match: add support for netlink reporting
++	[ Evgeniy Polyakov ]
++
++- new SCTP protocol match
++	[ Kiran Kumar ]
++
++
++Please note: Since version 1.2.7a, patch-o-matic is now no longer part of
++iptables but rather distributed as a seperate package
++(ftp://ftp.netfilter.org/pupatch-o-matic/)
++
++Please also note: Since Kernel 2.6.x is out, we now use patch-o-matic-ng,
++distributed as seperate package: (ftp://ftp.netfilter.org/pupatch-o-matic-ng)
++
++
++iptables v1.2.9 Changelog
++======================================================================
++This version requires kernel >= 2.4.4
++This version recommends kernel >= 2.4.18
++
++Bugs Fixed from 1.2.8:
++
++- ip(6)tables-save/restore: fix memory leaks
++	[ Harald Welte, Martin Josefsson ]
++- ip6tables: fix printout of odd length netmasks
++	[ Mikko Markus Torni ]
++- condition match: fix iptables-save
++	[ Stephane Ouellette ]
++- fuzzy match: fix ip(6)tables-save
++	[ Hime Aguiar e Oliveira Jr. ]
++- mac match: fix ip(6)tables-save if used inverted (!)
++	[ David Zambonini, Martin Josefsson ]
++- ip6tables udp match: check for invalid port ranges
++	[ Thomas Poehnitz ]
++- LOG target: fix iptables-save (save loglevel numerically)
++	[ Thomas Woerner ]
++- mport match: fix iptables-save (save numerically)
++	[ Thomas Woerner ]
++- libipq: fix ipq_id_t definition on 'real' 64bit/64bit architectures
++	[ Ryan Veety ]
++- libip6tc: fix ipv6_prefix_length endianness bugs
++	[ Mikko Markus Torni ]
++- MASQUERADE target: don't accept negative port numbers
++	[ Yasuyuki Kozakai ]
++- physdev match: fix new structure layout for kernel > 2.6.0-test8
++	[ Bart De Schuymer ]
++
++Changes from 1.2.8:
++
++- build plugins for connlimit, iprange, realm, CLASSIFY, CONNMARK, NETMAP
++	[ Harald Welte ]
++- libip(6)tc: Speedup due to inceremental chain cache updates
++	[ Harald Welte ]
++- recent match: Update to version 0.3.1 that was submitted to the kernel
++	[ Stephen Frost ]
++- physdev match: add --physdev-is-{in,out,bridge} option
++	[ Bart de Schuymer ]
++- REJECT target: add support for ICMP administratively prohibited
++	[ Maciej Soltysiak ]
++- conntrack match: add suport for CONFIRMED / unconfirmed state
++	[ Harald Welte ]
++- ROUTE target: new option: continue traversal
++	[ Cedric de Launois ]
++- varios cosmetic cleanups
++	[ Stephane Ouellette ]
++- iptables/libiptc: add support for the new 'raw' table
++	[ Jozsef Kadlecsik ]
++
++Please note: Since version 1.2.7a, patch-o-matic is now no longer part of
++iptables but rather distributed as a seperate package
++(ftp://ftp.netfilter.org/pupatch-o-matic/)
++
++
++iptables v1.2.8 Changelog
++======================================================================
++This version requires kernel >= 2.4.4
++This version recommends kernel >= 2.4.18
++
++Bugs Fixed from 1.2.7a:
++
++- fix ip6tables-save function of 'length' match
++	[ Gerry Skerbitz ]
++- fix ip6tables-save function of 'mac' match
++	[ Kristian Gronfeldt Sorensen ]
++- fix iptables-save function of 'ULOG' target
++	[ Jimmy Hedman ]
++- fix iptables-save function of 'conntrack' match
++	[ Lutz Pressler ]
++- fix iptables-save function of 'length' match
++	[ Gerry Skerbitz ]
++- fix iptables-save function of 'mac' match
++	[ Kristian Gronfeldt Sorense ]
++- fix iptables-save function of 'mark' match
++	[ Harald Welte ]
++- fix iptables-save function of 'owner' match
++	[ Costa Tsaousis ]
++- fix iptables-save function of 'pool' match
++	[ Oskar Berggren ]
++- fix iptables-save function of 'tcpmss' match
++	[ Michael Schwendt ]
++- fix iptables-save function of 'tos' match
++	[ Harald Welte ]
++- fix save/print function of 'connmark' match
++	[ Harald Welte ]
++- fix error message when invalid TCP flag is specified with 'tcp' match
++	[ Aaron Sethman ]
++
++Changes from 1.2.7a:
++
++- updated version of the ROUTE target
++	[ Cedric de Launois ]
++- updated version of the 'recent' match
++	[ Stephen Frost ]
++- update the RPC conntrack match, extend it to support filtering on procedures
++	[ Ian (Larry) Latter ]
++- add support for hexstrings to the 'string' match
++	[ Michael Rash ]
++- have iptables-restore print the line number in case of an error
++	[ Illes Marci ]
++- big iptables.8 manpage update
++	[ Herve Eychenne ]
++- print loglevel human-readable in ip6tables 'LOG' target
++	[ Michael Schwendt ]
++- print loglevel human-readable in 'LOG' target
++	[ Michael Schwendt ]
++- remove bogus code from 'ecn' match
++	[ Stephane Ouellette ]
++- be more specific in help message of 'helper' match
++	[ Herve Eychenne ]
++- fix semantic problem that '-p icmp -m icmp' was matching icmp type 0 instead
++	of 'any'
++	[ Harald Welte ]
++- fix iptables rename-chain option
++	[ Maciej Soltysiak ]
++- remove libipulog from iptables since it is distributed with ulogd
++	[ Harald Welte ]
++- support new ip6tables 'HL' target
++	[ Maciej Soltysiak ]
++- support new ip6tables 'condition' match
++	[ Stephane Ouellette ]
++- support new ip6tables 'fuzzy' match
++	[ Maciej Soltysiak ]
++- support new ip6tables 'hoplimit' match
++	[ Maciej Soltysiak ]
++- support new iptables 'CLASSIFY' target
++	[ unknown ]
++- support new iptables TARPIT target
++	[ Aaron Hopkins ]
++- support new iptables 'condition' match
++	[ Stephane Ouellette ]
++- support new iptables 'fuzzy' match
++	[ Hime Junior ]
++- support new iptables 'physdev' match (for 2.5.x bridging)
++	[ Bart de Schumyer ]
++- support new iptables 'u32' match (based on u32 tc filter)
++	[ Don Cohen ]
++
++Please note: As of version 1.2.7a, patch-o-matic is now no longer part of
++iptables but rather distributed as a seperate package
++(ftp://ftp.netfilter.org/pupatch-o-matic/)
++
++
++iptables v1.2.7a (== fixed 1.2.7) Changelog
++======================================================================
++This version requires kernel >= 2.4.4
++This version recommends kernel >= 2.4.18
++
++Bugs Fixed from 1.2.6a:
++
++- fix compiler warning in userspace support for ipv6 REJECT target
++	[ Fabrice Marie ]
++- check for invalid portranges in tcp+udp helper (e.g. 2000:100)
++	[ Thomas Poehnitz ]
++- fix save save/restore functions of ip6tables tcp/udp extension
++	[ Harald Welte / Andras Kis-Szabo ]
++- check for invalid (out of range) nfmark values in MARK target
++	[ Alexey ??? ]
++- fix save function of MASQUERADE userspace support
++	[ A. van Schie ]
++- compile fixes for userspace suppot of experimental POOL target
++	[ ? ]
++- fix save function of userspace support for ah and esp match
++	[ ? ]
++- fix static build (NO_SHARED_LIBS)
++	[ Roberto Nibali ]
++- fix save/restore function of userspace support for mport match
++	[ Bob Hockney ]
++- update manpages to reflect recent changes
++	[ Herve Eychenne, Harald Welte ]
++- remove all remnants of the 'check' option
++	[ ? ]
++
++
++Changes from 1.2.6a:
++
++- patch-o-matic is now no longer part of iptables but rather distributed
++	as a seperate package (ftp://ftp.netfilter.org/pupatch-o-matic/)
++		[ Harald Welte ]
++- userspace support for dscp match and target
++	[ Harald Welte ]
++- userspace supprot for ecn match and target
++	[ Harald Welte ]
++- userspace support for helper match
++	[ Martin Josefsson ]
++- userspace supprot for conntrack match
++	[ Marc Boucher ]
++- userspace support for pkttype match
++	[ Martin Ludvig ]
++- userspace support for experimental ROUTE target
++	[ Cédric de Launois ]
++- userspace support for experimental ipv6 ahesp match
++	[ Andras Kis-Szabo ]
++- userspace support for experimental ipv6 option header match
++	[ Andras Kis-Szabo ]
++- userspace support for experimental ipv6 routing header match
++	[ Andras Kis-Szabo ]
++- add matching of process name to userspace support of owner match
++	[ Marc Boucher ]
++- new version of userspace support for 'recent' match
++	[ Stephen Frost ]
++
++
++iptables v1.2.6a (== fixed 1.2.6) Changelog
++======================================================================
++This version requires kernel >= 2.4.4
++This version recommends kernel >= 2.4.18
++
++Bugs Fixed from 1.2.5:
++
++- Fix iptables segfault problem when using `!' without argument
++	[ Dionis Papavramidis, Harald Welte ]
++- Fix PSD match for psd-delay-threshold > 100
++	[ Steven Coenen, Dennis Koslowski ]
++- ip6tables alignment fixes
++	[ Andreas Herrmann ]
++- patch-o-matic:
++	- Fix NAT-related bug in TCP window tracking code
++		[ Jozsef Kadlecsik ]
++	- Fix support for DNAT of locally-originated connections (NAT in
++	  LOCAL_OUT)
++	  	[ Henrik Nordstrom, Harald Welte ]
++	- Fix string match (is now SMP safe)
++		[ Gianni Tedesco ]
++	- Fix TFTP conntrack/nat helper (now also catches first packet)
++		[ Magnus Boden ]
++
++Changes from 1.2.5:
++
++- Added global PREFIX makefile variable for all paths
++	[ Harald Welte ]
++- If compiled without any COPT_FLAGS, debugging is disabled.  To enable
++	debugging, use -DIPTC_DEBUG
++		[ Harald Welte ]
++- New ip6tables-restore and ip6tables-save manpage
++	[ Andras Kis-Szabo ]
++- Sync ip6tables-restore and ip6tables-save with iptables-restore
++	[ Andras Kis-Szabo ]
++- Sync ip6tables with iptables
++	[ Andras Kis-Szabo ]
++- mangle table attaches now to all five netfilter hooks
++	[ Brad Chapman, Harald Welte ]
++- iptables and ip6tables manpage updates
++	[ Herve Eychenne ]
++- patch-o-matic program now supports removal of already-applied patches
++	[ Bob Hockney ]
++- patch-o-matic program now supports patches to the userspace extensions
++	[ Fabrice Marie ]
++- patch-o-matic:
++	- Extend recent match to support multiple recent lists
++		[ Stephen Frost ]
++	- New GRE and PPTP connection tracking and NAT helper
++		[ Harald Welte ]
++	- New CONNMARK target for marking all packets within one connection
++		[ Henrik Nordstrom ]
++	- New conntrack match, enables matching on more conntrack informatin
++	  than state
++	  	[ Marc Boucher ]
++	- New DSCP match and target (DSCP header field obsoletes TOS)
++		[ Harald Welte ]
++	- New owner match extension: Match on process name
++		[ Marc Boucher ]
++	- Add support for bitwise AND / OR manipulation on nfmark
++		[ Fabrice Marie ]
++	- New experimental patch for disabling TCP connection tracking pickup
++		[ Harald Welte ]
++	- Add support for SACK in all NAT helpers
++		[ Harald Welte ]
++	- Make eggdrop botnet connection tracking support work with eggdrop
++	  v1.6.x
++	  	[ Magnus Sandin ]
++	- Add support to REJECT for sending icmp-unreachable messages
++	  from a fake source address
++	  	[ Fabrice Marie ]
++	- Add support for ntalk2 to talk NAT helper
++		[ Jozsef Kadlecsik ]
++	- Big update to newnat patch
++		[ Jozsef Kadlecsik, Paul P Komkoff ]
++
++iptables v1.2.6 Changelog
++======================================================================
++This version requires kernel >= 2.4.4
++This version recommends kernel >= 2.4.18
++
++Bugs Fixed from 1.2.5:
++
++- Fix iptables segfault problem when using `!' without argument
++	[ Dionis Papavramidis, Harald Welte ]
++- Fix PSD match for psd-delay-threshold > 100
++	[ Steven Coenen, Dennis Koslowski ]
++- ip6tables alignment fixes
++	[ Andreas Herrmann ]
++- patch-o-matic:
++	- Fix NAT-related bug in TCP window tracking code
++		[ Jozsef Kadlecsik ]
++	- Fix support for DNAT of locally-originated connections (NAT in
++	  LOCAL_OUT)
++	  	[ Henrik Nordstrom, Harald Welte ]
++	- Fix string match (is now SMP safe)
++		[ Gianni Tedesco ]
++	- Fix TFTP conntrack/nat helper (now also catches first packet)
++		[ Magnus Boden ]
++
++Changes from 1.2.5:
++
++- Added global PREFIX makefile variable for all paths
++	[ Harald Welte ]
++- If compiled without any COPT_FLAGS, debugging is disabled.  To enable
++	debugging, use -DIPTC_DEBUG
++		[ Harald Welte ]
++- New ip6tables-restore and ip6tables-save manpage
++	[ Andras Kis-Szabo ]
++- Sync ip6tables-restore and ip6tables-save with iptables-restore
++	[ Andras Kis-Szabo ]
++- Sync ip6tables with iptables
++	[ Andras Kis-Szabo ]
++- mangle table attaches now to all five netfilter hooks
++	[ Brad Chapman, Harald Welte ]
++- iptables and ip6tables manpage updates
++	[ Herve Eychenne ]
++- patch-o-matic program now supports removal of already-applied patches
++	[ Bob Hockney ]
++- patch-o-matic program now supports patches to the userspace extensions
++	[ Fabrice Marie ]
++- patch-o-matic:
++	- Extend recent match to support multiple recent lists
++		[ Stephen Frost ]
++	- New GRE and PPTP connection tracking and NAT helper
++		[ Harald Welte ]
++	- New CONNMARK target for marking all packets within one connection
++		[ Henrik Nordstrom ]
++	- New conntrack match, enables matching on more conntrack informatin
++	  than state
++	  	[ Marc Boucher ]
++	- New DSCP match and target (DSCP header field obsoletes TOS)
++		[ Harald Welte ]
++	- New owner match extension: Match on process name
++		[ Marc Boucher ]
++	- Add support for bitwise AND / OR manipulation on nfmark
++		[ Fabrice Marie ]
++	- New experimental patch for disabling TCP connection tracking pickup
++		[ Harald Welte ]
++	- Add support for SACK in all NAT helpers
++		[ Harald Welte ]
++	- Make eggdrop botnet connection tracking support work with eggdrop
++	  v1.6.x
++	  	[ Magnus Sandin ]
++	- Add support to REJECT for sending icmp-unreachable messages
++	  from a fake source address
++			[ Fabrice Marie ]
++	- Add support for ntalk2 to talk NAT helper
++		[ Jozsef Kadlecsik ]
++	- Big update to newnat patch
++		[ Jozsef Kadlecsik, Paul P Komkoff ]
++
++
++iptables v1.2.5 Changelog
++======================================================================
++This version requires kernel >= 2.4.4
++This version recommends kernel > 2.4.14
++
++Bugs Fixed from 1.2.4:
++
++- make iptables-restore accept --table as well as -t option
++	[ Andreas Ferber ]
++- make iptables-restore -v / --verbose option work
++	[ Marc Boucher ]
++- fix iptables-save problems with saving "ppp+" style interface wildcards
++	[ Harald Welte ]
++- make iptables accept '_' and '.' in interface names
++	[ Harald Welte ]
++- Kernel bugfixes in patch-o-matic:
++	 - Fix IRC NAT srcaddr fix (we used to nat DCC connectios to the
++	   address of the IRC server
++		[ Bob Hockney ]
++	- Fix potential Oops in TOS target module
++		[ Edward Killips ]
++	- Fix problem when raw socket has cloned skb while netfilter doing
++	  payload modification
++		 [ Rusty Russell ]
++	- Fix memory leak in ipchains redirect code
++		[ Rusty Russell ]
++	- Fix reintroduced ECN problem with unclean match
++		[ Guillaume Morin ]
++	- Fix MAC adress match problem with small udp packets
++		[ Harald Welte ]
++
++Changes from 1.2.4:
++
++- Whole patch-o-matic system restructured - now supports multiple patch
++	repositories (submitted, pending, base, extra, newnat).
++	[ Jozsef Kadlecsik ]
++- Add IPv6 support to the QUEUE target and libipq
++	[ Fernando Anton / James Morris ]
++- New patch-o-matic patches:
++	-New IPV4OPTSSTRIP target to strip IP options
++		[ Fabrice Marie ]
++	- New ipv6header match to match IPv6 header options
++		[ Brad Chapman / Andras Kis-Szabo ]
++	- New helper match to match RELATED connections on their conntrack
++		helper
++		[ Martin Josefsson ]
++	- New quota match to have fixed IP quotas
++		[ Sam Johnston ]
++	- New recent match to match recently seen packets
++		[ Stephen Frost ]
++
++
++iptables v1.2.4 Changelog
++======================================================================
++This version requires kernel >= 2.4.4
++This version recommends kernel > 2.4.9
++
++Bugs Fixed from 1.2.3:
++
++- make iptables-restore print error message instead of segfault when
++	processing broken / wrong input.
++	[ ]
++- string_to_number fix in LOG, IPv6 LOG, TOS and FTOS target
++	[ ]
++- fix iptables-save problems when saving MIRROR rules
++	[ Harald Welte ]
++- fix IPv6 ICMP problems [ ]
++- fix TTL increment in TTL target [ ]
++- Kernel bugfixes in patch-o-matic:
++	- Fix printing of inner-packet in ICMP error messages (LOG target)
++		[ ]
++	- Decrement TTL when using MIRROR target at PRE_ROUTING [ ]
++	- fix undiscovered REJECT checkentry() bug (alignment)
++	    [ Bert Hubert]
++
++Changes from 1.2.3:
++
++- New "make most-of-pom" feature for application of non-confliction
++	patches. This should be used instead of "make patch-o-matic" by most
++	users.
++	[ Harald Welte ]
++- iptables-save and iptables-restore now included in the default install;
++	They are n	- longer experimental for quite some time.
++	[ Harald Welte ]
++- synchronize ip6tables-save/restore with iptables-save/restore
++	[ Harald Welte ]
++- more precise save() function for ipt_limit rates
++	[ ]
++- new improved version of nth-match. Added support for multiple counters,
++	added support for matching on individual packets in the counter cycle
++	[ Richard Wagner ]
++- added manpage for ip6tables
++	[ ]
++- updated libipq documentation
++	[ ]
++- added timeout t	- libipq recv function
++	[ ]
++- New patch-o-matic patches:
++	- New random match
++		[ ]
++	- New ftp-fxp patch, imposes security risk but some people need it -sigh*
++		[ Magnus Sandin ]
++	- New H323 conntrack + nat modules
++		[ Jozsef Kadlecsik ]
++	- New version of tcp-window tracking patch, includes sysctl()
++		changeable timeouts
++		[ Jozsef Kadlecsik ]
++
++
++iptables v1.2.3 Changelog
++======================================================================
++This version requires kernel 2.4.4 or above.
++This version recommends kernel 2.4.9 or above.
++
++Bugs Fixed from 1.2.2:
++
++- fix ICMPv6 support for IPv6
++	[ Kis-Szab	- Andras ]
++- fix problems with REJECT and iptables-restore / iptables-save
++	[ Harald Welte ]
++- fix possible string overflow in psd match
++	[ Dennis Koslowski ]
++- fix string match compile problems
++	[ Gianni Tedesc	- ]
++- support interfaces with '_' (underscore) in device names
++	[ Harald Welte ]
++- support rules without target in iptables-save
++	[ Emmanuel Fleury ]
++- correct handling of "eth+" type interface names in iptables-save/restore
++	[ Harald Welte ]
++- d	- incremental checksumming when altering TTL in TTL target
++	[ Harald Welte ]
++- fix no-srr case in ipv4options match
++	[ Fabrice Marie ]
++- Kernel bugfixes in patch-o-matic:
++	- Fix unexported ip6_table symbols [ Brad Chapman ]
++	- Decrement TTL in MIRROR target if used in FORWARD chain [ Harald
++		Welte, Fabian Melzow ]
++	- Replace SACKPERM TCP option with NOOP (instead of ENDOFOPT)
++		[ Guillaume Morin ]
++
++Changes from 1.2.2:
++
++- New "make most-of-pom" feature for application of non-confliction
++	patches. This should be used instead of "make patch-o-matic" by most
++	users.
++	[ Harald Welte ]
++- support for statically linking iptables, without need for .s	- plugins
++	[ David McCullough ]
++- support for multiple ranges in SAME target
++	[ Martin Josefsson ]
++- support for router alert options in ipv4options match
++	[ Fabrice Marie ]
++- modprobe() modules when doing iptables-restore
++	[ Andries van Schie ]
++- remove obsolete fragment matching code in IPv6
++	[ Kis-Szab	- Andras ]
++- add support for dns hostnames t	- IPv6 code
++	[ Kis-Szab	- Andras ]
++- New patch-o-matic patches:
++	- New multiport (mport) match
++		[ Andreas Ferber ]
++	- New nth match for matching every n-th packet
++		[ Fabrice Marie ]
++	- New realm match for matchin the routing realm
++		[ Sampsa Ranta ]
++	- New ctnetlink patch for manipulation of conntrack from userspace
++		[ Jay Schulist ]
++	- New REJECT Target for IPv6
++		[ Harald Welte ]
++	- New length match for IPv6
++		[ Imran Patel ]
++	- New multiport (mport) match for IPv6
++		[ Andreas Ferber]
++
++
++iptables v1.2.1 Changelog
++======================================================================
++This version requires kernel 2.4.0 or above.
++
++Bugs Fixed from 1.2:
++
++- Missing quotes around log-prefix
++	[ Bart Theunissen ]
++- Bug in save function of string match
++	[ Gianni Tedesc	- ]
++- ip6tables.c string buffer size fixes
++	[ Andras Kis-Szab	- ]
++- dependency problem with iptables-save / iptables-restore
++	[ Harald Welte ]
++- strtok problem with iptables-save / iptables-restore
++	[ Harald Welte ]
++- Problems with tcp/udp extension and multiple calls of do_command()
++	[ Sven Koch ]
++- Kernel bugfixes in patch-o-matic:
++	- Updated rpc-record patch to work with 2.4.0
++		[ Marc Boucher ]
++	- New ftp-pasv patch for fixing PASV detection with some ftpd's
++		[ Erik Hensema ]
++	- Fix checksum calculation of TOS target
++		[ Rusty Russell ]
++
++Changes from 1.2:
++
++- New `pending-patches' target
++	[ Rusty Russell ]
++- build all shared library extensions regardless of kernel tree
++	[ Rusty Russell ]
++- New counter-restore functions for iptables
++	[ Harald Welte ]
++- Added libiptc and libipulog t	- `devel' Makefile target
++	[ Harald Welte ]
++- Ported iptables-save/restore t	- IPv6
++	[ Andras Kis-Szab	- ]
++- Updated ULOG target (now in-kernel accumulation [= higher performance])
++	[ Harald Welte ]
++- Added fxp support t	- ftp-multi patch
++	[ Magnus Sandin ]
++- Implemented Boyer Moore Sublinear search algorithm for string match
++	[ Gianni Tedesc	- ]
++- Fixed tcp-window-tracking incompatibility with NAT helpers
++	[ Harald Welte ]
++- New patch-o-matic patches:
++	- New generic sequence number offset API for nat helpers
++		[ Harald Welte ]
++	- New psd (port-scan-detection) match
++		[ Dennis Koslowski, Markus Henning ]
++	- New NETLINK target for old ipchains -o behaviour
++		[ Gianni Tedesc	- ]
++	- New SAME target as a special case of SNAT
++		[ Martin Josefsson ]
++	- Ported LOG target to IPv6
++		[ Jan Rekorajski ]
++	- Ported owner, limit, mac and multiport match to IPv6
++		[ Jan Rekorajski ]
++
++
++iptables v1.2.2 Changelog
++======================================================================
++This version requires kernel 2.4.1 or above.
++This version recommends kernel 2.4.4 or above.
++
++Bugs Fixed from 1.2.1a:
++
++- fixes for SAME Target
++	[ Martin Josefsson ]
++- fixes for iplimit match in combination with iptables-save/-restore
++	[ Gerd Knorr ]
++- fix for TCP match in combination with iptables-save/-restore
++	[ Ian Lynagh ]
++- iptables-restore now deals correclty with spaces in --log-prefix
++	[ Harald Welte ]
++- fix in 'isapplied' script. It used t	- give false negatives
++	[ Harald Welte ]
++- fix in BALANCE target, target now uses full ip address range
++	[ Martin Josefsson ]
++- fix for NETLINK target, was sending wrong interface name
++	[ Gianni Tedesc	- ]
++- fix for collision of ftp and irc NAT helpers
++	[ Harald Welte ]
++- ip6tables brought in sync with iptables
++	[ Kis-Szab	- Andras ]
++- Kernel bugfixes in patch-o-matic:
++	- Fix possible security vulnerability in ip_conntrack_ftp
++		[ Cristian	- Lincoln Mattos, James Morris and Rusty ]
++
++Changes from 1.2.1a:
++
++- libiptc should now be usable from C++ applications
++	[ Fabrice MAURIE ]
++- seqoffset-,ftp-security, ... patches are combined in 2.4.4.patch
++	[ Rusty Russell ]
++- lots of old pre-2.4.1 patches now combined in 2.4.1.patch
++	[ Rusty Russel ]
++- IRC conntrack + nat cleanup
++	[ Harald Welte ]
++- string match cleanup
++	[ Gianni Tedesc	- ]
++- ULOG cleanup, new version. Fixes 'unable t	- send nflink' bug
++	[ Harald Welte ]
++- New patch-o-matic patches:
++	- New NETMAP Target for mapping whole networks 1:1 to other addresses
++		[ Svenning Soerensen ]
++	- New length Target for matching packet length
++		[ James Morris ]
++	- New ipv4options match for matching IPv4 header options
++		[ Fabrice MARIE ]
++	- New IPv6 agr match for matching IPv6 global aggregatable unicast
++		adresses
++		[ Andras Kis-Szab	- ]
++	- New pkttype match for matching link-layer multicast / broadcast
++		packets
++		[ Michal Ludvig ]
++	- New time match for matching the packet's receive time
++		[ Fabrice MARIE ]
++	- New talk conntack + NAT helper module
++		[ Jozsef Kadlecsik ]
++
++
++iptables v1.2 Changelog
++======================================================================
++This version requires 2.4.0-test9 or above.
++
++Bugs Fixed from 1.1.2:
++
++- Now default installs int	- /usr/local/sbin, not /usr/local/bin.
++- Only does IPv6 compilation on libc6.
++- More header fixes for weird header combos.
++- ip6tables now refers t	- "icmpv6" protocol, not "icmp".
++	[ Harald Welte ]
++- IPPROTO_ESP and AH defined in iptables for primitive headers.
++- iptables multiple-DNS resolve fixed
++	[ Harald Welte, Rusty ]
++- Kernel bugfixes in patch-o-matic:
++	- IPv6 netfilter fixes
++		[ Harald Welte ]
++	- Masquerade with fwmark routing fix
++	- Dynamic hashsize optimization (NAT) + `hashsize=' module parameter.
++	- NAT overlap fix
++	- PPC/Sparc mangle table fix.
++
++Changes from 1.1.2:
++
++- New `install-devel' target
++	[ James Morris ]
++- libipq now has man pages!
++	[ James Morris ]
++- iptables-save and iptables-restore added (with man pages!)
++	[ Harald Welte ]
++- iptables now inserts modules if CONFIG_KMOD or --modprobe
++	[ Harald Welte, Rusty ]
++- New `experimental' and `install-experimental' targets.
++- `--reject-with=echo-reply' removed in anticipation of the removal of
++	kernel support.
++- ttl match enhancements (greater or less than tests)
++	[ Harald Welte ]
++- Reworked patch-o-matic interface, t	- force reading of help.
++- patch-o-matic updated for new 2.4 Makefiles
++	[ Daniel Stone, Harald Welte ]
++- patch-o-matic now supports non-IPv4 netfilter patches
++	[ Harald Welte ]
++- New patch-o-matic patches:
++	- eggdrop bot connection tracking
++		[ Magnus Sandin ]
++	- FTOS target for full ToS mangling.
++		[ Matthew G. Marsh ]
++	- BALANCE target for simple load-balancing.
++	- iplimit match for limiting number of connections.
++		[ Gerd Knorr ]
++	- IPv6 MARK target
++		[ Harald Welte ]
++	- IPv6 mark match
++		[ Harald Welte ]
++
++
++iptables v1.1.2 Changelog
++======================================================================
++This version requires 2.4.0-test9 or above.
++
++Bugs Fixed from 1.1.1:
++
++- Adding rules on UltraSparc now works
++- string_to_number now handles overflow
++	[ Jan Echternach ]
++- Bug when using ridiculous rule numbers fixed
++
++Changes from 1.1.1:
++
++- patch-o-matic system added:
++	- TTL alteration and ttl matching support -- Harald Welte
++	- AH/ESP matching support -- Yon Uriarte
++	- DROPPED table support -- Rusty
++	- ftp-multi patch for non-standard ftp servers -- Harald Welte
++	- IRC connection tracking & NAT -- Harald Welte
++	- pool match and POOL target -- Patrick
++	- RPC recording patch -- Marcelo Barbosa Lima
++	- SNMP NAT support -- James Morris
++	- string match for looking in packet's data -- Emmanuel Roger
++	- tcp-MSS target for altering MSS -- Marc Boucher
++	- ULOG target for advanced logging -- Harald Welte
++- Minor const cleanups
++	[ Jan Echternach ]
++- iptables.8 updates
++	[ Harald Welte, Rusty ]
++- Better warnings for non-existant matches/missing libraries
++	[ Harald Welte ]
++- Improved isapplied script

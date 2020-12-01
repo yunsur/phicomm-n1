@@ -1,0 +1,3 @@
+usr/include/xtables*
+usr/lib/*/libx*.so
+usr/lib/*/pkgconfig/xtables.pc

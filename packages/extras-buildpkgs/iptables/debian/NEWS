@@ -1,0 +1,34 @@
+iptables (1.8.4-1) unstable; urgency=medium
+
+    All the iptables binaries have been moved away from /sbin to /usr/sbin.
+    Compatibility symlinks were provided during the Buster release, but they
+    have been dropped now.
+    Please make sure your scripts aren't using hardcoded binary paths.
+    .
+    Also, please note that iptables is no longer Priority: important. This
+    means it is not installed by default in every system. It has been replaced
+    by nftables.
+
+ -- Arturo Borrero Gonzalez <arturo@debian.org>  Wed,  04 Dec 2019 11:49:00 +0200
+
+iptables (1.8.1-2) unstable; urgency=medium
+
+    All the iptables binaries have been moved away from /sbin to /usr/sbin.
+    Some compatibility symlinks have been added for the Buster release cycle,
+    but please make sure your scripts aren't using hardcoded binary paths.
+    The plan after Buster is to drop the symlinks.
+
+ -- Arturo Borrero Gonzalez <arturo@debian.org>  Wed,  25 Oct 2018 12:00:00 +0200
+
+iptables (1.8.1-1) unstable; urgency=medium
+
+    By default, this package will try to use the nf_tables kernel backend
+    instead of the xtables one. Please, read more about this in
+    /usr/share/doc/iptables/README.Debian, including details about the new
+    update-alternatives configuration possibilities.
+    This is a major update on the way iptables works and may have severe impact
+    in running systems which are upgrading between Debian versions.
+    The arptables and ebtables binaries are also affected, and those packages
+    will be updated soon as well.
+
+ -- Arturo Borrero Gonzalez <arturo@debian.org>  Wed,  24 Oct 2018 14:00:00 +0200

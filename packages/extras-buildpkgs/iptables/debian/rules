@@ -1,0 +1,32 @@
+#!/usr/bin/make -f
+
+export DH_VERBOSE=1
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+# used by iptables extensions/ makefile to be verbose:
+export V=1
+
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+LIB_DIR := /usr/lib/$(DEB_HOST_MULTIARCH)
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	dh_auto_configure -- --disable-libipq --enable-devel \
+			--libdir=$(LIB_DIR) --with-xtlibdir=$(LIB_DIR)/xtables
+
+override_dh_auto_install:
+	dh_auto_install
+	# leave room for paths links managed by update-alternatives
+	rm debian/tmp/usr/sbin/iptables
+	rm debian/tmp/usr/sbin/ip6tables
+	rm debian/tmp/usr/sbin/arptables
+	rm debian/tmp/usr/sbin/ebtables
+	rm debian/tmp/usr/sbin/iptables-save
+	rm debian/tmp/usr/sbin/iptables-restore
+	rm debian/tmp/usr/sbin/ip6tables-save
+	rm debian/tmp/usr/sbin/ip6tables-restore
+	rm debian/tmp/usr/sbin/arptables-save
+	rm debian/tmp/usr/sbin/arptables-restore
+	rm debian/tmp/usr/sbin/ebtables-save
+	rm debian/tmp/usr/sbin/ebtables-restore

@@ -1,0 +1,12 @@
+--- a/drivers/net/wireless/rtl8723ds/include/rtw_security.h
++++ b/drivers/net/wireless/rtl8723ds/include/rtw_security.h
+@@ -242,7 +242,7 @@
+ #endif /* DBG_SW_SEC_CNT */
+ };
+ 
+-struct sha256_state {
++struct rtw_sha256_state {
+ 	u64 length;
+ 	u32 state[8], curlen;
+ 	u8 buf[64];
+

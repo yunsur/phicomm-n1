@@ -1,0 +1,14 @@
+From: Laurence J. Lane <ljlane@debian.org>
+Description: lintian spelling warning, s/specifing/specifying
+
+--- a/libipq/ipq_set_verdict.3
++++ b/libipq/ipq_set_verdict.3
+@@ -30,7 +30,7 @@
+ .B ipq_set_verdict
+ function issues a verdict on a packet previously obtained with
+ .BR ipq_read ,
+-specifing the intended disposition of the packet, and optionally
++specifying the intended disposition of the packet, and optionally
+ supplying a modified version of the payload data.
+ .PP
+ The

@@ -1,0 +1,11 @@
+Document: nat
+Title: Linux 2.4/2.6 NAT HOWTO
+Author: Rusty Russell
+Abstract: This document describes how to do masquerading, transparent
+ proxying, port forwarding, and other forms of Network Address
+ Translations with the 2.6+ Linux Kernels.
+Section: Help/HOWTO
+
+Format: HTML
+Index: /usr/share/doc/iptables/html/NAT-HOWTO.html
+Files: /usr/share/doc/iptables/html/NAT-HOWTO*.html

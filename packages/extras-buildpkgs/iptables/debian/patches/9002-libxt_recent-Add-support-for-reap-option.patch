@@ -1,0 +1,26 @@
+Description: Fix support for reap option.
+Origin: 79ddbf202a06e6f018e087a328c2ca91e65a8463
+Author: Tim Gardner <tim.gardner@canonical.com>
+Last-Update: <2013-06-07>
+
+Index: iptables/extensions/libxt_recent.c
+===================================================================
+--- iptables.orig/extensions/libxt_recent.c	2013-10-23 19:37:20.190616082 -0400
++++ iptables/extensions/libxt_recent.c	2013-10-23 19:37:20.186616082 -0400
+@@ -170,10 +170,16 @@
+ 
+ static void recent_check(struct xt_fcheck_call *cb)
+ {
++	struct xt_recent_mtinfo *info = cb->data;
++
+ 	if (!(cb->xflags & F_ANY_OP))
+ 		xtables_error(PARAMETER_PROBLEM,
+ 			"recent: you must specify one of `--set', `--rcheck' "
+ 			"`--update' or `--remove'");
++
++	if ((info->check_set & XT_RECENT_REAP) && !info->seconds)
++		xtables_error(PARAMETER_PROBLEM,
++			"recent: you must specify `--seconds' with `--reap'");
+ }
+ 
+ static void recent_print(const void *ip, const struct xt_entry_match *match,

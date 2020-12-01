@@ -1,0 +1,9 @@
+Document: netfilter-hacking
+Title: Linux netfilter Hacking HOWTO
+Author: Rusty Russell
+Abstract: This document describes the netfilter architecture for Linux, how to hack it, and some of the major systems which sit on top of it, such as packet filtering, connection tracking and Network Address Translation.
+Section: Help/HOWTO
+
+Format: HTML
+Index: /usr/share/doc/iptables-dev/html/netfilter-hacking-HOWTO.html
+Files: /usr/share/doc/iptables-dev/html/netfilter-hacking-HOWTO-*.html

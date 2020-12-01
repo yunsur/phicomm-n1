@@ -1,0 +1,9 @@
+Document: netfilter-extensions
+Title: Netfilter Extensions HOWTO
+Author: Fabrice MARIE <fabrice@celestix.com>
+Abstract: This document describes how to install and use current iptables extensions for netfilter.
+Section: Help/HOWTO
+
+Format: HTML
+Index: /usr/share/doc/iptables-dev/html/netfilter-extensions-HOWTO.html
+Files: /usr/share/doc/iptables-dev/html/netfilter-extensions-HOWTO-?.html

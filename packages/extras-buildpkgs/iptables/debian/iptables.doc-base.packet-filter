@@ -1,0 +1,10 @@
+Document: packet-filter
+Title: Linux 2.4/2.6 Packet Filtering HOWTO
+Author: Rusty Russell
+Abstract: This document describes how to use iptables to filter
+ IP packets for the 2.6+ Linux kernels.
+Section: Help/HOWTO
+
+Format: HTML
+Index: /usr/share/doc/iptables/html/packet-filtering-HOWTO.html
+Files: /usr/share/doc/iptables/html/packet-filtering-HOWTO*.html
