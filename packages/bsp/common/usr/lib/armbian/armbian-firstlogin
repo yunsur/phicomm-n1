@@ -53,6 +53,8 @@ set_timezone_and_locales()
 		TZDATA=$(echo ${RES} | cut -d"," -f1)
 		STATE=$(echo ${RES} | cut -d"," -f2)
 		LOCALES=$(grep territory /usr/share/i18n/locales/* | grep "$STATE" | cut -d ":" -f 1 | cut -d "/" -f 6 |  xargs -I{} grep {} /usr/share/i18n/SUPPORTED | grep "\.UTF-8" | cut -d " " -f 1)
+		# UTF8 is not present everywhere so check again in case it returns empty value
+		[[ -z "$LOCALES" ]] && LOCALES=$(grep territory /usr/share/i18n/locales/* | grep "$STATE" | cut -d ":" -f 1 | cut -d "/" -f 6 |  xargs -I{} grep {} /usr/share/i18n/SUPPORTED | cut -d " " -f 1)
 		CCODE=$(echo ${RES} | cut -d"," -f3 | awk '{print tolower($0)}' | xargs)
 		options=(`echo ${LOCALES}`);
 
@@ -81,10 +83,12 @@ set_timezone_and_locales()
 		locale-gen $LOCALES > /dev/null 2>&1
 
 		# adding another keyboard layout
-		echo -e "Adding console keyboard layout: \x1B[92m$CCODE\x1B[0m"
-		CCODE=$(cat /etc/default/keyboard | grep XKBLAYOUT | awk -F'"' '$0=$2')",$CCODE"
-		sed -i "s/XKBLAYOUT=.*/XKBLAYOUT=\"$CCODE\"/" /etc/default/keyboard
-		setupcon -k --force
+		if grep -q " $CCODE " /usr/share/X11/xkb/rules/base.lst ; then
+			echo -e "Adding console keyboard layout: \x1B[92m$CCODE\x1B[0m"
+			CCODE=$(cat /etc/default/keyboard | grep XKBLAYOUT | awk -F'"' '$0=$2')",$CCODE"
+			sed -i "s/XKBLAYOUT=.*/XKBLAYOUT=\"$CCODE\"/" /etc/default/keyboard
+			setupcon -k --force
+		fi
 	fi
 
 }

@@ -206,13 +206,13 @@ if ! ls "${SRC}"/userpatches/{config-example.conf,config-docker.conf,config-vagr
 	fi
 
 	# Create Docker file
-        if [[ ! -f "${SRC}"/userpatches/Dockerfile ]]; then
-                cp "${SRC}"/config/templates/Dockerfile "${SRC}"/userpatches/Dockerfile || exit 1
-        fi
+	if [[ ! -f "${SRC}"/userpatches/Dockerfile ]]; then
+		cp "${SRC}"/config/templates/Dockerfile "${SRC}"/userpatches/Dockerfile || exit 1
+	fi
 
 	# Create Vagrant config
 	if [[ ! -f "${SRC}"/userpatches/config-vagrant.conf ]]; then
-	        cp "${SRC}"/config/templates/config-vagrant.conf "${SRC}"/userpatches/config-vagrant.conf || exit 1
+		cp "${SRC}"/config/templates/config-vagrant.conf "${SRC}"/userpatches/config-vagrant.conf || exit 1
 	fi
 
 	# Create Vagrant file
