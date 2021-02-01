@@ -130,8 +130,6 @@ install_common()
 	mkdir -p "${SDCARD}"/etc/systemd/system/getty@.service.d/
 	mkdir -p "${SDCARD}"/etc/systemd/system/serial-getty@.service.d/
 	cat <<-EOF > "${SDCARD}"/etc/systemd/system/serial-getty@.service.d/override.conf
-	[Unit]
-	After=graphical.target
 	[Service]
 	ExecStartPre=/bin/sh -c 'exec /bin/sleep 10'
 	ExecStart=
@@ -158,7 +156,7 @@ install_common()
 	# display welcome message at first root login
 	touch "${SDCARD}"/root/.not_logged_in_yet
 
-	if [[ ${DESKTOP_AUTOLOGIN} != no ]]; then
+	if [[ ${DESKTOP_AUTOLOGIN} == yes ]]; then
 		# set desktop autologin
 		touch "${SDCARD}"/root/.desktop_autologin
 	fi
@@ -203,7 +201,8 @@ install_common()
 
 	# set hostname in hosts file
 	cat <<-EOF > "${SDCARD}"/etc/hosts
-	127.0.0.1   localhost $HOST
+	127.0.0.1   localhost
+	127.0.1.1   $HOST
 	::1         localhost $HOST ip6-localhost ip6-loopback
 	fe00::0     ip6-localnet
 	ff00::0     ip6-mcastprefix
@@ -312,6 +311,17 @@ install_common()
 		fi
 	fi
 
+	# install armbian-zsh
+	if [[ "${REPOSITORY_INSTALL}" != *armbian-zsh* ]]; then
+		if [[ $BUILD_MINIMAL != yes ]]; then
+			install_deb_chroot "${DEB_STORAGE}/armbian-zsh_${REVISION}_all.deb"
+		fi
+	else
+		if [[ $BUILD_MINIMAL != yes ]]; then
+			install_deb_chroot "armbian-zsh" "remote"
+		fi
+	fi
+
 	# install kernel sources
 	if [[ -f ${DEB_STORAGE}/${CHOSEN_KSRC}_${REVISION}_all.deb && $INSTALL_KSRC == yes ]]; then
 		install_deb_chroot "${DEB_STORAGE}/${CHOSEN_KSRC}_${REVISION}_all.deb"
@@ -326,7 +336,7 @@ install_common()
 	if [[ $BSPFREEZE == yes ]]; then
 		display_alert "Freezing Armbian packages" "$BOARD" "info"
 		chroot "${SDCARD}" /bin/bash -c "apt-mark hold ${CHOSEN_KERNEL} ${CHOSEN_KERNEL/image/headers} \
-			linux-u-boot-${BOARD}-${BRANCH} ${CHOSEN_KERNEL/image/dtb}" >> "${DEST}"/debug/install.log 2>&1
+		linux-u-boot-${BOARD}-${BRANCH} ${CHOSEN_KERNEL/image/dtb}" >> "${DEST}"/debug/install.log 2>&1
 	fi
 
 	# remove deb files
@@ -556,6 +566,9 @@ install_distribution_specific()
 			rm -f "${SDCARD}"/etc/update-motd.d/50-motd-news
 			rm -f "${SDCARD}"/etc/update-motd.d/80-esm
 			rm -f "${SDCARD}"/etc/update-motd.d/80-livepatch
+			rm -f "${SDCARD}"/etc/update-motd.d/90-updates-available
+			rm -f "${SDCARD}"/etc/update-motd.d/91-release-upgrade
+			rm -f "${SDCARD}"/etc/update-motd.d/95-hwe-eol
 
 			# remove motd news from motd.ubuntu.com
 			[[ -f "${SDCARD}"/etc/default/motd-news ]] && sed -i "s/^ENABLED=.*/ENABLED=0/" "${SDCARD}"/etc/default/motd-news
