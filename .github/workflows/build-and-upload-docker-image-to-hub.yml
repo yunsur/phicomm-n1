@@ -13,8 +13,7 @@ jobs:
        run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin   
      - name: Build Docker image
        run: |
-        echo "latest" > VERSION
-        ./compile.sh docker KERNEL_ONLY="yes" BOARD="bananapi" BRANCH="current" KERNEL_CONFIGURE="no"        
+        ./compile.sh docker BOARD="arm-64" ARCH="arm64" BRANCH="current" RELEASE="focal" KERNEL_ONLY="no" KERNEL_CONFIGURE="no" BUILD_MINIMAL="no" BUILD_DESKTOP="no"
+        docker tag armbian:$(cat VERSION) armbian/build:latest
      - name: Push Docker image
        run: docker push armbian/build:latest
-
