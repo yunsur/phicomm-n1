@@ -667,7 +667,7 @@ adding_packages()
 		# add if not already there
 		aptly repo search -architectures="${arch}" -config="${SCRIPTPATH}config/${REPO_CONFIG}" "${1}" 'Name (% '${name}'), $Version (='${version}'), $Architecture (='${arch}')' &>/dev/null
 		if [[ $? -ne 0 ]]; then
-			display_alert "Adding" "$name" "info"
+			display_alert "Adding ${1}" "$name" "info"
 			aptly repo add -force-replace=true -config="${SCRIPTPATH}config/${REPO_CONFIG}" "${1}" "${f}" &>/dev/null
 		fi
 	done
@@ -684,7 +684,7 @@ addtorepo()
 # parameter "delete" remove incoming directory if publishing is succesful
 # function: cycle trough distributions
 
-	local distributions=("xenial" "stretch" "bionic" "buster" "bullseye" "groovy" "focal" "hirsute" "sid")
+	local distributions=("bionic" "buster" "bullseye" "focal" "hirsute" "sid")
 	local errors=0
 
 	for release in "${distributions[@]}"; do
@@ -698,10 +698,11 @@ addtorepo()
 
 		# create local repository if not exist
 		if [[ -z $(aptly repo list -config="${SCRIPTPATH}config/${REPO_CONFIG}" -raw | awk '{print $(NF)}' | grep "${release}") ]]; then
-			display_alert "Creating section" "$release" "info"
+			display_alert "Creating section" "main" "info"
 			aptly repo create -config="${SCRIPTPATH}config/${REPO_CONFIG}" -distribution="${release}" -component="main" \
 			-comment="Armbian main repository" "${release}" >/dev/null
 		fi
+
 		if [[ -z $(aptly repo list -config="${SCRIPTPATH}config/${REPO_CONFIG}" -raw | awk '{print $(NF)}' | grep "^utils") ]]; then
 			aptly repo create -config="${SCRIPTPATH}config/${REPO_CONFIG}" -distribution="${release}" -component="utils" \
 			-comment="Armbian utilities (backwards compatibility)" utils >/dev/null
@@ -727,7 +728,7 @@ addtorepo()
 
 		# adding main distribution packages
 		if find "${DEB_STORAGE}/${release}" -maxdepth 1 -type f -name "*.deb" 2>/dev/null | grep -q .; then
-			adding_packages "$release" "/${release}" "release"
+			adding_packages "${release}-utils" "/${release}" "release packages"
 		else
 			# workaround - add dummy package to not trigger error
 			aptly repo add -config="${SCRIPTPATH}config/${REPO_CONFIG}" "${release}" "${SCRIPTPATH}config/templates/example.deb" >/dev/null
@@ -756,9 +757,17 @@ addtorepo()
 		desknum=$(aptly repo show -with-packages -config="${SCRIPTPATH}config/${REPO_CONFIG}" "${release}-utils" | grep "Number of packages" | awk '{print $NF}')
 
 		if [ $mainnum -gt 0 ] && [ $utilnum -gt 0 ] && [ $desknum -gt 0 ]; then
+
 			# publish
-			aptly publish -force-overwrite -passphrase="${GPG_PASS}" -origin=Armbian -label=Armbian -config="${SCRIPTPATH}config/${REPO_CONFIG}" -component="${COMPONENTS// /,}" \
-				--distribution="${release}" repo "${release}" ${COMPONENTS//main/} >/dev/null
+			aptly publish \
+			-acquire-by-hash \
+			-passphrase="${GPG_PASS}" \
+			-origin="Armbian" \
+			-label="Armbian" \
+			-config="${SCRIPTPATH}config/${REPO_CONFIG}" \
+			-component="${COMPONENTS// /,}" \
+			-distribution="${release}" repo "${release}" ${COMPONENTS//main/} >/dev/null
+
 			if [[ $? -ne 0 ]]; then
 				display_alert "Publishing failed" "${release}" "err"
 				errors=$((errors+1))
@@ -1010,7 +1019,7 @@ prepare_host()
 	parted pkg-config libncurses5-dev whiptail debian-keyring debian-archive-keyring f2fs-tools libfile-fcntllock-perl rsync libssl-dev \
 	nfs-kernel-server btrfs-progs ncurses-term p7zip-full kmod dosfstools libc6-dev-armhf-cross imagemagick \
 	curl patchutils liblz4-tool libpython2.7-dev linux-base swig aptly acl python3-dev python3-distutils \
-	locales ncurses-base pixz dialog systemd-container udev lib32stdc++6 libc6-i386 lib32ncurses5 lib32tinfo5 \
+	locales ncurses-base pixz dialog systemd-container udev libfdt-dev lib32stdc++6 libc6-i386 lib32ncurses5 lib32tinfo5 \
 	bison libbison-dev flex libfl-dev cryptsetup gpg gnupg1 cpio aria2 pigz dirmngr python3-distutils jq"
 
 # build aarch64
@@ -1030,7 +1039,7 @@ prepare_host()
 	local codename=$(lsb_release -sc)
 
 	# Add support for Ubuntu 20.04, 21.04 and Mint Ulyana
-	if [[ $codename =~ ^(focal|groovy|hirsute|ulyana)$ ]]; then
+	if [[ $codename =~ ^(focal|groovy|hirsute|ulyana|ulyssa|bullseye)$ ]]; then
 		hostdeps+=" python2 python3"
 		ln -fs /usr/bin/python2.7 /usr/bin/python2
 		ln -fs /usr/bin/python2.7 /usr/bin/python
@@ -1045,7 +1054,7 @@ prepare_host()
 	#
 	# NO_HOST_RELEASE_CHECK overrides the check for a supported host system
 	# Disable host OS check at your own risk. Any issues reported with unsupported releases will be closed without discussion
-	if [[ -z $codename || "buster groovy focal hirsute debbie tricia ulyana" != *"$codename"* ]]; then
+	if [[ -z $codename || "buster bullseye groovy focal hirsute debbie tricia ulyana ulyssa" != *"$codename"* ]]; then
 		if [[ $NO_HOST_RELEASE_CHECK == yes ]]; then
 			display_alert "You are running on an unsupported system" "${codename:-(unknown)}" "wrn"
 			display_alert "Do not report any errors, warnings or other issues encountered beyond this point" "" "wrn"
@@ -1061,7 +1070,7 @@ prepare_host()
 # build aarch64
   if [[ $(dpkg --print-architecture) == amd64 ]]; then
 
-	if [[ -z $codename || $codename =~ ^(focal|groovy|debbie|buster|hirsute|ulyana)$ ]]; then
+	if [[ -z $codename || $codename =~ ^(focal|groovy|debbie|buster|bullseye|hirsute|ulyana|ulyssa)$ ]]; then
 	    hostdeps="${hostdeps/lib32ncurses5 lib32tinfo5/lib32ncurses6 lib32tinfo6}"
 	fi
 
