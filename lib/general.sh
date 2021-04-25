@@ -191,8 +191,9 @@ create_sources_list()
 
 	if [[ $INSTALL_DOCKER == yes ]]; then
 		# stage: add docker repository and install key
-		echo "deb [arch=$ARCH] https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/ubuntu $RELEASE stable" > "${SDCARD}"/etc/apt/sources.list.d/docker.list
-		
+
+		echo "deb [arch=$ARCH] https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/debian $RELEASE stable" > "${SDCARD}"/etc/apt/sources.list.d/docker.list
+
 		display_alert "Adding Docker repository and authentication key" "/etc/apt/sources.list.d/docker.list" "info"
 		cp "${SRC}"/config/docker.key "${SDCARD}"
 		chroot "${SDCARD}" /bin/bash -c "cat docker.key | apt-key add - > /dev/null 2>&1"
@@ -1297,7 +1298,7 @@ download_and_verify()
 	if [[ $? -ne 7 && $? -ne 22 && $? -ne 0 ]]; then
 		display_alert "Timeout from $server" "retrying" "info"
 		server="https://mirrors.tuna.tsinghua.edu.cn/armbian-releases/"
-		
+
 		# switch to another china mirror if tuna timeouts
 		timeout 10 curl --head --fail --silent ${server}${remotedir}/${filename} 2>&1 >/dev/null
 		if [[ $? -ne 7 && $? -ne 22 && $? -ne 0 ]]; then
@@ -1305,7 +1306,7 @@ download_and_verify()
 			server="https://mirrors.bfsu.edu.cn/armbian-releases/"
 		fi
 	fi
-	
+
 
 	# check if file exists on remote server before running aria2 downloader
 	[[ ! `timeout 10 curl --head --fail --silent ${server}${remotedir}/${filename}` ]] && return
