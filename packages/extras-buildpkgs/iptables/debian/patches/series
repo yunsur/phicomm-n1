@@ -1,6 +1,3 @@
-0000-upstream-bump-build-dep-libnftnl.patch
-0000-upstream-fix-restore-noflush.patch
-0000-upstream-xtables-restore-empty-lines.patch
 0101-changelog.patch
 0103-lintian_allows_to.patch
 0104-lintian_hyphens.patch
@@ -10,6 +7,5 @@
 0301-install_iptables_apply.patch
 0401-580941-iptables_apply_update.patch
 0402-extensions-add-libipt_fullconenat.patch
-
-9000-howtos.patch
-9002-libxt_recent-Add-support-for-reap-option.patch
+format-security_fixes_in_libip[6]t_icmp.patch
+bug_922973.patch

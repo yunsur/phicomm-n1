@@ -31,7 +31,7 @@ Index: pkg-iptables/iptables/iptables-save.8.in
 ===================================================================
 --- pkg-iptables.orig/iptables/iptables-save.8.in
 +++ pkg-iptables/iptables/iptables-save.8.in
-@@ -62,7 +62,7 @@ Rusty Russell <rusty@rustcorp.com.au>
+@@ -59,7 +59,7 @@ Rusty Russell <rusty@rustcorp.com.au>
  .br
  Andras Kis-Szabo <kisza@sch.bme.hu> contributed ip6tables-save.
  .SH SEE ALSO

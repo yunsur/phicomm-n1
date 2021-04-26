@@ -7,4 +7,3 @@ usr/lib/*/xtables/libxt_*.so
 usr/sbin/*
 usr/share/man/man1
 usr/share/man/man8
-howtos/NAT*html debian/tmp/howtos/packet*html usr/share/doc/iptables/html

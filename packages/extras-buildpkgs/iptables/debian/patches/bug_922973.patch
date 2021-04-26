@@ -1,0 +1,35 @@
+From 2478b6cbb8112f940cec61ec1e62a598472d33d0 Mon Sep 17 00:00:00 2001
+From: Phil Sutter <phil@nwl.cc>
+Date: Thu, 7 Feb 2019 22:13:31 +0100
+Subject: xtables-save: Fix table not found error message
+
+First of all, this error message should not appear on stdout, otherwise
+it may end in dump files. Next, with completely empty ruleset, even
+valid table names cause errors. To avoid this, continue operation if the
+not found table is a builtin one.
+
+Signed-off-by: Phil Sutter <phil@nwl.cc>
+Signed-off-by: Florian Westphal <fw@strlen.de>
+---
+ iptables/xtables-save.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/iptables/xtables-save.c b/iptables/xtables-save.c
+index 414a864b..87ebb913 100644
+--- a/iptables/xtables-save.c
++++ b/iptables/xtables-save.c
+@@ -105,8 +105,9 @@ do_output(struct nft_handle *h, const char *tablename, bool counters)
+ 		return !!ret;
+ 	}
+ 
+-	if (!nft_table_find(h, tablename)) {
+-		printf("Table `%s' does not exist\n", tablename);
++	if (!nft_table_find(h, tablename) &&
++	    !nft_table_builtin_find(h, tablename)) {
++		fprintf(stderr, "Table `%s' does not exist\n", tablename);
+ 		return 1;
+ 	}
+ 
+-- 
+cgit v1.2.1
+
