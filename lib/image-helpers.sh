@@ -19,7 +19,6 @@
 # customize_image
 # install_deb_chroot
 
-
 # mount_chroot <target>
 #
 # helper to reduce code duplication
@@ -96,9 +95,8 @@ if [[ $ADD_UBOOT == yes ]]; then
 	chmod 700 ${TEMP_DIR}
 	revision=${REVISION}
 	if [[ -n $UPSTREM_VER ]]; then
-		DEB_BRANCH=${DEB_BRANCH/-/}
 		revision=${UPSTREM_VER}
-		dpkg -x "${DEB_STORAGE}/linux-u-boot-${BOARD}-${DEB_BRANCH/-/}_${revision}_${ARCH}.deb" ${TEMP_DIR}/
+		dpkg -x "${DEB_STORAGE}/linux-u-boot-${BOARD}-${BRANCH}_${revision}_${ARCH}.deb" ${TEMP_DIR}/
 	else
 		dpkg -x "${DEB_STORAGE}/${CHOSEN_UBOOT}_${revision}_${ARCH}.deb" ${TEMP_DIR}/
 	fi
@@ -118,7 +116,7 @@ customize_image()
 	# util-linux >= 2.27 required
 	mount -o bind,ro "$USERPATCHES_PATH"/overlay "${SDCARD}"/tmp/overlay
 	display_alert "Calling image customization script" "customize-image.sh" "info"
-	chroot "${SDCARD}" /bin/bash -c "/tmp/customize-image.sh $RELEASE $LINUXFAMILY $BOARD $BUILD_DESKTOP"
+	chroot "${SDCARD}" /bin/bash -c "/tmp/customize-image.sh $RELEASE $LINUXFAMILY $BOARD $BUILD_DESKTOP $ARCH"
 	CUSTOMIZE_IMAGE_RC=$?
 	umount -i "${SDCARD}"/tmp/overlay >/dev/null 2>&1
 	mountpoint -q "${SDCARD}"/tmp/overlay || rm -r "${SDCARD}"/tmp/overlay

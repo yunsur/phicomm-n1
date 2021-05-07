@@ -17,3 +17,4 @@ jobs:
         docker tag armbian:$(cat VERSION) armbian/build:latest
      - name: Push Docker image
        run: docker push armbian/build:latest
+

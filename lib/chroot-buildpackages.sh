@@ -33,23 +33,26 @@ create_chroot()
 	apt_mirror['bionic']="$UBUNTU_MIRROR"
 	apt_mirror['focal']="$UBUNTU_MIRROR"
 	apt_mirror['groovy']="$UBUNTU_MIRROR"
+	apt_mirror['hirsute']="$UBUNTU_MIRROR"
 	components['stretch']='main,contrib'
 	components['buster']='main,contrib'
 	components['bullseye']='main,contrib'
+	components['sid']='main,contrib'
 	components['xenial']='main,universe,multiverse'
 	components['bionic']='main,universe,multiverse'
 	components['focal']='main,universe,multiverse'
 	components['groovy']='main,universe,multiverse'
+	components['hirsute']='main,universe,multiverse'
 	display_alert "Creating build chroot" "$release/$arch" "info"
 	local includes="ccache,locales,git,ca-certificates,devscripts,libfile-fcntllock-perl,debhelper,rsync,python3,distcc"
 	# perhaps a temporally workaround
-	[[ $release == buster || $release == bullseye || $release == focal || $release == groovy ]] && includes=${includes}",perl-openssl-defaults,libnet-ssleay-perl"
+	[[ $release == buster || $release == bullseye || $release == focal || $release == groovy || $release == hirsute || $release == sid ]] && includes=${includes}",perl-openssl-defaults,libnet-ssleay-perl"
 	if [[ $NO_APT_CACHER != yes ]]; then
 		local mirror_addr="http://localhost:3142/${apt_mirror[${release}]}"
 	else
 		local mirror_addr="http://${apt_mirror[${release}]}"
 	fi
-	debootstrap --variant=buildd --components="${components[${release}]}" --arch="${arch}" --foreign --include="${includes}" "${release}" "${target_dir}" "${mirror_addr}"
+	debootstrap --variant=buildd --components="${components[${release}]}" --arch="${arch}" $DEBOOTSTRAP_OPTION --foreign --include="${includes}" "${release}" "${target_dir}" "${mirror_addr}"
 	[[ $? -ne 0 || ! -f "${target_dir}"/debootstrap/debootstrap ]] && exit_with_error "Create chroot first stage failed"
 	cp /usr/bin/${qemu_binary[$arch]} "${target_dir}"/usr/bin/
 	[[ ! -f "${target_dir}"/usr/share/keyrings/debian-archive-keyring.gpg ]] && \
@@ -78,7 +81,7 @@ create_chroot()
 		mkdir -p "${target_dir}"/var/lock
 	fi
 	chroot "${target_dir}" /bin/bash -c "/usr/sbin/update-ccache-symlinks"
-	[[ $release == focal ]] && chroot "${target_dir}" /bin/bash -c "ln -s /usr/bin/python3 /usr/bin/python"
+	[[ $release == bullseye || $release == focal || $release == groovy || $release == hirsute || $release == sid ]] && chroot "${target_dir}" /bin/bash -c "ln -s /usr/bin/python3 /usr/bin/python"
 	touch "${target_dir}"/root/.debootstrap-complete
 	display_alert "Debootstrap complete" "${release}/${arch}" "info"
 } #############################################################################
@@ -99,6 +102,8 @@ chroot_prepare_distccd()
 	gcc_version['bionic']='5.4'
 	gcc_version['focal']='9.2'
 	gcc_version['groovy']='10.2'
+	gcc_version['hirsute']='10.2'
+	gcc_version['sid']='10.2'
 	gcc_type['armhf']='arm-linux-gnueabihf-'
 	gcc_type['arm64']='aarch64-linux-gnu-'
 	rm -f "${dest}"/cmdlist
@@ -132,7 +137,7 @@ chroot_build_packages()
 		target_arch="${ARCH}"
 	else
 		# only make packages for recent releases. There are no changes on older
-		target_release="stretch bionic buster bullseye groovy focal"
+		target_release="stretch bionic buster bullseye groovy focal hirsute sid"
 		target_arch="armhf arm64"
 	fi
 
@@ -296,13 +301,13 @@ chroot_installpackages_local()
 	local conf="${SRC}"/config/aptly-temp.conf
 	rm -rf /tmp/aptly-temp/
 	mkdir -p /tmp/aptly-temp/
-	aptly -config="${conf}" repo create temp
+	aptly -config="${conf}" repo create temp >> "${DEST}"/debug/install.log
 	# NOTE: this works recursively
-	aptly -config="${conf}" repo add temp "${DEB_STORAGE}/extra/${RELEASE}-desktop/"
-	aptly -config="${conf}" repo add temp "${DEB_STORAGE}/extra/${RELEASE}-utils/"
+	aptly -config="${conf}" repo add temp "${DEB_STORAGE}/extra/${RELEASE}-desktop/" >> "${DEST}"/debug/install.log
+	aptly -config="${conf}" repo add temp "${DEB_STORAGE}/extra/${RELEASE}-utils/" >> "${DEST}"/debug/install.log
 	# -gpg-key="925644A6"
 	aptly -keyring="${SRC}/packages/extras-buildpkgs/buildpkg-public.gpg" -secret-keyring="${SRC}/packages/extras-buildpkgs/buildpkg.gpg" -batch=true -config="${conf}" \
-		 -gpg-key="925644A6" -passphrase="testkey1234" -component=temp -distribution="${RELEASE}" publish repo temp
+		 -gpg-key="925644A6" -passphrase="testkey1234" -component=temp -distribution="${RELEASE}" publish repo temp >> "${DEST}"/debug/install.log
 	aptly -config="${conf}" -listen=":8189" serve &
 	local aptly_pid=$!
 	cp "${SRC}"/packages/extras-buildpkgs/buildpkg.key "${SDCARD}"/tmp/buildpkg.key
@@ -324,7 +329,6 @@ chroot_installpackages()
 {
 	local remote_only=$1
 	local install_list=""
-	display_alert "Installing additional packages" "EXTERNAL_NEW"
 	for plugin in "${SRC}"/packages/extras-buildpkgs/*.conf; do
 		source "${plugin}"
 		if [[ $(type -t package_checkinstall) == function ]] && package_checkinstall; then
@@ -332,6 +336,12 @@ chroot_installpackages()
 		fi
 		unset package_install_target package_checkinstall
 	done
+	if [[ -n $PACKAGE_LIST_RM ]]; then
+        install_list=$(sed -r "s/\W($(tr ' ' '|' <<< ${PACKAGE_LIST_RM}))\W/ /g" <<< " ${install_list} ")
+        install_list="$(echo ${install_list})"
+	fi
+	display_alert "Installing extras-buildpkgs" "$install_list"
+
 	[[ $NO_APT_CACHER != yes ]] && local apt_extra="-o Acquire::http::Proxy=\"http://${APT_PROXY_ADDR:-localhost:3142}\" -o Acquire::http::Proxy::localhost=\"DIRECT\""
 	cat <<-EOF > "${SDCARD}"/tmp/install.sh
 	#!/bin/bash
@@ -354,5 +364,5 @@ chroot_installpackages()
 	rm -- "\$0"
 	EOF
 	chmod +x "${SDCARD}"/tmp/install.sh
-	chroot "${SDCARD}" /bin/bash -c "/tmp/install.sh"
+	chroot "${SDCARD}" /bin/bash -c "/tmp/install.sh" >> "${DEST}"/debug/install.log 2>&1
 } #############################################################################

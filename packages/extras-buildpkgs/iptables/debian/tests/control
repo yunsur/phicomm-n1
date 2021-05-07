@@ -32,7 +32,7 @@ Restrictions: needs-root, isolation-container
 
 Test-Command: iptables-nft-save
 Depends: @
-Restrictions: needs-root, isolation-container, allow-stderr
+Restrictions: needs-root, isolation-container
 
 Test-Command: ip6tables-nft-save
 Depends: @

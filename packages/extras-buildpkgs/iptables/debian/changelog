@@ -1,166 +1,3 @@
-iptables (1.8.4-3ubuntu2) focal; urgency=medium
-
-  * debian/control: correct Breaks/Replaces for ipt_kernel_headers.h
-    move from libiptc-dev to libip4tc-dev (LP: #1865055)
-
- -- Jamie Strandboge <jamie@ubuntu.com>  Fri, 28 Feb 2020 14:16:32 +0000
-
-iptables (1.8.4-3ubuntu1) focal; urgency=medium
-
-  * Merge from Debian unstable.  Remaining changes:
-    - debian/control: add linuxdoc-tools dep
-    - 9000-howtos.patch: add howtos/ and install them
-    - 9002-libxt_recent-Add-support-for-reap-option.patch: Some changes are
-      upstream, patch needed for additional reap option checks.
-    - debian/iptables-dev.doc-base.netfilter-extensions,
-      debian/iptables-dev.doc-base.netfilter-hacking,
-      debian/iptables.doc-base.nat, debian/iptables.doc-base.packet-filter:
-      add howtos
-    - Swap alternative priority around so we prefer legacy.
-    - Demote nftables from Recommends to Suggests for focal.
-    - autopkgtest: allow-stderr on command9 to fix regression
-
- -- Jamie Strandboge <jamie@ubuntu.com>  Thu, 13 Feb 2020 22:23:25 +0000
-
-iptables (1.8.4-3) unstable; urgency=medium
-
-  [ Alberto Molina Coballes ]
-  * [d87a98a] libiptc-dev: add Breaks and Replaces fields (Closes: #949576)
-
-  [ Arturo Borrero Gonzalez ]
-  * [c66f003] d/patches: add 0000-upstream-xtables-restore-empty-lines.patch
-    (Closes: #949518, #951102)
-
- -- Arturo Borrero Gonzalez <arturo@debian.org>  Thu, 13 Feb 2020 12:20:19 +0100
-
-iptables (1.8.4-2ubuntu1) focal; urgency=low
-
-  * Merge from Debian unstable.  Remaining changes:
-    - debian/control: add linuxdoc-tools dep
-    - 9000-howtos.patch: add howtos/ and install them
-    - 9002-libxt_recent-Add-support-for-reap-option.patch: Some changes are
-      upstream, patch needed for additional reap option checks.
-    - debian/iptables-dev.doc-base.netfilter-extensions,
-      debian/iptables-dev.doc-base.netfilter-hacking,
-      debian/iptables.doc-base.nat, debian/iptables.doc-base.packet-filter:
-      add howtos
-    - Swap alternative priority around so we prefer legacy.
-    - Demote nftables from Recommends to Suggests for focal.
-    - autopkgtest: allow-stderr on command9 to fix regression
-  * Dropped changes, included upstream:
-    - d/p/lp-1840633-nft-exit-in-case-we-can-t-fetch-current-genid.patch: avoid
-      busy loop if cache can't be created
-
- -- Steve Langasek <steve.langasek@ubuntu.com>  Thu, 13 Feb 2020 11:16:57 -0800
-
-iptables (1.8.4-2) unstable; urgency=medium
-
-  [ Alberto Molina Coballes ]
-  * [740ac01] d/control: refresh homepage (Closes: #946253)
-  * [983ab27] d/control: drop dependencies upon libiptc0 (Closes: #946202)
-
-  [ Debian Janitor ]
-  * [7d57346] Set debhelper-compat version in Build-Depends.
-  * [5d19fc0] debian/copyright: use spaces rather than tabs to start
-    continuation lines.
-  * [18f2cea] Move transitional packages libiptc0 to oldlibs/optional per
-    policy 4.0.1.
-  * [d7e5843] Set upstream metadata fields: Repository.
-  * [d3d04fb] Drop unnecessary dependency on dh-autoreconf.
-  * [13ed20f] Use canonical URL in Vcs-Git.
-  * [6285405] Update standards version to 4.4.1, no changes needed.
-
-  [ Alberto Molina Coballes ]
-  * [d7ad217] d/control: add dependency upon netbase (Closes: #946932)
-
-  [ Debian Janitor ]
-  * [249fc99] Refer to common license file for Artistic.
-
-  [ Arturo Borrero Gonzalez ]
-  * [3892140] src:iptables: add Alberto Molina to Uploaders
-  * [d36d29f] d/patches: add 0000-upstream-fix-restore-noflush.patch
-    (Closes: #946289)
-  * [3a66221] libiptc-dev: reintroduce package with shared pkg-config file
-    (Closes: #947176, #946202)
-  * [474f1aa] iptables: clarify binary utilities names (Closes: #946258)
-
- -- Arturo Borrero Gonzalez <arturo@debian.org>  Mon, 20 Jan 2020 14:20:19 +0100
-
-iptables (1.8.4-1) unstable; urgency=medium
-
-  * [c59797a] iptables: no longer Priority: important
-  * [f8bb861] src:iptables: drop iptables-dev transitional package
-    (Closes: #939243)
-  * [4efb6c3] iptables: add Suggest: firewalld
-  * [290749d] New upstream version 1.8.4
-  * [7e5627f] d/patches: refresh 0301-install_iptables_apply.patch
-  * [e31ef86] d/patches: include 0000-upstream-bump-build-dep-libnftnl.patch
-  * [d7ebb42] src:iptables: drop libiptc0, libiptc-dev packages
-  * [8347150] src:iptables: bump debhelper compat to 12
-  * [5b0b408] src:iptables: drop /sbin -> /usr/sbin compat symlinks
-
- -- Arturo Borrero Gonzalez <arturo@debian.org>  Wed, 04 Dec 2019 11:53:40 +0100
-
-iptables (1.8.3-2ubuntu5) eoan; urgency=medium
-
-  * Demote nftables from Recommends to Suggests for eoan, in keeping with
-    the changes for LP #1843468.
-
- -- Steve Langasek <steve.langasek@ubuntu.com>  Wed, 25 Sep 2019 12:36:12 -0700
-
-iptables (1.8.3-2ubuntu4) eoan; urgency=medium
-
-  * autopkgtest: allow-stderr on command9 to fix regression
-
- -- Julian Andres Klode <juliank@ubuntu.com>  Mon, 16 Sep 2019 13:48:52 +0200
-
-iptables (1.8.3-2ubuntu3) eoan; urgency=medium
-
-  * Swap alternative priority around so we prefer legacy (LP: #1843468)
-
- -- Julian Andres Klode <juliank@ubuntu.com>  Wed, 11 Sep 2019 16:02:54 +0200
-
-iptables (1.8.3-2ubuntu2) eoan; urgency=medium
-
-  * d/p/lp-1840633-nft-exit-in-case-we-can-t-fetch-current-genid.patch: avoid
-    busy loop if cache can't be created (LP: #1840633)
-
- -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 21 Aug 2019 14:04:49 +0200
-
-iptables (1.8.3-2ubuntu1) eoan; urgency=low
-
-  * Merge from Debian unstable.  Remaining changes:
-    - debian/control: add linuxdoc-tools dep
-    - 9000-howtos.patch: add howtos/ and install them
-    - 9002-libxt_recent-Add-support-for-reap-option.patch: Some changes are
-      upstream, patch needed for additional reap option checks.
-    - debian/iptables-dev.doc-base.netfilter-extensions,
-      debian/iptables-dev.doc-base.netfilter-hacking,
-      debian/iptables.doc-base.nat, debian/iptables.doc-base.packet-filter:
-      add howtos
-
- -- Gianfranco Costamagna <locutusofborg@debian.org>  Mon, 29 Jul 2019 23:59:20 +0200
-
-iptables (1.8.3-2) unstable; urgency=medium
-
-  * [1cfe029] d/control: bump std-version to 4.4.0
-
- -- Arturo Borrero Gonzalez <arturo@debian.org>  Wed, 10 Jul 2019 10:48:04 +0200
-
-iptables (1.8.3-1~exp1) experimental; urgency=medium
-
-  * [89c92f0] New upstream version 1.8.3 (Closes: #929527)
-  * [7c34195] iptables: bump dependency on libnftnl to >= 1.1.3
-  * [ab1a5b7] d/patches: refresh 0104-lintian_hyphens.patch
-  * [3771b10] d/patches: refresh 0201-660748-iptables_apply_man.patch
-  * [97d6c1a] d/patches: refresh 0301-install_iptables_apply.patch
-  * [dd6d2e6] d/patches: drop format-security_fixes_in_libip[6]t_icmp.patch
-  * [6f0e55f] d/patches: drop bug_922973.patch
-  * [5d1950b] libip6tc: bump SONAME from 0 to 2
-  * [cf5f265] libip4tc: bump SONAME from 0 to 2
-
- -- Arturo Borrero Gonzalez <arturo@debian.org>  Tue, 28 May 2019 12:34:08 +0200
-
 iptables (1.8.2-4) unstable; urgency=medium
 
   * [5053b60] d/rules: reintroduce V=1
@@ -266,32 +103,6 @@ iptables (1.6.2-1) unstable; urgency=medium
 
  -- Arturo Borrero Gonzalez <arturo@debian.org>  Fri, 02 Feb 2018 19:34:31 +0100
 
-iptables (1.6.1-2ubuntu3) disco; urgency=medium
-
-  * No-change rebuild against latest libnftnl
-
- -- Jeremy Bicha <jbicha@ubuntu.com>  Fri, 07 Dec 2018 06:14:40 -0500
-
-iptables (1.6.1-2ubuntu2) bionic; urgency=medium
-
-  * No-change rebuild against latest libnftnl
-
- -- Jeremy Bicha <jbicha@ubuntu.com>  Sat, 11 Nov 2017 21:52:05 -0500
-
-iptables (1.6.1-2ubuntu1) artful; urgency=low
-
-  * Merge from Debian unstable.  Remaining changes:
-    - debian/control: add linuxdoc-tools dep
-    - 9000-howtos.patch: add howtos/ and install them
-    - 9002-libxt_recent-Add-support-for-reap-option.patch: Some changes are
-      upstream, patch needed for additional reap option checks.
-    - debian/iptables-dev.doc-base.netfilter-extensions,
-      debian/iptables-dev.doc-base.netfilter-hacking,
-      debian/iptables.doc-base.nat, debian/iptables.doc-base.packet-filter:
-      add howtos
-
- -- Steve Langasek <steve.langasek@ubuntu.com>  Sun, 02 Jul 2017 20:08:59 -0700
-
 iptables (1.6.1-2) unstable; urgency=medium
 
   [ Helmut Grohne ]
@@ -323,30 +134,6 @@ iptables (1.6.1-1~exp1) experimental; urgency=medium
   * [3abd57d] d/patches/: refresh 0301-install_iptables_apply.patch
 
  -- Arturo Borrero Gonzalez <arturo@debian.org>  Wed, 15 Mar 2017 11:03:30 +0100
-
-iptables (1.6.0+snapshot20161117-6ubuntu1) artful; urgency=low
-
-  * Merge from Debian unstable.  Remaining changes:
-    - debian/control: add linuxdoc-tools dep
-    - 9000-howtos.patch: add howtos/ and install them
-    - 9002-libxt_recent-Add-support-for-reap-option.patch: Some changes are
-      upstream, patch needed for additional reap option checks.
-    - debian/iptables-dev.doc-base.netfilter-extensions,
-      debian/iptables-dev.doc-base.netfilter-hacking,
-      debian/iptables.doc-base.nat, debian/iptables.doc-base.packet-filter:
-      add howtos
-  * Dropped changes, included in Debian:
-    - Add missing libip[46]tc0 dependencies to their -dev packages.
-
- -- Steve Langasek <steve.langasek@ubuntu.com>  Thu, 15 Jun 2017 16:11:08 -0700
-
-iptables (1.6.0+snapshot20161117-6) unstable; urgency=medium
-
-  * [3db1c4d] d/patches: add
-    0001-extensions-libxt_hashlimit-fix-64-bit-printf-formats.patch.
-    Thanks to James Cowgill for the patch (Closes: #859775)
-
- -- Arturo Borrero Gonzalez <arturo@debian.org>  Wed, 12 Apr 2017 11:41:06 +0200
 
 iptables (1.6.0+snapshot20161117-5) unstable; urgency=medium
 
@@ -413,27 +200,6 @@ iptables (1.6.0-4) unstable; urgency=medium
 
  -- Arturo Borrero Gonzalez <arturo@debian.org>  Mon, 10 Oct 2016 12:03:13 +0200
 
-iptables (1.6.0-3ubuntu2) yakkety; urgency=medium
-
-  * Add missing libip[46]tc0 dependencies to their -dev packages.
-    (Closes: #835664)
-
- -- Martin Pitt <martin.pitt@ubuntu.com>  Sun, 28 Aug 2016 10:12:11 +0200
-
-iptables (1.6.0-3ubuntu1) yakkety; urgency=medium
-
-  * Merge with Debian (LP: #1616437); remaining Ubuntu changes:
-    - debian/control: add linuxdoc-tools dep
-    - 9000-howtos.patch: add howtos/ and install them
-    - 9002-libxt_recent-Add-support-for-reap-option.patch: Some changes are
-      upstream, patch needed for additional reap option checks.
-    - debian/iptables-dev.doc-base.netfilter-extensions,
-      debian/iptables-dev.doc-base.netfilter-hacking,
-      debian/iptables.doc-base.nat, debian/iptables.doc-base.packet-filter:
-      add howtos
-
- -- Martin Pitt <martin.pitt@ubuntu.com>  Fri, 26 Aug 2016 12:32:56 +0200
-
 iptables (1.6.0-3) unstable; urgency=medium
 
   * several changes in this release. To put it short: split packages into
@@ -477,38 +243,6 @@ iptables (1.6.0-3) unstable; urgency=medium
 
  -- Arturo Borrero Gonzalez <arturo.borrero.glez@gmail.com>  Tue, 07 Jun 2016 14:58:53 +0200
 
-iptables (1.6.0-2ubuntu3) xenial; urgency=medium
-
-  * Don't ship an empty iptables-nftables-compat package.
-
- -- Matthias Klose <doko@ubuntu.com>  Fri, 19 Feb 2016 15:13:01 +0000
-
-iptables (1.6.0-2ubuntu2) xenial; urgency=medium
-
-  * Multiarchify the libxtables11 package.
-  * Move other libraries to the multiarch libdir.
-
- -- Matthias Klose <doko@ubuntu.com>  Mon, 15 Feb 2016 21:21:05 +0100
-
-iptables (1.6.0-2ubuntu1) xenial; urgency=medium
-
-  * Merge with Debian; remaining changes:
-    - debian/control: add linuxdoc-tools dep, remove libipq references
-    - debian/rules: compile with --disable-libipq
-    - 9000-howtos.patch: add howtos/ and install them
-    - 9002-libxt_recent-Add-support-for-reap-option.patch: Some changes are
-      upstream, patch needed for additional reap option checks.
-    - debian/iptables.install: install NAT and packetfilter howtos into
-      /usr/share/doc
-    - debian/iptables-dev.doc-base.netfilter-extensions,
-      debian/iptables-dev.doc-base.netfilter-hacking,
-      debian/iptables.doc-base.nat, debian/iptables.doc-base.packet-filter:
-      add howtos
-    - debian/iptables-dev.install: remove usr/share/man/man3 only used with
-      libipq manpages
-
- -- Matthias Klose <doko@ubuntu.com>  Mon, 15 Feb 2016 21:06:54 +0100
-
 iptables (1.6.0-2) unstable; urgency=medium
 
   * Rebuild for unstable
@@ -541,31 +275,6 @@ iptables (1.6.0-1) experimental; urgency=medium
 
  -- Arturo Borrero Gonzalez <arturo.borrero.glez@gmail.com>  Fri, 15 Jan 2016 13:23:10 +0100
 
-iptables (1.4.21-2ubuntu2) vivid; urgency=medium
-
-  * No change rebuild to get debug symbols for all architectures.
-
- -- Brian Murray <brian@ubuntu.com>  Wed, 03 Dec 2014 08:10:31 -0800
-
-iptables (1.4.21-2ubuntu1) utopic; urgency=medium
-
-  * Merge from Debian unstable. Remaining changes:
-    - debian/control: add linuxdoc-tools dep, remove libipq references
-    - debian/rules: compile with --disable-libipq
-    - 9000-howtos.patch: add howtos/ and install them
-    - 9002-libxt_recent-Add-support-for-reap-option.patch: Some changes are
-      upstream, patch needed for additional reap option checks.
-    - debian/iptables.install: install NAT and packetfilter howtos into
-      /usr/share/doc
-    - debian/iptables-dev.doc-base.netfilter-extensions,
-      debian/iptables-dev.doc-base.netfilter-hacking,
-      debian/iptables.doc-base.nat, debian/iptables.doc-base.packet-filter:
-      add howtos
-    - debian/iptables-dev.install: remove usr/share/man/man3 only used with
-      libipq manpages
-
- -- Stéphane Graber <stgraber@ubuntu.com>  Thu, 05 Jun 2014 16:32:50 -0400
-
 iptables (1.4.21-2) unstable; urgency=medium
 
   * correct _dhopts var to enable autoreconf. Closes: #744968
@@ -574,26 +283,6 @@ iptables (1.4.21-2) unstable; urgency=medium
   * drop extra iptables-apply, fix iptables.install
 
  -- Laurence J. Lane <ljlane@debian.org>  Mon, 19 May 2014 20:49:01 -0400
-
-iptables (1.4.21-1ubuntu1) trusty; urgency=medium
-
-  * Merge from Debian unstable. Remaining changes:
-    - debian/control: add linuxdoc-tools dep, remove libipq references
-    - debian/rules: compile with --disable-libipq
-    - 9000-howtos.patch: add howtos/ and install them
-    - 9002-libxt_recent-Add-support-for-reap-option.patch: Some changes are
-      upstream, patch needed for additional reap option checks.
-    - debian/iptables.install: install NAT and packetfilter howtos into
-      /usr/share/doc
-    - debian/iptables-dev.doc-base.netfilter-extensions,
-      debian/iptables-dev.doc-base.netfilter-hacking,
-      debian/iptables.doc-base.nat, debian/iptables.doc-base.packet-filter:
-      add howtos
-    - debian/iptables-dev.install: remove usr/share/man/man3 only used with
-      libipq manpages
-  * Fix --with autoreconf in debian/rules
-
- -- Stéphane Graber <stgraber@ubuntu.com>  Wed, 08 Jan 2014 17:20:40 -0500
 
 iptables (1.4.21-1) unstable; urgency=low
 
@@ -616,25 +305,6 @@ iptables (1.4.21-1) unstable; urgency=low
   * Removed debug info from README.Debian
 
  -- Laurence J. Lane <ljlane@debian.org>  Sun, 01 Dec 2013 19:48:23 -0500
-
-iptables (1.4.20-2ubuntu1) trusty; urgency=low
-
-  * Re-apply mistakenly dropped delta with Debian:
-    - debian/control: add linuxdoc-tools dep, remove libipq references
-    - debian/rules: compile with --disable-libipq
-    - 9000-howtos.patch: add howtos/ and install them
-    - 9002-libxt_recent-Add-support-for-reap-option.patch: Some changes are
-      upstream, patch needed for additional reap option checks.
-    - debian/iptables.install: install NAT and packetfilter howtos into
-      /usr/share/doc
-    - debian/iptables-dev.doc-base.netfilter-extensions,
-      debian/iptables-dev.doc-base.netfilter-hacking,
-      debian/iptables.doc-base.nat, debian/iptables.doc-base.packet-filter:
-      add howtos
-    - debian/iptables-dev.install: remove usr/share/man/man3 only used with
-      libipq manpages
-
- -- Stéphane Graber <stgraber@ubuntu.com>  Wed, 23 Oct 2013 19:55:19 -0400
 
 iptables (1.4.20-2) unstable; urgency=low
 
@@ -1937,4 +1607,3 @@ iptables (1.0.0alpha-1) unstable; urgency=low
   * Initial release.
 
  -- Christoph Lameter <christoph@lameter.com>  Sun, 26 Mar 2000 18:49:18 -0800
-

@@ -1,7 +1,0 @@
-usr/lib/x86_64-linux-gnu/libip4tc.la
-usr/lib/x86_64-linux-gnu/libiptc.la
-usr/lib/x86_64-linux-gnu/libxtables.la
-usr/lib/x86_64-linux-gnu/libip6tc.la
-usr/bin/iptables-xml
-usr/share/xtables/pf.os
-etc/ethertypes

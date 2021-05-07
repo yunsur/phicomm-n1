@@ -42,6 +42,9 @@ if [[ $ADD_UBOOT == yes ]]; then
 
 	display_alert "Compiling ATF" "" "info"
 
+# build aarch64
+  if [[ $(dpkg --print-architecture) == amd64 ]]; then
+
 	local toolchain
 	toolchain=$(find_toolchain "$ATF_COMPILER" "$ATF_USE_GCC")
 	[[ -z $toolchain ]] && exit_with_error "Could not find required toolchain" "${ATF_COMPILER}gcc $ATF_USE_GCC"
@@ -53,6 +56,9 @@ if [[ $ADD_UBOOT == yes ]]; then
 		toolchain2=$(find_toolchain "$toolchain2_type" "$toolchain2_ver")
 		[[ -z $toolchain2 ]] && exit_with_error "Could not find required toolchain" "${toolchain2_type}gcc $toolchain2_ver"
 	fi
+
+# build aarch64
+  fi
 
 	display_alert "Compiler version" "${ATF_COMPILER}gcc $(eval env PATH="${toolchain}:${PATH}" "${ATF_COMPILER}gcc" -dumpversion)" "info"
 
@@ -131,6 +137,9 @@ if [[ $ADD_UBOOT == yes ]]; then
 
 	display_alert "Compiling u-boot" "$version" "info"
 
+# build aarch64
+  if [[ $(dpkg --print-architecture) == amd64 ]]; then
+
 	local toolchain
 	toolchain=$(find_toolchain "$UBOOT_COMPILER" "$UBOOT_USE_GCC")
 	[[ -z $toolchain ]] && exit_with_error "Could not find required toolchain" "${UBOOT_COMPILER}gcc $UBOOT_USE_GCC"
@@ -143,6 +152,8 @@ if [[ $ADD_UBOOT == yes ]]; then
 		[[ -z $toolchain2 ]] && exit_with_error "Could not find required toolchain" "${toolchain2_type}gcc $toolchain2_ver"
 	fi
 
+# build aarch64
+  fi
 
 	display_alert "Compiler version" "${UBOOT_COMPILER}gcc $(eval env PATH="${toolchain}:${toolchain2}:${PATH}" "${UBOOT_COMPILER}gcc" -dumpversion)" "info"
 	[[ -n $toolchain2 ]] && display_alert "Additional compiler version" "${toolchain2_type}gcc $(eval env PATH="${toolchain}:${toolchain2}:${PATH}" "${toolchain2_type}gcc" -dumpversion)" "info"
@@ -181,7 +192,7 @@ if [[ $ADD_UBOOT == yes ]]; then
 			rm -rf "${atftempdir}"
 		fi
 
-		echo -e "\n\t== u-boot ==\n" >> "${DEST}"/debug/compilation.log
+		echo -e "\n\t== u-boot make $BOOTCONFIG ==\n" >> "${DEST}"/debug/compilation.log
 		eval CCACHE_BASEDIR="$(pwd)" env PATH="${toolchain}:${toolchain2}:${PATH}" \
 			'make $CTHREADS $BOOTCONFIG \
 			CROSS_COMPILE="$CCACHE $UBOOT_COMPILER"' 2>> "${DEST}"/debug/compilation.log \
@@ -217,6 +228,7 @@ if [[ $ADD_UBOOT == yes ]]; then
 		cross_compile="CROSS_COMPILE=$CCACHE $UBOOT_COMPILER";
 		[[ -n $UBOOT_TOOLCHAIN2 ]] && cross_compile="ARMBIAN=foe"; # empty parameter is not allowed
 
+		echo -e "\n\t== u-boot make $target_make ==\n" >> "${DEST}"/debug/compilation.log
 		eval CCACHE_BASEDIR="$(pwd)" env PATH="${toolchain}:${toolchain2}:${PATH}" \
 			'make $target_make $CTHREADS \
 			"${cross_compile}"' 2>>"${DEST}"/debug/compilation.log \
@@ -283,7 +295,7 @@ if [[ $ADD_UBOOT == yes ]]; then
 	[[ ! -f $uboottempdir/${uboot_name}.deb ]] && exit_with_error "Building u-boot package failed"
 
 	rsync --remove-source-files -rq "$uboottempdir/${uboot_name}.deb" "${DEB_STORAGE}/"
-    rm -rf "$uboottempdir"
+	rm -rf "$uboottempdir"
 fi
 }
 
@@ -342,9 +354,15 @@ compile_kernel()
 	fi
 	display_alert "Compiling $BRANCH kernel" "$version" "info"
 
+# build aarch64
+  if [[ $(dpkg --print-architecture) == amd64 ]]; then
+
 	local toolchain
 	toolchain=$(find_toolchain "$KERNEL_COMPILER" "$KERNEL_USE_GCC")
 	[[ -z $toolchain ]] && exit_with_error "Could not find required toolchain" "${KERNEL_COMPILER}gcc $KERNEL_USE_GCC"
+
+# build aarch64
+  fi
 
 	display_alert "Compiler version" "${KERNEL_COMPILER}gcc $(eval env PATH="${toolchain}:${PATH}" "${KERNEL_COMPILER}gcc" -dumpversion)" "info"
 
@@ -471,7 +489,7 @@ compile_kernel()
 	echo "${hash}" > "${SRC}/cache/hash"$([[ ${BETA} == yes ]] && echo "-beta")"/linux-image-${BRANCH}-${LINUXFAMILY}.githash"
 	[[ -z ${KERNELPATCHDIR} ]] && KERNELPATCHDIR=$LINUXFAMILY-$BRANCH
 	[[ -z ${LINUXCONFIG} ]] && LINUXCONFIG=linux-$LINUXFAMILY-$BRANCH
-	hash_watch_1=$(find "${SRC}/patch/kernel/${KERNELPATCHDIR}" -maxdepth 1 -printf '%s %P\n' 2> /dev/null | sort)
+	hash_watch_1=$(find "${SRC}/patch/kernel/${KERNELPATCHDIR}/" -maxdepth 1 -printf '%s %P\n' 2> /dev/null | sort)
 	hash_watch_2=$(cat "${SRC}/config/kernel/${LINUXCONFIG}.config")
 	echo "${hash_watch_1}${hash_watch_2}" | improved_git hash-object --stdin >> "${SRC}/cache/hash"$([[ ${BETA} == yes ]] && echo "-beta")"/linux-image-${BRANCH}-${LINUXFAMILY}.githash"
 }
@@ -483,12 +501,6 @@ compile_firmware()
 {
 	display_alert "Merging and packaging linux firmware" "@host" "info"
 
-	if [[ $USE_MAINLINE_GOOGLE_MIRROR == yes ]]; then
-		plugin_repo="https://kernel.googlesource.com/pub/scm/linux/kernel/git/firmware/linux-firmware.git"
-	else
-		plugin_repo="https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git"
-	fi
-
 	local firmwaretempdir plugin_dir
 
 	firmwaretempdir=$(mktemp -d)
@@ -499,7 +511,7 @@ compile_firmware()
 
 	fetch_from_repo "https://github.com/armbian/firmware" "armbian-firmware-git" "branch:master"
 	if [[ -n $FULL ]]; then
-		fetch_from_repo "$plugin_repo" "linux-firmware-git" "branch:master"
+		fetch_from_repo "$MAINLINE_FIRMWARE_SOURCE" "linux-firmware-git" "branch:master"
 		# cp : create hardlinks
 		cp -af --reflink=auto "${SRC}"/cache/sources/linux-firmware-git/* "${firmwaretempdir}/${plugin_dir}/lib/firmware/"
 	fi
@@ -583,18 +595,6 @@ compile_armbian-zsh()
 	exit 0
 	END
 
-	# set up post remove script
-	cat <<-END > "${tmp_dir}/${armbian_zsh_dir}"/DEBIAN/postrm
-	#!/bin/sh
-	# change shell back to bash for future users
-	BASHLOCATION=\$(grep /bash\$ /etc/shells | tail -1)
-	sed -i "s|^SHELL=.*|SHELL=\${BASHLOCATION}|" /etc/default/useradd
-	sed -i "s|^DSHELL=.*|DSHELL=\${BASHLOCATION}|" /etc/adduser.conf
-	# change to BASH shell for root and all normal users
-	awk -F'[/:]' '{if (\$3 >= 1000 && \$3 != 65534 || \$3 == 0) print \$1}' /etc/passwd | xargs -L1 chsh -s \$(grep /bash\$ /etc/shells | tail -1)
-	exit 0
-	END
-
 	cp -R "${SRC}"/cache/sources/oh-my-zsh "${tmp_dir}/${armbian_zsh_dir}"/etc/
 	cp -R "${SRC}"/cache/sources/evalcache "${tmp_dir}/${armbian_zsh_dir}"/etc/oh-my-zsh/plugins
 	cp "${tmp_dir}/${armbian_zsh_dir}"/etc/oh-my-zsh/templates/zshrc.zsh-template "${tmp_dir}/${armbian_zsh_dir}"/etc/skel/.zshrc
@@ -619,7 +619,7 @@ compile_armbian-zsh()
 	# define default plugins
 	sed -i 's/^plugins=.*/plugins=(evalcache git git-extras debian tmux screen history extract colorize web-search docker autojump command-not-found common-aliases colored-man-pages last-working-dir safe-paste)/' "${tmp_dir}/${armbian_zsh_dir}"/etc/skel/.zshrc
 
-	chmod 755 "${tmp_dir}/${armbian_zsh_dir}"/DEBIAN/{postrm,postinst}
+	chmod 755 "${tmp_dir}/${armbian_zsh_dir}"/DEBIAN/postinst
 
 	fakeroot dpkg -b "${tmp_dir}/${armbian_zsh_dir}" >/dev/null
 	rsync --remove-source-files -rq "${tmp_dir}/${armbian_zsh_dir}.deb" "${DEB_STORAGE}/"
@@ -641,6 +641,8 @@ compile_armbian-config()
 	display_alert "Building deb" "armbian-config" "info"
 
 	fetch_from_repo "https://github.com/armbian/config" "armbian-config" "branch:master"
+	fetch_from_repo "https://github.com/dylanaraps/neofetch" "neofetch" "tag:7.1.0"
+	fetch_from_repo "https://github.com/complexorganizations/wireguard-manager" "wireguard-manager" "tag:1.0.11"
 
 	mkdir -p "${tmp_dir}/${armbian_config_dir}"/{DEBIAN,usr/bin/,usr/sbin/,usr/lib/armbian-config/}
 
@@ -650,9 +652,9 @@ compile_armbian-config()
 	Version: $REVISION
 	Architecture: all
 	Maintainer: $MAINTAINER <$MAINTAINERMAIL>
-	Replaces: armbian-bsp
-	Depends: bash, iperf3, psmisc, curl, bc, expect, dialog, pv, \
-	debconf-utils, unzip, build-essential, html2text, apt-transport-https, html2text, dirmngr, software-properties-common
+	Replaces: armbian-bsp, neofetch
+	Depends: bash, iperf3, psmisc, curl, bc, expect, dialog, pv, zip, \
+	debconf-utils, unzip, build-essential, html2text, apt-transport-https, html2text, dirmngr, software-properties-common, debconf, jq
 	Recommends: armbian-bsp
 	Suggests: libpam-google-authenticator, qrencode, network-manager, sunxi-tools
 	Section: utils
@@ -660,6 +662,11 @@ compile_armbian-config()
 	Description: Armbian configuration utility
 	END
 
+	install -m 755 "${SRC}"/cache/sources/neofetch/neofetch "${tmp_dir}/${armbian_config_dir}"/usr/bin/neofetch
+	cd "${tmp_dir}/${armbian_config_dir}"/usr/bin/
+	process_patch_file "${SRC}/patch/misc/add-armbian-neofetch.patch" "applying"
+
+	install -m 755 "${SRC}"/cache/sources/wireguard-manager/wireguard-manager.sh "${tmp_dir}/${armbian_config_dir}"/usr/bin/wireguard-manager
 	install -m 755 "${SRC}"/cache/sources/armbian-config/scripts/tv_grab_file "${tmp_dir}/${armbian_config_dir}"/usr/bin/tv_grab_file
 	install -m 755 "${SRC}"/cache/sources/armbian-config/debian-config "${tmp_dir}/${armbian_config_dir}"/usr/sbin/armbian-config
 	install -m 644 "${SRC}"/cache/sources/armbian-config/debian-config-jobs "${tmp_dir}/${armbian_config_dir}"/usr/lib/armbian-config/jobs.sh
