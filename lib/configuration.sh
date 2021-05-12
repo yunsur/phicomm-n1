@@ -18,10 +18,11 @@ REVISION=$(cat "${SRC}"/VERSION)"$SUBREVISION" # all boards have same revision
 [[ -z $MAINTAINERMAIL ]] && MAINTAINERMAIL="igor.pecovnik@****l.com" # deb signature
 TZDATA=$(cat /etc/timezone) # Timezone for target is taken from host or defined here.
 USEALLCORES=yes # Use all CPU cores for compiling
+HOSTRELEASE=$(cat /etc/os-release | grep VERSION_CODENAME | cut -d"=" -f2)
 [[ -z $EXIT_PATCHING_ERROR ]] && EXIT_PATCHING_ERROR="" # exit patching if failed
 [[ -z $HOST ]] && HOST="$BOARD" # set hostname to the board
 cd "${SRC}" || exit
-ROOTFSCACHE_VERSION=4
+ROOTFSCACHE_VERSION=5
 CHROOT_CACHE_VERSION=7
 BUILD_REPOSITORY_URL=$(improved_git remote get-url $(improved_git remote 2>/dev/null | grep origin) 2>/dev/null)
 BUILD_REPOSITORY_COMMIT=$(improved_git describe --match=d_e_a_d_b_e_e_f --always --dirty 2>/dev/null)
@@ -245,6 +246,9 @@ if [[ $BUILD_DESKTOP == "yes" ]]; then
 			error_msg+="$(cat "${DESKTOP_ENVIRONMENT_DIRPATH}/only_for")"
 		fi
 
+		# supress error when cache is rebuilding
+		[[ -n "$ROOT_FS_CREATE_ONLY" ]] && exit 0
+
 		exit_with_error "${error_msg}"
 	}
 
@@ -335,7 +339,7 @@ DESTIMG="${SRC}/.tmp/image-${MOUNT_UUID}"
 [[ $CRYPTROOT_ENABLE == yes && $RELEASE == xenial ]] && exit_with_error "Encrypted rootfs is not supported in Xenial"
 [[ $RELEASE == stretch && $CAN_BUILD_STRETCH != yes ]] && exit_with_error "Building Debian Stretch images with selected kernel is not supported"
 [[ $RELEASE == bionic && $CAN_BUILD_STRETCH != yes ]] && exit_with_error "Building Ubuntu Bionic images with selected kernel is not supported"
-[[ $RELEASE == bionic && $(lsb_release -sc) == xenial ]] && exit_with_error "Building Ubuntu Bionic images requires a Bionic build host. Please upgrade your host or select a different target OS"
+[[ $RELEASE == hirsute && $HOSTRELEASE == focal ]] && exit_with_error "Building Ubuntu Hirsute images requires Hirsute build host. Please upgrade your host or select a different target OS"
 
 [[ -n $ATFSOURCE && -z $ATF_USE_GCC ]] && exit_with_error "Error in configuration: ATF_USE_GCC is unset"
 [[ -z $UBOOT_USE_GCC ]] && exit_with_error "Error in configuration: UBOOT_USE_GCC is unset"
@@ -521,12 +525,14 @@ if [[ $DOWNLOAD_MIRROR == "bfsu" ]] ; then
 fi
 
 # don't use mirrors that throws garbage on 404
-while true; do
+if [[ -z ${ARMBIAN_MIRROR} ]]; then
+	while true; do
 
-	ARMBIAN_MIRROR=$(wget -SO- -T 1 -t 1 https://redirect.armbian.com 2>&1 | egrep -i "Location" | awk '{print $2}' | head -1)
-	[[ ${ARMBIAN_MIRROR} != *armbian.hosthatch* ]] && break
+		ARMBIAN_MIRROR=$(wget -SO- -T 1 -t 1 https://redirect.armbian.com 2>&1 | egrep -i "Location" | awk '{print $2}' | head -1)
+		[[ ${ARMBIAN_MIRROR} != *armbian.hosthatch* ]] && break
 
-done
+	done
+fi
 
 # For user override
 if [[ -f $USERPATCHES_PATH/lib.config ]]; then
@@ -611,7 +617,7 @@ cat <<-EOF >> "${DEST}"/debug/output.log
 Repository: $REPOSITORY_URL
 Version: $REPOSITORY_COMMIT
 
-Host OS: $(lsb_release -sc)
+Host OS: $HOSTRELEASE
 Host arch: $(dpkg --print-architecture)
 Host system: $(uname -a)
 Virtualization type: $(systemd-detect-virt)

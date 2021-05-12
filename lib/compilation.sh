@@ -17,6 +17,7 @@
 # compile_armbian-config
 # compile_sunxi_tools
 # install_rkbin_tools
+# compile_xilinx_bootgen
 # grab_version
 # find_toolchain
 # advanced_patch
@@ -255,6 +256,31 @@ if [[ $ADD_UBOOT == yes ]]; then
 			cp "${f_src}" "$uboottempdir/${uboot_name}/usr/lib/${uboot_name}/${f_dst}"
 		done
 	done <<< "$UBOOT_TARGET_MAP"
+
+	# set up postinstall script
+	if [[ $BOARD == tinkerboard ]]; then
+		cat <<-EOF > "$uboottempdir/${uboot_name}/DEBIAN/postinst"
+		#!/bin/bash
+		source /usr/lib/u-boot/platform_install.sh
+		[[ \$DEVICE == /dev/null ]] && exit 0
+		if [[ -z \$DEVICE ]]; then
+			DEVICE="/dev/mmcblk0"
+			# proceed to other options.
+			[ ! -b \$DEVICE ] && DEVICE="/dev/mmcblk1"
+			[ ! -b \$DEVICE ] && DEVICE="/dev/mmcblk2"
+		fi
+		[[ \$(type -t setup_write_uboot_platform) == function ]] && setup_write_uboot_platform
+		if [[ -b \$DEVICE ]]; then
+			echo "Updating u-boot on \$DEVICE" >&2
+			write_uboot_platform \$DIR \$DEVICE
+			sync
+		else
+			echo "Device \$DEVICE does not exist, skipping" >&2
+		fi
+		exit 0
+		EOF
+		chmod 755 "$uboottempdir/${uboot_name}/DEBIAN/postinst"
+	fi
 
 	# declare -f on non-defined function does not do anything
 	cat <<-EOF > "$uboottempdir/${uboot_name}/usr/lib/u-boot/platform_install.sh"
@@ -713,6 +739,27 @@ install_rkbin_tools()
 		install -m 755 tools/trust_merger /usr/local/bin/
 		improved_git rev-parse @ 2>/dev/null > .commit_id
 	fi
+}
+
+compile_xilinx_bootgen()
+{
+	# Source code checkout
+	(fetch_from_repo "https://github.com/Xilinx/bootgen.git" "xilinx-bootgen" "branch:master")
+
+	pushd "${SRC}"/cache/sources/xilinx-bootgen || exit
+
+	# Compile and install only if git commit hash changed
+	# need to check if /usr/local/bin/bootgen to detect new Docker containers with old cached sources
+	if [[ ! -f .commit_id || $(improved_git rev-parse @ 2>/dev/null) != $(<.commit_id) || ! -f /usr/local/bin/bootgen ]]; then
+		display_alert "Compiling" "xilinx-bootgen" "info"
+		make -s clean >/dev/null
+		make -s -j$(nproc) bootgen >/dev/null
+		mkdir -p /usr/local/bin/
+		install bootgen /usr/local/bin >/dev/null 2>&1
+		improved_git rev-parse @ 2>/dev/null > .commit_id
+	fi
+
+	popd
 }
 
 grab_version()
