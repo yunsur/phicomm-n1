@@ -406,12 +406,6 @@ compile_kernel()
 		fi
 	fi
 
-	# hack for OdroidXU4. Copy firmare files
-	if [[ $BOARD == odroidxu4 ]]; then
-		mkdir -p "${kerneldir}/firmware/edid"
-		cp "${SRC}"/packages/blobs/odroidxu4/*.bin "${kerneldir}/firmware/edid"
-	fi
-
 	# hack for deb builder. To pack what's missing in headers pack.
 	cp "${SRC}"/patch/misc/headers-debian-byteshift.patch /tmp
 
