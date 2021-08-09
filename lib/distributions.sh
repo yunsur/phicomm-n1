@@ -187,9 +187,9 @@ install_common()
 	else
 
 		if [ -f "${USERPATCHES_PATH}/bootscripts/${bootscript_src}" ]; then
-			cp "${USERPATCHES_PATH}/bootscripts/${bootscript_src}" "${SDCARD}/boot/${bootscript_dst}"
+			cp -R "${USERPATCHES_PATH}/bootscripts/${bootscript_src}" "${SDCARD}/boot/${bootscript_dst}"
 		else
-			cp "${SRC}/config/bootscripts/${bootscript_src}" "${SDCARD}/boot/${bootscript_dst}"
+			cp -R "${SRC}/config/bootscripts/${bootscript_src}" "${SDCARD}/boot/${bootscript_dst}"
 		fi
 
 		if [[ -n $BOOTENV_FILE ]]; then
