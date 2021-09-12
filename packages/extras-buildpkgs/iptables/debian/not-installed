@@ -1,0 +1,7 @@
+usr/lib/${DEB_TARGET_MULTIARCH}/libip4tc.la
+usr/lib/${DEB_TARGET_MULTIARCH}/libiptc.la
+usr/lib/${DEB_TARGET_MULTIARCH}/libxtables.la
+usr/lib/${DEB_TARGET_MULTIARCH}/libip6tc.la
+usr/bin/iptables-xml
+usr/share/xtables/pf.os
+etc/ethertypes

@@ -1,5 +1,2 @@
-debian/xtables-compat.8
-debian/xtables-multi.8
-debian/xtables-translate.8
 iptables/*.8
 utils/nfnl_osf.8

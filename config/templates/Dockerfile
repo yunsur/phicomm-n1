@@ -11,11 +11,11 @@ RUN apt-get update && apt-get -y install \
 RUN sh -c " \
     if [ $(dpkg --print-architecture) = amd64 ]; then \
         if [ x'' != x$http_proxy ]; then \
-            curl -fsSL -x $http_proxy https://www.aptly.info/pubkey.txt | apt-key add - >/dev/null 2>&1; \
+            curl -fsSL -x $http_proxy https://www.aptly.info/pubkey.txt | gpg --dearmor | tee /usr/share/keyrings/aptly-archive-keyring.gpg >/dev/null 2>&1; \
         else \
-            curl -fsSL https://www.aptly.info/pubkey.txt | apt-key add - >/dev/null 2>&1; \
+            curl -fsSL https://www.aptly.info/pubkey.txt | gpg --dearmor | tee /usr/share/keyrings/aptly-archive-keyring.gpg >/dev/null 2>&1; \
         fi; \
-        echo \"deb http://repo.aptly.info/ nightly main\" > /etc/apt/sources.list.d/aptly.list; \
+        echo \"deb [signed-by=/usr/share/keyrings/aptly-archive-keyring.gpg] http://repo.aptly.info/ nightly main\" > /etc/apt/sources.list.d/aptly.list; \
         dpkg --add-architecture i386 \
         && apt-get update \
         && apt-get install -y --no-install-recommends \

@@ -1,24 +1,24 @@
-Test-Command: iptables -h
+Test-Command: iptables-legacy -h
 Depends: @
 Restrictions: needs-root, isolation-container
 
-Test-Command: ip6tables -h
+Test-Command: ip6tables-legacy -h
 Depends: @
 Restrictions: needs-root, isolation-container
 
-Test-Command: iptables-save
+Test-Command: iptables-legacy-save
 Depends: @
 Restrictions: needs-root, isolation-container
 
-Test-Command: ip6tables-save
+Test-Command: ip6tables-legacy-save
 Depends: @
 Restrictions: needs-root, isolation-container
 
-Test-Command: iptables-restore -h
+Test-Command: iptables-legacy-restore -h
 Depends: @
 Restrictions: needs-root, isolation-container, allow-stderr
 
-Test-Command: ip6tables-restore -h
+Test-Command: ip6tables-legacy-restore -h
 Depends: @
 Restrictions: needs-root, isolation-container, allow-stderr
 

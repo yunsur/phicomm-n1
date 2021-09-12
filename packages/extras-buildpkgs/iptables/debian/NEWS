@@ -1,3 +1,16 @@
+iptables (1.8.4-1) unstable; urgency=medium
+
+    All the iptables binaries have been moved away from /sbin to /usr/sbin.
+    Compatibility symlinks were provided during the Buster release, but they
+    have been dropped now.
+    Please make sure your scripts aren't using hardcoded binary paths.
+    .
+    Also, please note that iptables is no longer Priority: important. This
+    means it is not installed by default in every system. It has been replaced
+    by nftables.
+
+ -- Arturo Borrero Gonzalez <arturo@debian.org>  Wed,  04 Dec 2019 11:49:00 +0200
+
 iptables (1.8.1-2) unstable; urgency=medium
 
     All the iptables binaries have been moved away from /sbin to /usr/sbin.

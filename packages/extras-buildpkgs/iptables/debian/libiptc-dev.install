@@ -1,6 +1,1 @@
-usr/include/libiptc/ipt_kernel_headers.h
-usr/include/libiptc/libiptc.h
-usr/include/libiptc/libxtc.h
-usr/include/libiptc/xtcshared.h
-usr/lib/*/libiptc.so
 usr/lib/*/pkgconfig/libiptc.pc
