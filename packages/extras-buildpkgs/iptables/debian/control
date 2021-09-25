@@ -1,35 +1,36 @@
 Source: iptables
 Section: net
-Priority: important
+Priority: optional
 Maintainer: Debian Netfilter Packaging Team <pkg-netfilter-team@lists.alioth.debian.org>
 Uploaders: Arturo Borrero Gonzalez <arturo@debian.org>,
+           Alberto Molina Coballes <alb.molina@gmail.com>,
            Laurence J. Lane <ljlane@debian.org>
 Build-Depends: autoconf,
                automake,
                bison,
-               debhelper (>= 10),
+               debhelper-compat (= 13),
                flex,
                libmnl-dev,
                libnetfilter-conntrack-dev,
                libnetfilter-conntrack3,
                libnfnetlink-dev,
-               libnftnl-dev,
+               libnftnl-dev (>= 1.1.6),
                libtool (>= 2.2.6)
-Standards-Version: 4.3.0
-Homepage: http://www.netfilter.org/
-Vcs-Git: https://salsa.debian.org/pkg-netfilter-team/pkg-iptables
+Standards-Version: 4.5.0
+Homepage: https://www.netfilter.org/
+Vcs-Git: https://salsa.debian.org/pkg-netfilter-team/pkg-iptables.git
 Vcs-Browser: https://salsa.debian.org/pkg-netfilter-team/pkg-iptables
 
 Package: iptables
 Multi-Arch: foreign
 Architecture: linux-any
-Depends: libip4tc0 (=${binary:Version}),
-         libip6tc0 (=${binary:Version}),
-         libiptc0 (=${binary:Version}),
+Depends: libip4tc2 (=${binary:Version}),
+         libip6tc2 (=${binary:Version}),
          libxtables12 (=${binary:Version}),
+         netbase (>= 6.0),
          ${misc:Depends},
          ${shlibs:Depends}
-Suggests: kmod
+Suggests: firewalld, kmod
 Breaks: iptables-nftables-compat (<< 1.6.2~)
 Replaces: iptables-nftables-compat (<< 1.6.2~)
 Recommends: nftables
@@ -43,35 +44,21 @@ Description: administration tools for packet filtering and NAT
  .
  This package contains several different utilities, the most important ones:
  .
- iptables, iptables-save, iptables-restore (nft-based version)
+ iptables-nft, iptables-nft-save, iptables-nft-restore (nft-based version)
  .
- iptables, iptables-save, iptables-restore (legacy version)
+ iptables-legacy, iptables-legacy-save, iptables-legacy-restore (legacy version)
  .
- ip6tables, ip6tables-save, ip6tables-restore (nft-based version)
+ ip6tables-nft, ip6tables-nft-save, ip6tables-nft-restore (nft-based version)
  .
- ip6tables, ip6tables-save, ip6tables-restore (legacy version)
+ ip6tables-legacy, ip6tables-legacy-save, ip6tables-legacy-restore (legacy version)
  .
- arptables, arptables-save, arptables-restore (nft-based version)
+ arptables-nft, arptables-nft-save, arptables-nft-restore (nft-based version)
  .
- ebtables, ebtables-save, ebtables-restore (nft-based version)
-
-Package: iptables-dev
-Depends: libip4tc-dev (>= ${source:Version}),
-         libip6tc-dev (>= ${source:Version}),
-         libiptc-dev (>= ${source:Version}),
-         libxtables-dev (>= ${source:Version}),
-         ${misc:Depends}
-Architecture: any
-Multi-Arch: same
-Priority: optional
-Section: oldlibs
-Description: transitional dummy package
- This is a transitional dummy package. It can safely be removed.
+ ebtables-nft, ebtables-nft-save, ebtables-nft-restore (nft-based version)
 
 Package: libxtables12
 Multi-Arch: same
 Architecture: linux-any
-Priority: optional
 Section: libs
 Depends: ${misc:Depends}, ${shlibs:Depends}
 Replaces: iptables (<< 1.4.16.3-3), libxtables11 (>= 1.6.0+snapshot20161117-1)
@@ -86,7 +73,6 @@ Description: netfilter xtables library
 Package: libxtables-dev
 Architecture: linux-any
 Multi-Arch: same
-Priority: optional
 Pre-Depends: ${misc:Pre-Depends}
 Depends: libxtables12 (=${binary:Version}), ${misc:Depends}
 Replaces: iptables-dev (<< 1.6.0-3)
@@ -99,44 +85,29 @@ Description: netfilter xtables library -- development files
  This package includes the development files of libxtables.
 
 Package: libiptc0
-Priority: optional
-Multi-Arch: same
 Architecture: linux-any
-Section: libs
-Pre-Depends: ${misc:Pre-Depends}
-Depends: ${misc:Depends}, ${shlibs:Depends}
-Description: netfilter libiptc library
- The iptables/xtables framework has been replaced by nftables. You should
- consider migrating now.
- .
- This package contains the user-space iptables C library from the Netfilter
- xtables framework.
- .
- iptables v4/v6 ruleset ADT and kernel interface.
- .
- This library has been considered private for years (and still is), in the
- sense of changing symbols and backward compatibility not guaranteed.
+Multi-Arch: same
+Depends: libip4tc2 (=${binary:Version}),
+         ${misc:Depends}
+Section: oldlibs
+Description: transitional dummy package
+ This is a transitional package. It can safely be removed.
 
 Package: libiptc-dev
 Architecture: linux-any
 Multi-Arch: same
-Priority: optional
-Pre-Depends: ${misc:Pre-Depends}
 Depends: libip4tc-dev (=${binary:Version}),
          libip6tc-dev (=${binary:Version}),
-         libiptc0 (=${binary:Version}),
          ${misc:Depends}
-Replaces: iptables-dev (<< 1.6.0-3)
-Breaks: iptables-dev (<< 1.6.0-3)
+Breaks: libip4tc-dev (<< 1.8.4-2)
 Section: libdevel
-Description: Development files for libiptc
+Description: Common development files for libiptc
  The iptables/xtables framework has been replaced by nftables. You should
  consider migrating now.
  .
- This package provides development files and static libraries for libiptc.
+ This package provides development files (pkg-config) for libiptc.
 
-Package: libip4tc0
-Priority: optional
+Package: libip4tc2
 Multi-Arch: same
 Architecture: linux-any
 Section: libs
@@ -157,13 +128,11 @@ Description: netfilter libip4tc library
 Package: libip4tc-dev
 Architecture: linux-any
 Multi-Arch: same
-Priority: optional
 Pre-Depends: ${misc:Pre-Depends}
-Depends: libip4tc0 (=${binary:Version}),
-         libiptc0 (=${binary:Version}),
+Depends: libip4tc2 (=${binary:Version}),
          ${misc:Depends}
-Replaces: iptables-dev (<< 1.6.0-3)
-Breaks: iptables-dev (<< 1.6.0-3)
+Replaces: iptables-dev (<< 1.6.0-3), libiptc-dev (<< 1.8.4-2)
+Breaks: iptables-dev (<< 1.6.0-3), libiptc-dev (<< 1.8.4-2)
 Section: libdevel
 Description: Development files for libip4tc
  The iptables/xtables framework has been replaced by nftables. You should
@@ -171,8 +140,7 @@ Description: Development files for libip4tc
  .
  This package provides development files and static libraries for libip4tc.
 
-Package: libip6tc0
-Priority: optional
+Package: libip6tc2
 Multi-Arch: same
 Architecture: linux-any
 Section: libs
@@ -193,10 +161,8 @@ Description: netfilter libip6tc library
 Package: libip6tc-dev
 Architecture: linux-any
 Multi-Arch: same
-Priority: optional
 Pre-Depends: ${misc:Pre-Depends}
-Depends: libip6tc0 (=${binary:Version}),
-         libiptc0 (=${binary:Version}),
+Depends: libip6tc2 (=${binary:Version}),
          ${misc:Depends}
 Replaces: iptables-dev (<< 1.6.0-3)
 Breaks: iptables-dev (<< 1.6.0-3)

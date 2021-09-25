@@ -1,21 +1,24 @@
 #!/bin/bash
-# Copyright (c) 2015 Igor Pecovnik, igor.pecovnik@gma**.com
+#
+# Copyright (c) 2021 Igor Pecovnik, igor.pecovnik@gma**.com
 #
 # This file is licensed under the terms of the GNU General Public
 # License version 2. This program is licensed "as is" without any
 # warranty of any kind, whether express or implied.
-
+#
 # This file is a part of the Armbian build script
 # https://github.com/armbian/build/
 
-# Create board support packages
 #
 # Functions:
 # create_board_package
 
+
+
+
 create_board_package()
 {
-	display_alert "Creating board support package" "$BOARD $BRANCH" "info"
+	display_alert "Creating board support package for CLI" "$CHOSEN_ROOTFS" "info"
 
 	bsptempdir=$(mktemp -d)
 	chmod 700 ${bsptempdir}
@@ -24,17 +27,24 @@ create_board_package()
 	mkdir -p "${destination}"/DEBIAN
 	cd $destination
 
+	# copy general overlay from packages/bsp-cli
+	copy_all_packages_files_for "bsp-cli"
+
 	# install copy of boot script & environment file
 	local bootscript_src=${BOOTSCRIPT%%:*}
 	local bootscript_dst=${BOOTSCRIPT##*:}
 	mkdir -p "${destination}"/usr/share/armbian/
-	if [ -f "${USERPATCHES_PATH}/bootscripts/${bootscript_src}" ]; then
-	  cp "${USERPATCHES_PATH}/bootscripts/${bootscript_src}" "${destination}/usr/share/armbian/${bootscript_dst}"
-	else
-	  cp "${SRC}/config/bootscripts/${bootscript_src}" "${destination}/usr/share/armbian/${bootscript_dst}"
+
+	# create extlinux config file
+	if [[ $SRC_EXTLINUX != yes ]]; then
+		if [ -f "${USERPATCHES_PATH}/bootscripts/${bootscript_src}" ]; then
+		  cp -R "${USERPATCHES_PATH}/bootscripts/${bootscript_src}" "${destination}/usr/share/armbian/${bootscript_dst}"
+		else
+		  cp -R "${SRC}/config/bootscripts/${bootscript_src}" "${destination}/usr/share/armbian/${bootscript_dst}"
+		fi
+		[[ -n $BOOTENV_FILE && -f $SRC/config/bootenv/$BOOTENV_FILE ]] && \
+			cp -R "${SRC}/config/bootenv/${BOOTENV_FILE}" "${destination}"/usr/share/armbian/armbianEnv.txt
 	fi
-	[[ -n $BOOTENV_FILE && -f $SRC/config/bootenv/$BOOTENV_FILE ]] && \
-		cp "${SRC}/config/bootenv/${BOOTENV_FILE}" "${destination}"/usr/share/armbian/armbianEnv.txt
 
 	# add configuration for setting uboot environment from userspace with: fw_setenv fw_printenv
 	if [[ -n $UBOOT_FW_ENV ]]; then
@@ -169,17 +179,6 @@ create_board_package()
 	fi
 
 	EOF
-
-	if [[ $RELEASE == bionic ]] || [[ $RELEASE == focal && $BOARDFAMILY == sun50iw6 ]]; then
-		cat <<-EOF >> "${destination}"/DEBIAN/postinst
-		# temporally disable acceleration on some arch in Bionic due to broken mesa packages
-		echo 'Section "Device"
-		\tIdentifier \t"Default Device"
-		\tOption \t"AccelMethod" "none"
-		EndSection' >> /etc/X11/xorg.conf.d/01-armbian-defaults.conf
-		EOF
-	fi
-
 	# install bootscripts if they are not present. Fix upgrades from old images
 	if [[ $FORCE_BOOTSCRIPT_UPDATE == yes ]]; then
 	    cat <<-EOF >> "${destination}"/DEBIAN/postinst
@@ -244,9 +243,9 @@ fi
 		mv /usr/lib/chromium-browser/master_preferences.dpkg-dist /usr/lib/chromium-browser/master_preferences
 	fi
 
-	sed -i "s/^PRETTY_NAME=.*/PRETTY_NAME=\"Armbian $REVISION "${RELEASE^}"\"/" /etc/os-release
-	echo "Armbian ${REVISION} ${RELEASE^} \\l \n" > /etc/issue
-	echo "Armbian ${REVISION} ${RELEASE^}" > /etc/issue.net
+	sed -i "s/^PRETTY_NAME=.*/PRETTY_NAME=\"${VENDOR} $REVISION "${RELEASE^}"\"/" /etc/os-release
+	echo "${VENDOR} ${REVISION} ${RELEASE^} \\l \n" > /etc/issue
+	echo "${VENDOR} ${REVISION} ${RELEASE^}" > /etc/issue.net
 
 	systemctl --no-reload enable armbian-hardware-monitor.service armbian-hardware-optimize.service armbian-zram-config.service >/dev/null 2>&1
 	exit 0
@@ -310,34 +309,9 @@ fi
 	find "${destination}" ! -type l -print0 2>/dev/null | xargs -0r chmod 'go=rX,u+rw,a-s'
 
 	# create board DEB file
-	display_alert "Building package" "$CHOSEN_ROOTFS" "info"
-	fakeroot dpkg-deb -b "${destination}" "${destination}.deb" >> "${DEST}"/debug/install.log 2>&1
+	fakeroot dpkg-deb -b "${destination}" "${destination}.deb" >> "${DEST}"/${LOG_SUBPATH}/install.log 2>&1
 	mkdir -p "${DEB_STORAGE}/${RELEASE}/"
 	rsync --remove-source-files -rq "${destination}.deb" "${DEB_STORAGE}/${RELEASE}/"
-
-	# Can be removed after 21.05
-	# create meta package for upgrade
-	local DEB_BRANCH=("legacy" "current" "edge")
-	for deb_branch in "${DEB_BRANCH[@]}"; do
-
-	local destination=${bsptempdir}/${RELEASE}/linux-${RELEASE}-root-${deb_branch}-${BOARD}_${REVISION}_${ARCH}
-	mkdir -p "${destination}"/DEBIAN
-	cat <<-EOF > "${destination}"/DEBIAN/control
-	Package: linux-${RELEASE}-root-${deb_branch}-${BOARD}
-	Version: $REVISION
-	Architecture: all
-	Priority: optional
-	Section: oldlibs
-	Maintainer: $MAINTAINER <$MAINTAINERMAIL>
-	Depends: ${BSP_CLI_PACKAGE_NAME}
-	Description: This is a transitional package. It can safely be removed.
-	EOF
-	display_alert "Building meta  package" "$CHOSEN_ROOTFS" "info"
-	fakeroot dpkg-deb -b "${destination}" "${destination}.deb" >> "${DEST}"/debug/install.log 2>&1
-	mkdir -p "${DEB_STORAGE}/${RELEASE}/"
-	rsync --remove-source-files -rq "${destination}.deb" "${DEB_STORAGE}/${RELEASE}/"
-	done
-	# Can be removed after 21.05
 
 	# cleanup
 	rm -rf ${bsptempdir}

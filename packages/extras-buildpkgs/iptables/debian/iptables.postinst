@@ -2,22 +2,6 @@
 
 set -e
 
-# compat symlinks for /sbin -> /usr/sbin move, to be dropped in buster+1
-if [ "$1" = "configure" ] ; then
-	LIST="/sbin/iptables
-	      /sbin/iptables-save
-	      /sbin/iptables-restore
-	      /sbin/ip6tables
-              /sbin/ip6tables-save
-              /sbin/ip6tables-restore"
-
-	for i in $LIST ; do
-		if [ ! -e "$i" ] ; then
-			ln -sf /usr$i $i
-		fi
-	done
-fi
-
 if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ]; then
 	update-alternatives \
 	  --install /usr/sbin/iptables iptables /usr/sbin/iptables-legacy 10 \

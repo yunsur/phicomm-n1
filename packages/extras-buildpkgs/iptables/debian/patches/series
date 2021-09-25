@@ -1,11 +1,1 @@
-0101-changelog.patch
-0103-lintian_allows_to.patch
-0104-lintian_hyphens.patch
-0105-lintian_spelling.patch
-0201-660748-iptables_apply_man.patch
-0202-725413-sctp_man_description.patch
-0301-install_iptables_apply.patch
-0401-580941-iptables_apply_update.patch
-0402-extensions-add-libipt_fullconenat.patch
-format-security_fixes_in_libip[6]t_icmp.patch
-bug_922973.patch
+0499-extensions-add-libipt_fullconenat.patch

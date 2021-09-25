@@ -1,3 +1,131 @@
+iptables (1.8.7-1) unstable; urgency=medium
+
+  * [6343d36] New upstream version 1.8.7 (Closes: #975028)
+  * [b633a41] d/libxtables12.symbols: refresh file
+
+ -- Arturo Borrero Gonzalez <arturo@debian.org>  Sun, 17 Jan 2021 19:05:22 +0100
+
+iptables (1.8.6-1) unstable; urgency=medium
+
+  * [9caffe9] New upstream version 1.8.6
+  * [424bda6] d/patches: drop 0000-upstream-fix-xtables-translate.patch
+  * [6436087] src:iptables: drop unused manual pages
+
+ -- Arturo Borrero Gonzalez <arturo@debian.org>  Mon, 09 Nov 2020 11:38:43 +0100
+
+iptables (1.8.5-3) unstable; urgency=medium
+
+  * [2d587e5] src:iptables: bump build-dep version on libnftnl to 1.1.6
+
+ -- Arturo Borrero Gonzalez <arturo@debian.org>  Tue, 25 Aug 2020 11:56:55 +0200
+
+iptables (1.8.5-2) unstable; urgency=medium
+
+  [ Alberto Molina Coballes ]
+  * [d90516d] d/control: modify breaks and replaces fields (Closes: #949576)
+  * [4754a45] d/not-installed: arch independ files
+  * [780330f] d/tests/control: Run iptables-legacy-* tests explicitly
+
+  [ Arturo Borrero Gonzalez ]
+  * [6fb6557] d/patches: add 0000-upstream-fix-xtables-translate.patch
+    (Closes: #962724)
+
+ -- Arturo Borrero Gonzalez <arturo@debian.org>  Wed, 24 Jun 2020 10:56:19 +0200
+
+iptables (1.8.5-1) unstable; urgency=medium
+
+  [ Debian Janitor ]
+  * [c3deeb3] Wrap long lines in changelog entries: 1.8.2-1, 1.8.0-1~exp1,
+  1.6.0-1.
+  * [214468e] Update standards version to 4.5.0, no changes needed.
+
+  [ Arturo Borrero Gonzalez ]
+  * [eb1d7c5] New upstream version 1.8.5 (Closes: #950535)
+  * [7a119db] d/patches: drop all patches
+  * [ec63c87] libxtables12.symbols: add new symbol
+  * [4056ce6] iptables: bump debhelper-compat to 13
+
+ -- Arturo Borrero Gonzalez <arturo@debian.org>  Thu, 04 Jun 2020 13:33:22 +0200
+
+iptables (1.8.4-3) unstable; urgency=medium
+
+  [ Alberto Molina Coballes ]
+  * [d87a98a] libiptc-dev: add Breaks and Replaces fields (Closes: #949576)
+
+  [ Arturo Borrero Gonzalez ]
+  * [c66f003] d/patches: add 0000-upstream-xtables-restore-empty-lines.patch
+    (Closes: #949518, #951102)
+
+ -- Arturo Borrero Gonzalez <arturo@debian.org>  Thu, 13 Feb 2020 12:20:19 +0100
+
+iptables (1.8.4-2) unstable; urgency=medium
+
+  [ Alberto Molina Coballes ]
+  * [740ac01] d/control: refresh homepage (Closes: #946253)
+  * [983ab27] d/control: drop dependencies upon libiptc0 (Closes: #946202)
+
+  [ Debian Janitor ]
+  * [7d57346] Set debhelper-compat version in Build-Depends.
+  * [5d19fc0] debian/copyright: use spaces rather than tabs to start
+    continuation lines.
+  * [18f2cea] Move transitional packages libiptc0 to oldlibs/optional per
+    policy 4.0.1.
+  * [d7e5843] Set upstream metadata fields: Repository.
+  * [d3d04fb] Drop unnecessary dependency on dh-autoreconf.
+  * [13ed20f] Use canonical URL in Vcs-Git.
+  * [6285405] Update standards version to 4.4.1, no changes needed.
+
+  [ Alberto Molina Coballes ]
+  * [d7ad217] d/control: add dependency upon netbase (Closes: #946932)
+
+  [ Debian Janitor ]
+  * [249fc99] Refer to common license file for Artistic.
+
+  [ Arturo Borrero Gonzalez ]
+  * [3892140] src:iptables: add Alberto Molina to Uploaders
+  * [d36d29f] d/patches: add 0000-upstream-fix-restore-noflush.patch
+    (Closes: #946289)
+  * [3a66221] libiptc-dev: reintroduce package with shared pkg-config file
+    (Closes: #947176, #946202)
+  * [474f1aa] iptables: clarify binary utilities names (Closes: #946258)
+
+ -- Arturo Borrero Gonzalez <arturo@debian.org>  Mon, 20 Jan 2020 14:20:19 +0100
+
+iptables (1.8.4-1) unstable; urgency=medium
+
+  * [c59797a] iptables: no longer Priority: important
+  * [f8bb861] src:iptables: drop iptables-dev transitional package
+    (Closes: #939243)
+  * [4efb6c3] iptables: add Suggest: firewalld
+  * [290749d] New upstream version 1.8.4
+  * [7e5627f] d/patches: refresh 0301-install_iptables_apply.patch
+  * [e31ef86] d/patches: include 0000-upstream-bump-build-dep-libnftnl.patch
+  * [d7ebb42] src:iptables: drop libiptc0, libiptc-dev packages
+  * [8347150] src:iptables: bump debhelper compat to 12
+  * [5b0b408] src:iptables: drop /sbin -> /usr/sbin compat symlinks
+
+ -- Arturo Borrero Gonzalez <arturo@debian.org>  Wed, 04 Dec 2019 11:53:40 +0100
+
+iptables (1.8.3-2) unstable; urgency=medium
+
+  * [1cfe029] d/control: bump std-version to 4.4.0
+
+ -- Arturo Borrero Gonzalez <arturo@debian.org>  Wed, 10 Jul 2019 10:48:04 +0200
+
+iptables (1.8.3-1~exp1) experimental; urgency=medium
+
+  * [89c92f0] New upstream version 1.8.3 (Closes: #929527)
+  * [7c34195] iptables: bump dependency on libnftnl to >= 1.1.3
+  * [ab1a5b7] d/patches: refresh 0104-lintian_hyphens.patch
+  * [3771b10] d/patches: refresh 0201-660748-iptables_apply_man.patch
+  * [97d6c1a] d/patches: refresh 0301-install_iptables_apply.patch
+  * [dd6d2e6] d/patches: drop format-security_fixes_in_libip[6]t_icmp.patch
+  * [6f0e55f] d/patches: drop bug_922973.patch
+  * [5d1950b] libip6tc: bump SONAME from 0 to 2
+  * [cf5f265] libip4tc: bump SONAME from 0 to 2
+
+ -- Arturo Borrero Gonzalez <arturo@debian.org>  Tue, 28 May 2019 12:34:08 +0200
+
 iptables (1.8.2-4) unstable; urgency=medium
 
   * [5053b60] d/rules: reintroduce V=1
@@ -38,7 +166,8 @@ iptables (1.8.2-1) unstable; urgency=medium
   * [31d2d6e] d/NEWS: fix typos (Closes: #912981)
   * [b24cf92] iptables: don't ship paths served by update-alternatives
     (Closes: #911899)
-  * [f5ec47b] d/patches: cherry-pick format-security_fixes_in_libip[6]t_icmp.patch
+  * [f5ec47b] d/patches: cherry-pick
+    format-security_fixes_in_libip[6]t_icmp.patch
   * [2017f99] d/libxtables12.symbols: add new symbols
 
  -- Arturo Borrero Gonzalez <arturo@debian.org>  Thu, 15 Nov 2018 12:33:36 +0100
@@ -78,7 +207,8 @@ iptables (1.8.0-1~exp1) experimental; urgency=medium
   * [f6022b6] d/patches/: refresh 0201-660748-iptables_apply_man.patch
   * [de3df70] iptables: merge iptables-nftables-compat package
   * [9e6437c] d/libxtables12.symbols: refresh file
-  * [7f8aa9f] debian/patches/series:0301-install_iptables_apply.patch: typo sbion
+  * [7f8aa9f] debian/patches/series:0301-install_iptables_apply.patch: typo
+    sbion
 
  -- Arturo Borrero Gonzalez <arturo@debian.org>  Thu, 27 Sep 2018 13:47:59 +0200
 
@@ -261,15 +391,19 @@ iptables (1.6.0-1) experimental; urgency=medium
   * [569bc44] d/: put arp and bridge modules in iptables-nftables-compat package
   * [90738ae] d/copyright: refresh copyright file
   * [57d17b1] iptables-nftables-compat: include compat tools (links)
-  * [4940e7a] d/control: recommends nftables in the iptables-nftables-compat package
-  * [7814c21] d/control: give more information in the description of iptables-nftables-compat
+  * [4940e7a] d/control: recommends nftables in the iptables-nftables-compat
+    package
+  * [7814c21] d/control: give more information in the description of
+    iptables-nftables-compat
   * [d41dd7d] d/control: bump libxtables10 to libxtables11
-  * [81bb804] d/control: the iptables-nftables-compat package depends on iptables
+  * [81bb804] d/control: the iptables-nftables-compat package depends on
+    iptables
   * [a5b4148] d/: wrap-and-sort
   * [d0c6615] d/control: bump standars to 3.9.6
   * [9ae565f] iptables-nftables-compat: link compat manpages to the originals
   * [d0f191f] d/patches: refresh 0101-changelog.patch
-  * [ef507da] iptables-nftables-compat: link manpage also for xtables-compat-multi
+  * [ef507da] iptables-nftables-compat: link manpage also for
+    xtables-compat-multi
   * [453ee4c] d/control: add Vcs-Git and Vcs-Browser fields
   * [8e52d5b] d/changelog: upload is for experimental rather than unstable
 

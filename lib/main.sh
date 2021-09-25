@@ -1,24 +1,27 @@
 #!/bin/bash
-
-# Copyright (c) 2015 Igor Pecovnik, igor.pecovnik@gma**.com
+#
+# Copyright (c) 2013-2021 Igor Pecovnik, igor.pecovnik@gma**.com
 #
 # This file is licensed under the terms of the GNU General Public
 # License version 2. This program is licensed "as is" without any
 # warranty of any kind, whether express or implied.
-
+#
 # This file is a part of the Armbian build script
 # https://github.com/armbian/build/
 
-# Main program
-#
+
+
 
 cleanup_list() {
-    local varname="${1}"
-    local list_to_clean="${!varname}"
-    list_to_clean="${list_to_clean#"${list_to_clean%%[![:space:]]*}"}"
-    list_to_clean="${list_to_clean%"${list_to_clean##*[![:space:]]}"}"
-    echo ${list_to_clean}
+	local varname="${1}"
+	local list_to_clean="${!varname}"
+	list_to_clean="${list_to_clean#"${list_to_clean%%[![:space:]]*}"}"
+	list_to_clean="${list_to_clean%"${list_to_clean##*[![:space:]]}"}"
+	echo ${list_to_clean}
 }
+
+
+
 
 if [[ $(basename "$0") == main.sh ]]; then
 
@@ -26,6 +29,9 @@ if [[ $(basename "$0") == main.sh ]]; then
 	exit 255
 
 fi
+
+
+
 
 # default umask for root is 022 so parent directories won't be group writeable without this
 # this is used instead of making the chmod in prepare_host() recursive
@@ -47,41 +53,46 @@ if [[ $BUILD_ALL != "yes" && -z $ROOT_FS_CREATE_ONLY ]]; then
 fi
 
 # We'll use this title on all menus
-backtitle="Armbian building script, http://www.armbian.com | Author: Igor Pecovnik"
+backtitle="Armbian building script, https://www.armbian.com | https://docs.armbian.com | (c) 2013-2021 Igor Pecovnik "
 
-# if language not set, set to english
-[[ -z $LANGUAGE ]] && export LANGUAGE="en_US:en"
 
-# default console if not set
-[[ -z $CONSOLE_CHAR ]] && export CONSOLE_CHAR="UTF-8"
+# Warnings mitigation
+[[ -z $LANGUAGE ]] && export LANGUAGE="en_US:en"            # set to english if not set
+[[ -z $CONSOLE_CHAR ]] && export CONSOLE_CHAR="UTF-8"       # set console to UTF-8 if not set
 
-# Load libraries
+# Libraries include
+
 # shellcheck source=debootstrap.sh
-source "${SRC}"/lib/debootstrap.sh 						# system specific install
+source "${SRC}"/lib/debootstrap.sh                          # system specific install
 # shellcheck source=image-helpers.sh
-source "${SRC}"/lib/image-helpers.sh						# helpers for OS image building
+source "${SRC}"/lib/image-helpers.sh                        # helpers for OS image building
 # shellcheck source=distributions.sh
-source "${SRC}"/lib/distributions.sh						# system specific install
+source "${SRC}"/lib/distributions.sh                        # system specific install
 # shellcheck source=desktop.sh
-source "${SRC}"/lib/desktop.sh							# desktop specific install
+source "${SRC}"/lib/desktop.sh                              # desktop specific install
 # shellcheck source=compilation.sh
-source "${SRC}"/lib/compilation.sh						# patching and compilation of kernel, uboot, ATF
+source "${SRC}"/lib/compilation.sh                          # patching and compilation of kernel, uboot, ATF
 # shellcheck source=compilation-prepare.sh
-source "${SRC}"/lib/compilation-prepare.sh					# kernel plugins - 3rd party drivers that are not upstreamed. Like WG, AUFS, various Wifi
+source "${SRC}"/lib/compilation-prepare.sh                  # drivers that are not upstreamed
 # shellcheck source=makeboarddeb.sh
-source "${SRC}"/lib/makeboarddeb.sh						# create board support package
+source "${SRC}"/lib/makeboarddeb.sh                         # board support package
 # shellcheck source=general.sh
-source "${SRC}"/lib/general.sh							# general functions
+source "${SRC}"/lib/general.sh                              # general functions
 # shellcheck source=chroot-buildpackages.sh
-source "${SRC}"/lib/chroot-buildpackages.sh					# building packages in chroot
+source "${SRC}"/lib/chroot-buildpackages.sh                 # chroot packages building
+
+
+# set log path
+LOG_SUBPATH=${LOG_SUBPATH:=debug}
 
 # compress and remove old logs
-mkdir -p "${DEST}"/debug
-(cd "${DEST}"/debug && tar -czf logs-"$(<timestamp)".tgz ./*.log) > /dev/null 2>&1
-rm -f "${DEST}"/debug/*.log > /dev/null 2>&1
-date +"%d_%m_%Y-%H_%M_%S" > "${DEST}"/debug/timestamp
+mkdir -p "${DEST}"/${LOG_SUBPATH}
+(cd "${DEST}"/${LOG_SUBPATH} && tar -czf logs-"$(<timestamp)".tgz ./*.log) > /dev/null 2>&1
+rm -f "${DEST}"/${LOG_SUBPATH}/*.log > /dev/null 2>&1
+date +"%d_%m_%Y-%H_%M_%S" > "${DEST}"/${LOG_SUBPATH}/timestamp
+
 # delete compressed logs older than 7 days
-(cd "${DEST}"/debug && find . -name '*.tgz' -mtime +7 -delete) > /dev/null
+(cd "${DEST}"/${LOG_SUBPATH} && find . -name '*.tgz' -mtime +7 -delete) > /dev/null
 
 if [[ $PROGRESS_DISPLAY == none ]]; then
 
@@ -95,7 +106,11 @@ fi
 
 if [[ $PROGRESS_LOG_TO_FILE != yes ]]; then unset PROGRESS_LOG_TO_FILE; fi
 
+
+
 SHOW_WARNING=yes
+
+
 
 if [[ $USE_CCACHE != no ]]; then
 
@@ -111,43 +126,36 @@ else
 
 fi
 
+
+
+
 if [[ -n $REPOSITORY_UPDATE ]]; then
 
-        # select stable/beta configuration
-        if [[ $BETA == yes ]]; then
-                DEB_STORAGE=$DEST/debs-beta
-                REPO_STORAGE=$DEST/repository-beta
-                REPO_CONFIG="aptly-beta.conf"
-        else
-                DEB_STORAGE=$DEST/debs
-                REPO_STORAGE=$DEST/repository
-                REPO_CONFIG="aptly.conf"
-        fi
+	# select stable/beta configuration
+	if [[ $BETA == yes ]]; then
+		DEB_STORAGE=$DEST/debs-beta
+		REPO_STORAGE=$DEST/repository-beta
+		REPO_CONFIG="aptly-beta.conf"
+	else
+		DEB_STORAGE=$DEST/debs
+		REPO_STORAGE=$DEST/repository
+		REPO_CONFIG="aptly.conf"
+	fi
 
-        # For user override
-        if [[ -f "${USERPATCHES_PATH}"/lib.config ]]; then
-                display_alert "Using user configuration override" "userpatches/lib.config" "info"
-            source "${USERPATCHES_PATH}"/lib.config
-        fi
+	# For user override
+	if [[ -f "${USERPATCHES_PATH}"/lib.config ]]; then
+		display_alert "Using user configuration override" "userpatches/lib.config" "info"
+		source "${USERPATCHES_PATH}"/lib.config
+	fi
 
-        repo-manipulate "$REPOSITORY_UPDATE"
-        exit
+	repo-manipulate "$REPOSITORY_UPDATE"
+	exit
 
 fi
 
-if [ "$OFFLINE_WORK" == "yes" ]; then
-	echo -e "\n"
-	display_alert "* " "You are working offline."
-	display_alert "* " "Sources, time and host will not be checked"
-	echo -e "\n"
-	sleep 3s
-else
-	# we need dialog to display the menu in case not installed. Other stuff gets installed later
-	prepare_host_basic
-fi
+
 
 # if KERNEL_ONLY, KERNEL_CONFIGURE, BOARD, BRANCH or RELEASE are not set, display selection menu
-
 if [[ -z $KERNEL_ONLY ]]; then
 
 	options+=("yes" "U-boot and kernel packages")
@@ -246,6 +254,9 @@ if [[ -z $BOARD ]]; then
 	done
 fi
 
+
+
+
 if [[ -f $SRC/config/boards/${BOARD}.conf ]]; then
 	BOARD_TYPE='conf'
 elif [[ -f $SRC/config/boards/${BOARD}.csc ]]; then
@@ -257,6 +268,9 @@ elif [[ -f $SRC/config/boards/${BOARD}.eos ]]; then
 elif [[ -f $SRC/config/boards/${BOARD}.tvb ]]; then
 	BOARD_TYPE='tvb'
 fi
+
+
+
 
 # shellcheck source=/dev/null
 source "${SRC}/config/boards/${BOARD}.${BOARD_TYPE}"
@@ -284,12 +298,15 @@ if [[ -z $BRANCH ]]; then
 	[[ $BRANCH == dev && $SHOW_WARNING == yes ]] && show_developer_warning
 
 else
+
 	[[ $BRANCH == next ]] && KERNEL_TARGET="next"
 	# next = new legacy. Should stay for backward compatibility, but be removed from menu above
 	# or we left definitions in board configs and only remove menu
 	[[ $KERNEL_TARGET != *$BRANCH* ]] && exit_with_error "Kernel branch not defined for this board" "$BRANCH"
 
 fi
+
+
 
 if [[ $KERNEL_ONLY != yes && -z $RELEASE ]]; then
 
@@ -357,9 +374,9 @@ elif [[ $BUILD_MINIMAL == "yes" ]]; then
 	SELECTED_CONFIGURATION="cli_minimal"
 fi
 
-[[ $BUILD_MINIMAL == yes ]] && EXTERNAL=no
+[[ ${KERNEL_CONFIGURE} == prebuilt ]] && [[ -z ${REPOSITORY_INSTALL} ]] && \
+REPOSITORY_INSTALL="u-boot,kernel,bsp,armbian-zsh,armbian-config,armbian-firmware${BUILD_DESKTOP:+,armbian-desktop}"
 
-[[ ${KERNEL_CONFIGURE} == prebuilt ]] && [[ -z ${REPOSITORY_INSTALL} ]] && REPOSITORY_INSTALL="u-boot,kernel,bsp,armbian-zsh,armbian-config,armbian-firmware${BUILD_DESKTOP:+,armbian-desktop}"
 
 #shellcheck source=configuration.sh
 source "${SRC}"/lib/configuration.sh
@@ -394,6 +411,8 @@ LINUXSOURCEDIR="${KERNELDIR}/$(branch2dir "${KERNELBRANCH}")"
 
 BSP_CLI_PACKAGE_NAME="armbian-bsp-cli-${BOARD}"
 BSP_CLI_PACKAGE_FULLNAME="${BSP_CLI_PACKAGE_NAME}_${REVISION}_${ARCH}"
+BSP_DESKTOP_PACKAGE_NAME="armbian-bsp-desktop-${BOARD}"
+BSP_DESKTOP_PACKAGE_FULLNAME="${BSP_DESKTOP_PACKAGE_NAME}_${REVISION}_${ARCH}"
 
 CHOSEN_UBOOT=linux-u-boot-${BRANCH}-${BOARD}
 CHOSEN_KERNEL=linux-image-${BRANCH}-${LINUXFAMILY}
@@ -441,14 +460,16 @@ done
 
 fi
 
-# Compile u-boot if packed .deb does not exist or use the one from repository
-if [[ ! -f "${DEB_STORAGE}"/${CHOSEN_UBOOT}_${REVISION}_${ARCH}.deb ]]; then
+if [[ $ADD_UBOOT == yes ]]; then
+	# Compile u-boot if packed .deb does not exist or use the one from repository
+	if [[ ! -f "${DEB_STORAGE}"/${CHOSEN_UBOOT}_${REVISION}_${ARCH}.deb ]]; then
 
-	if [[ -n "${ATFSOURCE}" && "${REPOSITORY_INSTALL}" != *u-boot* ]]; then
-		compile_atf
+		if [[ -n "${ATFSOURCE}" && "${REPOSITORY_INSTALL}" != *u-boot* ]]; then
+			compile_atf
+		fi
+		[[ "${REPOSITORY_INSTALL}" != *u-boot* ]] && compile_uboot
+
 	fi
-	[[ "${REPOSITORY_INSTALL}" != *u-boot* ]] && compile_uboot
-
 fi
 
 # Compile kernel if packed .deb does not exist or use the one from repository
@@ -491,21 +512,33 @@ fi
 
 overlayfs_wrapper "cleanup"
 
+
+
+
 # create board support package
 [[ -n $RELEASE && ! -f ${DEB_STORAGE}/$RELEASE/${BSP_CLI_PACKAGE_FULLNAME}.deb ]] && create_board_package
 
+
+
 # create desktop package
 [[ -n $RELEASE && $DESKTOP_ENVIRONMENT && ! -f ${DEB_STORAGE}/$RELEASE/${CHOSEN_DESKTOP}_${REVISION}_all.deb ]] && create_desktop_package
+[[ -n $RELEASE && $DESKTOP_ENVIRONMENT && ! -f ${DEB_STORAGE}/${RELEASE}/${BSP_DESKTOP_PACKAGE_FULLNAME}.deb ]] && create_bsp_desktop_package
+
+
 
 # build additional packages
 [[ $EXTERNAL_NEW == compile ]] && chroot_build_packages
 
 if [[ $KERNEL_ONLY != yes ]]; then
+
 	[[ $BSP_BUILD != yes ]] && debootstrap_ng
+
 else
+
 	display_alert "Kernel build done" "@host" "info"
 	display_alert "Target directory" "${DEB_STORAGE}/" "info"
 	display_alert "File name" "${CHOSEN_KERNEL}_${REVISION}_${ARCH}.deb" "info"
+
 fi
 
 # hook for function to run after build, i.e. to change owner of $SRC

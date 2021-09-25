@@ -1,18 +1,24 @@
-# Copyright (c) 2015 Igor Pecovnik, igor.pecovnik@gma**.com
+#!/bin/bash
+#
+# Copyright (c) 2013-2021 Igor Pecovnik, igor.pecovnik@gma**.com
 #
 # This file is licensed under the terms of the GNU General Public
 # License version 2. This program is licensed "as is" without any
 # warranty of any kind, whether express or implied.
-
+#
 # This file is a part of the Armbian build script
 # https://github.com/armbian/build/
 
 # Functions:
+
 # debootstrap_ng
 # create_rootfs_cache
 # prepare_partitions
 # update_initramfs
 # create_image
+
+
+
 
 # debootstrap_ng
 #
@@ -62,8 +68,12 @@ debootstrap_ng()
 	# NOTE: installing too many packages may fill tmpfs mount
 	customize_image
 
+	# remove packages that are no longer needed. Since we have intrudoced uninstall feature, we might want to clean things that are no longer needed
+	display_alert "No longer needed packages" "purge" "info"
+	chroot $SDCARD /bin/bash -c "apt-get autoremove -y"  >/dev/null 2>&1
+
 	# create list of installed packages for debug purposes
-	chroot $SDCARD /bin/bash -c "dpkg --get-selections" | grep -v deinstall | awk '{print $1}' | cut -f1 -d':' > $DEST/debug/installed-packages-${RELEASE}$([[ ${BUILD_MINIMAL} == yes ]] && echo "-minimal")$([[ ${BUILD_DESKTOP} == yes  ]] && echo "-desktop").list 2>&1
+	chroot $SDCARD /bin/bash -c "dpkg --get-selections" | grep -v deinstall | awk '{print $1}' | cut -f1 -d':' > $DEST/${LOG_SUBPATH}/installed-packages-${RELEASE}$([[ ${BUILD_MINIMAL} == yes ]] && echo "-minimal")$([[ ${BUILD_DESKTOP} == yes  ]] && echo "-desktop").list 2>&1
 
 	# clean up / prepare for making the image
 	umount_chroot "$SDCARD"
@@ -108,7 +118,6 @@ create_rootfs_cache()
 	# seek last cache, proceed to previous otherwise build it
 	for ((n=0;n<${cycles};n++)); do
 
-		local packages_hash=$(get_package_list_hash "$(($ROOTFSCACHE_VERSION - $n))")
 		[[ -z ${FORCED_MONTH_OFFSET} ]] && FORCED_MONTH_OFFSET=${n}
 		local packages_hash=$(get_package_list_hash "$(date -d "$D +${FORCED_MONTH_OFFSET} month" +"%Y-%m-module$ROOTFSCACHE_VERSION" | sed 's/^0*//')")
 		local cache_type="cli"
@@ -118,6 +127,8 @@ create_rootfs_cache()
 		local cache_name=${RELEASE}-${cache_type}-${ARCH}.$packages_hash.tar.lz4
 		local cache_fname=${SRC}/cache/rootfs/${cache_name}
 		local display_name=${RELEASE}-${cache_type}-${ARCH}.${packages_hash:0:3}...${packages_hash:29}.tar.lz4
+
+		[[ "$ROOT_FS_CREATE_ONLY" == force ]] && break
 
 		if [[ -f ${cache_fname} && -f ${cache_fname}.aria2 ]]; then
 			rm ${cache_fname}*
@@ -148,7 +159,7 @@ create_rootfs_cache()
 		# speed up checking
 		if [[ -n "$ROOT_FS_CREATE_ONLY" ]]; then
 			touch $cache_fname.current
-			[[ $use_tmpfs = yes ]] && umount $SDCARD
+			umount --lazy "$SDCARD"
 			rm -rf $SDCARD
 			# remove exit trap
 			trap - INT TERM EXIT
@@ -179,9 +190,10 @@ create_rootfs_cache()
 
 
 		display_alert "Installing base system" "Stage 1/2" "info"
+		cd $SDCARD # this will prevent error sh: 0: getcwd() failed
 		eval 'debootstrap --variant=minbase --include=${DEBOOTSTRAP_LIST// /,} ${PACKAGE_LIST_EXCLUDE:+ --exclude=${PACKAGE_LIST_EXCLUDE// /,}} \
 			--arch=$ARCH --components=${DEBOOTSTRAP_COMPONENTS} $DEBOOTSTRAP_OPTION --foreign $RELEASE $SDCARD/ $apt_mirror' \
-			${PROGRESS_LOG_TO_FILE:+' | tee -a $DEST/debug/debootstrap.log'} \
+			${PROGRESS_LOG_TO_FILE:+' | tee -a $DEST/${LOG_SUBPATH}/debootstrap.log'} \
 			${OUTPUT_DIALOG:+' | dialog --backtitle "$backtitle" --progressbox "Debootstrap (stage 1/2)..." $TTY_Y $TTY_X'} \
 			${OUTPUT_VERYSILENT:+' >/dev/null 2>/dev/null'}
 
@@ -194,7 +206,7 @@ create_rootfs_cache()
 
 		display_alert "Installing base system" "Stage 2/2" "info"
 		eval 'chroot $SDCARD /bin/bash -c "/debootstrap/debootstrap --second-stage"' \
-			${PROGRESS_LOG_TO_FILE:+' | tee -a $DEST/debug/debootstrap.log'} \
+			${PROGRESS_LOG_TO_FILE:+' | tee -a $DEST/${LOG_SUBPATH}/debootstrap.log'} \
 			${OUTPUT_DIALOG:+' | dialog --backtitle "$backtitle" --progressbox "Debootstrap (stage 2/2)..." $TTY_Y $TTY_X'} \
 			${OUTPUT_VERYSILENT:+' >/dev/null 2>/dev/null'}
 
@@ -238,7 +250,7 @@ create_rootfs_cache()
 		# stage: update packages list
 		display_alert "Updating package list" "$RELEASE" "info"
 		eval 'LC_ALL=C LANG=C chroot $SDCARD /bin/bash -c "apt-get -q -y $apt_extra update"' \
-			${PROGRESS_LOG_TO_FILE:+' | tee -a $DEST/debug/debootstrap.log'} \
+			${PROGRESS_LOG_TO_FILE:+' | tee -a $DEST/${LOG_SUBPATH}/debootstrap.log'} \
 			${OUTPUT_DIALOG:+' | dialog --backtitle "$backtitle" --progressbox "Updating package lists..." $TTY_Y $TTY_X'} \
 			${OUTPUT_VERYSILENT:+' >/dev/null 2>/dev/null'}
 
@@ -248,7 +260,7 @@ create_rootfs_cache()
 		display_alert "Upgrading base packages" "Armbian" "info"
 		eval 'LC_ALL=C LANG=C chroot $SDCARD /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y -q \
 			$apt_extra $apt_extra_progress upgrade"' \
-			${PROGRESS_LOG_TO_FILE:+' | tee -a $DEST/debug/debootstrap.log'} \
+			${PROGRESS_LOG_TO_FILE:+' | tee -a $DEST/${LOG_SUBPATH}/debootstrap.log'} \
 			${OUTPUT_DIALOG:+' | dialog --backtitle "$backtitle" --progressbox "Upgrading base packages..." $TTY_Y $TTY_X'} \
 			${OUTPUT_VERYSILENT:+' >/dev/null 2>/dev/null'}
 
@@ -264,7 +276,7 @@ create_rootfs_cache()
 		display_alert "Installing the main packages for" "Armbian" "info"
 		eval 'LC_ALL=C LANG=C chroot $SDCARD /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y -q \
 			$apt_extra $apt_extra_progress --no-install-recommends install $PACKAGE_MAIN_LIST"' \
-			${PROGRESS_LOG_TO_FILE:+' | tee -a $DEST/debug/debootstrap.log'} \
+			${PROGRESS_LOG_TO_FILE:+' | tee -a $DEST/${LOG_SUBPATH}/debootstrap.log'} \
 			${OUTPUT_DIALOG:+' | dialog --backtitle "$backtitle" --progressbox "Installing Armbian main packages..." $TTY_Y $TTY_X'} \
 			${OUTPUT_VERYSILENT:+' >/dev/null 2>/dev/null'}
 
@@ -292,7 +304,7 @@ create_rootfs_cache()
 			display_alert "Installing the desktop packages for" "Armbian" "info"
 			eval 'LC_ALL=C LANG=C chroot $SDCARD /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y -q \
 				$apt_extra $apt_extra_progress install ${apt_desktop_install_flags} $PACKAGE_LIST_DESKTOP"' \
-				${PROGRESS_LOG_TO_FILE:+' | tee -a $DEST/debug/debootstrap.log'} \
+				${PROGRESS_LOG_TO_FILE:+' | tee -a $DEST/${LOG_SUBPATH}/debootstrap.log'} \
 				${OUTPUT_DIALOG:+' | dialog --backtitle "$backtitle" --progressbox "Installing Armbian desktop packages..." $TTY_Y $TTY_X'} \
 				${OUTPUT_VERYSILENT:+' >/dev/null 2>/dev/null'}
 
@@ -304,7 +316,7 @@ create_rootfs_cache()
 		display_alert "Uninstall packages" "$PACKAGE_LIST_UNINSTALL" "info"
 		eval 'LC_ALL=C LANG=C chroot $SDCARD /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y -qq \
 			$apt_extra $apt_extra_progress purge $PACKAGE_LIST_UNINSTALL"' \
-			${PROGRESS_LOG_TO_FILE:+' >> $DEST/debug/debootstrap.log'} \
+			${PROGRESS_LOG_TO_FILE:+' >> $DEST/${LOG_SUBPATH}/debootstrap.log'} \
 			${OUTPUT_DIALOG:+' | dialog --backtitle "$backtitle" --progressbox "Removing packages.uninstall packages..." $TTY_Y $TTY_X'} \
 			${OUTPUT_VERYSILENT:+' >/dev/null 2>/dev/null'}
 
@@ -315,7 +327,7 @@ create_rootfs_cache()
 		PURGINGPACKAGES=$(chroot $SDCARD /bin/bash -c "dpkg -l | grep \"^rc\" | awk '{print \$2}' | tr \"\n\" \" \"")
 		eval 'LC_ALL=C LANG=C chroot $SDCARD /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y -q \
 			$apt_extra $apt_extra_progress remove --purge $PURGINGPACKAGES"' \
-			${PROGRESS_LOG_TO_FILE:+' | tee -a $DEST/debug/debootstrap.log'} \
+			${PROGRESS_LOG_TO_FILE:+' | tee -a $DEST/${LOG_SUBPATH}/debootstrap.log'} \
 			${OUTPUT_DIALOG:+' | dialog --backtitle "$backtitle" --progressbox "Purging residual Armbian packages..." $TTY_Y $TTY_X'} \
 			${OUTPUT_VERYSILENT:+' >/dev/null 2>/dev/null'}
 
@@ -326,7 +338,7 @@ create_rootfs_cache()
 
 		# DEBUG: print free space
 		local freespace=$(LC_ALL=C df -h)
-		echo $freespace >> $DEST/debug/debootstrap.log
+		echo $freespace >> $DEST/${LOG_SUBPATH}/debootstrap.log
 		display_alert "Free SD cache" "$(echo -e "$freespace" | grep $SDCARD | awk '{print $5}')" "info"
 		display_alert "Mount point" "$(echo -e "$freespace" | grep $MOUNT | head -1 | awk '{print $5}')" "info"
 
@@ -354,8 +366,9 @@ create_rootfs_cache()
 			--exclude='./sys/*' . | pv -p -b -r -s $(du -sb $SDCARD/ | cut -f1) -N "$display_name" | lz4 -5 -c > $cache_fname
 
 		# sign rootfs cache archive that it can be used for web cache once. Internal purposes
-		if [[ -n $GPG_PASS ]]; then
-			echo $GPG_PASS | gpg --passphrase-fd 0 --armor --detach-sign --pinentry-mode loopback --batch --yes $cache_fname
+		if [[ -n "${GPG_PASS}" && "${SUDO_USER}" ]]; then
+			[[ -n ${SUDO_USER} ]] && sudo chown -R ${SUDO_USER}:${SUDO_USER} "${DEST}"/images/
+			echo "${GPG_PASS}" | sudo -H -u ${SUDO_USER} bash -c "gpg --passphrase-fd 0 --armor --detach-sign --pinentry-mode loopback --batch --yes ${cache_fname}" || exit 1
 		fi
 
 		# needed for backend to keep current only
@@ -365,7 +378,7 @@ create_rootfs_cache()
 
 	# used for internal purposes. Faster rootfs cache rebuilding
 	if [[ -n "$ROOT_FS_CREATE_ONLY" ]]; then
-		[[ $use_tmpfs = yes ]] && umount $SDCARD
+		umount --lazy "$SDCARD"
 		rm -rf $SDCARD
 		# remove exit trap
 		trap - INT TERM EXIT
@@ -408,7 +421,7 @@ prepare_partitions()
 	# add -N number of inodes to keep mount from running out
 	# create bigger number for desktop builds
 	if [[ $BUILD_DESKTOP == yes ]]; then local node_number=4096; else local node_number=1024; fi
-	if [[ $HOSTRELEASE =~ bionic|buster|bullseye|cosmic|groovy|focal|hirsute|sid ]]; then
+	if [[ $HOSTRELEASE =~ bionic|buster|bullseye|cosmic|focal|hirsute|impish|sid ]]; then
 		mkopts[ext4]="-q -m 2 -O ^64bit,^metadata_csum -N $((128*${node_number}))"
 	elif [[ $HOSTRELEASE == xenial ]]; then
 		mkopts[ext4]="-q -m 2 -N $((128*${node_number}))"
@@ -565,7 +578,7 @@ prepare_partitions()
 
 		check_loop_device "$rootdevice"
 		display_alert "Creating rootfs" "$ROOTFS_TYPE on $rootdevice"
-		mkfs.${mkfs[$ROOTFS_TYPE]} ${mkopts[$ROOTFS_TYPE]} $rootdevice >> "${DEST}"/debug/install.log 2>&1
+		mkfs.${mkfs[$ROOTFS_TYPE]} ${mkopts[$ROOTFS_TYPE]} $rootdevice >> "${DEST}"/${LOG_SUBPATH}/install.log 2>&1
 		[[ $ROOTFS_TYPE == ext4 ]] && tune2fs -L ROOTFS -o journal_data_writeback $rootdevice > /dev/null
 		if [[ $ROOTFS_TYPE == btrfs && $BTRFS_COMPRESSION != none ]]; then
 			local fscreateopt="-o compress-force=${BTRFS_COMPRESSION}"
@@ -584,7 +597,7 @@ prepare_partitions()
 	if [[ -n $bootpart ]]; then
 		display_alert "Creating /boot" "$bootfs on ${LOOP}p${bootpart}"
 		check_loop_device "${LOOP}p${bootpart}"
-		mkfs.${mkfs[$bootfs]} ${mkopts[$bootfs]} ${LOOP}p${bootpart} >> "${DEST}"/debug/install.log 2>&1
+		mkfs.${mkfs[$bootfs]} ${mkopts[$bootfs]} ${LOOP}p${bootpart} >> "${DEST}"/${LOG_SUBPATH}/install.log 2>&1
 		mkdir -p $MOUNT/boot/
 		mount ${LOOP}p${bootpart} $MOUNT/boot/
 		echo "LABEL=BOOT /boot ${mkfs[$bootfs]} defaults${mountopts[$bootfs]} 0 2" >> $SDCARD/etc/fstab
@@ -659,16 +672,23 @@ prepare_partitions()
 update_initramfs()
 {
 	local chroot_target=$1
-	update_initramfs_cmd="update-initramfs -uv -k ${VER}-${LINUXFAMILY}"
+	local target_dir=$(
+		find ${chroot_target}/lib/modules/ -maxdepth 1 -type d -name "*${VER}*"
+	)
+	if [ "$target_dir" != "" ]; then
+		update_initramfs_cmd="update-initramfs -uv -k $(basename $target_dir)"
+	else
+		exit_with_error "No kernel installed for the version" "${VER}"
+	fi
 	display_alert "Updating initramfs..." "$update_initramfs_cmd" ""
 	cp /usr/bin/$QEMU_BINARY $chroot_target/usr/bin/
 	mount_chroot "$chroot_target/"
 
-	chroot $chroot_target /bin/bash -c "$update_initramfs_cmd" >> $DEST/debug/install.log 2>&1
-	display_alert "Updated initramfs." "for details see: $DEST/debug/install.log" "info"
+	chroot $chroot_target /bin/bash -c "$update_initramfs_cmd" >> $DEST/${LOG_SUBPATH}/install.log 2>&1
+	display_alert "Updated initramfs." "for details see: $DEST/${LOG_SUBPATH}/install.log" "info"
 
 	display_alert "Re-enabling" "initramfs-tools hook for kernel"
-	chroot $chroot_target /bin/bash -c "chmod -v +x /etc/kernel/postinst.d/initramfs-tools" >> "${DEST}"/debug/install.log 2>&1
+	chroot $chroot_target /bin/bash -c "chmod -v +x /etc/kernel/postinst.d/initramfs-tools" >> "${DEST}"/${LOG_SUBPATH}/install.log 2>&1
 
 	umount_chroot "$chroot_target/"
 	rm $chroot_target/usr/bin/$QEMU_BINARY
@@ -682,7 +702,7 @@ update_initramfs()
 create_image()
 {
 	# stage: create file name
-	local version="Armbian_${REVISION}_${BOARD^}_${RELEASE}_${BRANCH}_${VER/-$LINUXFAMILY/}${DESKTOP_ENVIRONMENT:+_$DESKTOP_ENVIRONMENT}"
+	local version="${VENDOR}_${REVISION}_${BOARD^}_${RELEASE}_${BRANCH}_${VER/-$LINUXFAMILY/}${DESKTOP_ENVIRONMENT:+_$DESKTOP_ENVIRONMENT}"
 	[[ $BUILD_DESKTOP == yes ]] && version=${version}_desktop
 	[[ $BUILD_MINIMAL == yes ]] && version=${version}_minimal
 	[[ $ROOTFS_TYPE == nfs ]] && version=${version}_nfsboot
@@ -690,7 +710,7 @@ create_image()
 	if [[ $ROOTFS_TYPE != nfs ]]; then
 		display_alert "Copying files to" "/"
 		rsync -aHWXh --exclude="/boot/*" --exclude="/dev/*" --exclude="/proc/*" --exclude="/run/*" --exclude="/tmp/*" \
-			--exclude="/sys/*" --info=progress2,stats1 $SDCARD/ $MOUNT/ >> "${DEST}"/debug/install.log 2>&1
+			--exclude="/sys/*" --info=progress2,stats1 $SDCARD/ $MOUNT/ >> "${DEST}"/${LOG_SUBPATH}/install.log 2>&1
 	else
 		display_alert "Creating rootfs archive" "rootfs.tgz" "info"
 		tar cp --xattrs --directory=$SDCARD/ --exclude='./boot/*' --exclude='./dev/*' --exclude='./proc/*' --exclude='./run/*' --exclude='./tmp/*' \
@@ -701,10 +721,10 @@ create_image()
 	display_alert "Copying files to" "/boot"
 	if [[ $(findmnt --target $MOUNT/boot -o FSTYPE -n) == vfat ]]; then
 		# fat32
-		rsync -rLtWh --info=progress2,stats1 $SDCARD/boot $MOUNT >> "${DEST}"/debug/install.log 2>&1
+		rsync -rLtWh --info=progress2,stats1 $SDCARD/boot $MOUNT >> "${DEST}"/${LOG_SUBPATH}/install.log 2>&1
 	else
 		# ext4
-		rsync -aHWXh --info=progress2,stats1 $SDCARD/boot $MOUNT >> "${DEST}"/debug/install.log 2>&1
+		rsync -aHWXh --info=progress2,stats1 $SDCARD/boot $MOUNT >> "${DEST}"/${LOG_SUBPATH}/install.log 2>&1
 	fi
 
 	# stage: create final initramfs
@@ -712,12 +732,14 @@ create_image()
 
 	# DEBUG: print free space
 	local freespace=$(LC_ALL=C df -h)
-	echo $freespace >> $DEST/debug/debootstrap.log
+	echo $freespace >> $DEST/${LOG_SUBPATH}/debootstrap.log
 	display_alert "Free SD cache" "$(echo -e "$freespace" | grep $SDCARD | awk '{print $5}')" "info"
 	display_alert "Mount point" "$(echo -e "$freespace" | grep $MOUNT | head -1 | awk '{print $5}')" "info"
 
-	# stage: write u-boot
-	write_uboot $LOOP
+	if [[ $ADD_UBOOT == yes ]]; then
+		# stage: write u-boot
+		write_uboot $LOOP
+	fi
 
 	# fix wrong / permissions
 	chmod 755 $MOUNT
@@ -744,17 +766,22 @@ create_image()
 	FINALDEST=$DEST/images
 
 	if [[ $BUILD_ALL == yes ]]; then
-		if [[ "$BETA" == yes ]]; then
+		if [[ "$RC" == yes ]]; then
+			FINALDEST=$DEST/images/"${BOARD}"/RC
+		elif [[ "$BETA" == yes ]]; then
 			FINALDEST=$DEST/images/"${BOARD}"/nightly
-			else
+		else
 			FINALDEST=$DEST/images/"${BOARD}"/archive
 		fi
 		install -d -o nobody -g nogroup -m 775 ${FINALDEST}
 	fi
 
 
-	if [[ -z $SEND_TO_SERVER ]]; then
+	# custom post_build_image_modify hook to run before fingerprinting and compression
+	[[ $(type -t post_build_image_modify) == function ]] && display_alert "Custom Hook Detected" "post_build_image_modify" "info" && post_build_image_modify "${DESTIMG}/${version}.img"
 
+	if [[ -z $SEND_TO_SERVER ]]; then
+	
 		if [[ $COMPRESS_OUTPUTIMAGE == "" || $COMPRESS_OUTPUTIMAGE == no ]]; then
 			COMPRESS_OUTPUTIMAGE="sha,gpg,img"
 		elif [[ $COMPRESS_OUTPUTIMAGE == yes ]]; then
@@ -762,57 +789,72 @@ create_image()
 		fi
 
 		if [[ $COMPRESS_OUTPUTIMAGE == *gz* ]]; then
-			display_alert "Compressing" "${FINALDEST}/${version}.img.gz" "info"
-			pigz -3 < $DESTIMG/${version}.img > ${FINALDEST}/${version}.img.gz
+			display_alert "Compressing" "${DESTIMG}/${version}.img.gz" "info"
+			pigz -3 < $DESTIMG/${version}.img > $DESTIMG/${version}.img.gz
 			compression_type=".gz"
 		fi
 
 		if [[ $COMPRESS_OUTPUTIMAGE == *xz* ]]; then
-			display_alert "Compressing" "${FINALDEST}/${version}.img.xz" "info"
+			display_alert "Compressing" "${DESTIMG}/${version}.img.xz" "info"
 			# compressing consumes a lot of memory we don't have. Waiting for previous packing job to finish helps to run a lot more builds in parallel
-			[[ ${BUILD_ALL} == yes && $(free | grep Mem | awk '{print $4/$2 * 100.0}' | awk '{print int($1)}') -lt 5 ]] && while [[ $(ps -uax | grep "pixz" | wc -l) -gt 4 ]]; do echo -en "#"; sleep 20; done
-			pixz -8 -p 12 < $DESTIMG/${version}.img > ${FINALDEST}/${version}.img.xz
+			available_cpu=$(grep -c 'processor' /proc/cpuinfo)
+			[[ ${BUILD_ALL} == yes ]] && available_cpu=$(( $available_cpu * 30 / 100 )) # lets use 20% of resources in case of build-all
+			[[ ${available_cpu} -gt 8 ]] && available_cpu=8 # using more cpu cores for compressing is pointless
+			available_mem=$(LC_ALL=c free | grep Mem | awk '{print $4/$2 * 100.0}' | awk '{print int($1)}') # in percentage
+			# build optimisations when memory drops below 5%
+			if [[ ${BUILD_ALL} == yes && ( ${available_mem} -lt 15 || $(ps -uax | grep "pixz" | wc -l) -gt 4 )]]; then
+				while [[ $(ps -uax | grep "pixz" | wc -l) -gt 2 ]]
+					do echo -en "#"
+					sleep 20
+				done
+			fi
+			pixz -7 -p ${available_cpu} -f $(expr ${available_cpu} + 2) < $DESTIMG/${version}.img > ${DESTIMG}/${version}.img.xz
 			compression_type=".xz"
 		fi
 
 		if [[ $COMPRESS_OUTPUTIMAGE == *img* || $COMPRESS_OUTPUTIMAGE == *7z* ]]; then
-			mv $DESTIMG/${version}.img ${FINALDEST}/${version}.img || exit 1
+#			mv $DESTIMG/${version}.img ${FINALDEST}/${version}.img || exit 1
 			compression_type=""
 		fi
 
 		if [[ $COMPRESS_OUTPUTIMAGE == *sha* ]]; then
-			cd ${FINALDEST}
+			cd ${DESTIMG}
 			display_alert "SHA256 calculating" "${version}.img${compression_type}" "info"
 			sha256sum -b ${version}.img${compression_type} > ${version}.img${compression_type}.sha
 		fi
 
 		if [[ $COMPRESS_OUTPUTIMAGE == *gpg* ]]; then
-			cd ${FINALDEST}
+			cd ${DESTIMG}
 			if [[ -n $GPG_PASS ]]; then
 				display_alert "GPG signing" "${version}.img${compression_type}" "info"
-				echo $GPG_PASS | gpg --passphrase-fd 0 --armor --detach-sign --pinentry-mode loopback --batch --yes ${FINALDEST}/${version}.img${compression_type} || exit 1
+				[[ -n ${SUDO_USER} ]] && sudo chown -R ${SUDO_USER}:${SUDO_USER} "${DESTIMG}"/
+				echo "${GPG_PASS}" | sudo -H -u ${SUDO_USER} bash -c "gpg --passphrase-fd 0 --armor --detach-sign --pinentry-mode loopback --batch --yes ${DESTIMG}/${version}.img${compression_type}" || exit 1
 			else
 				display_alert "GPG signing skipped - no GPG_PASS" "${version}.img" "wrn"
 			fi
 		fi
 
-		fingerprint_image "${FINALDEST}/${version}.img${compression_type}.txt" "${version}"
+		fingerprint_image "${DESTIMG}/${version}.img${compression_type}.txt" "${version}"
 
 		if [[ $COMPRESS_OUTPUTIMAGE == *7z* ]]; then
-			display_alert "Compressing" "${FINALDEST}/${version}.7z" "info"
+			display_alert "Compressing" "${DESTIMG}/${version}.7z" "info"
 			7za a -t7z -bd -m0=lzma2 -mx=3 -mfb=64 -md=32m -ms=on \
-			${FINALDEST}/${version}.7z ${version}.key ${version}.img* >/dev/null 2>&1
-			find ${FINALDEST}/ -type \
+			${DESTIMG}/${version}.7z ${version}.key ${version}.img* >/dev/null 2>&1
+			find ${DESTIMG}/ -type \
 			f \( -name "${version}.img" -o -name "${version}.img.asc" -o -name "${version}.img.txt" -o -name "${version}.img.sha" \) -print0 \
 			| xargs -0 rm >/dev/null 2>&1
 		fi
 
-		rm -rf $DESTIMG
 	fi
-	display_alert "Done building" "${FINALDEST}/${version}.img" "info"
+	display_alert "Done building" "${DESTIMG}/${version}.img" "info"
 
 	# call custom post build hook
-	[[ $(type -t post_build_image) == function ]] && post_build_image "${FINALDEST}/${version}.img"
+	[[ $(type -t post_build_image) == function ]] && post_build_image "${DESTIMG}/${version}.img"
+
+	# move artefacts from temporally directory to its final destination
+	[[ -n $compression_type ]] && rm $DESTIMG/${version}.img
+	mv $DESTIMG/${version}* ${FINALDEST}
+	rm -rf $DESTIMG
 
 	# write image to SD card
 	if [[ $(lsblk "$CARD_DEVICE" 2>/dev/null) && -f ${FINALDEST}/${version}.img ]]; then

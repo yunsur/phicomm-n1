@@ -11,7 +11,9 @@ if [ "$1" != "upgrade" ]; then
     update-alternatives --remove ebtables /usr/sbin/ebtables-nft
 fi
 
-# compat symlinks for /sbin -> /usr/sbin move, to be dropped in buster+1
+# remove compat symlinks for /sbin -> /usr/sbin move
+# This piece of code can be dropped eventually, when we are confident user
+# systems are left in a consistent state.
 if [ "$1" = "remove" ] ; then
 	LIST="/sbin/iptables
 	     /sbin/iptables-save

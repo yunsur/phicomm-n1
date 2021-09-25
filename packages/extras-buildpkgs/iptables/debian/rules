@@ -9,7 +9,7 @@ DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
 LIB_DIR := /usr/lib/$(DEB_HOST_MULTIARCH)
 
 %:
-	dh $@ --with autoreconf
+	dh $@
 
 override_dh_auto_configure:
 	dh_auto_configure -- --disable-libipq --enable-devel \

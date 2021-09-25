@@ -19,6 +19,7 @@ libxtables.so.12 libxtables12 #MINVER#
  xtables_find_match_revision@Base 1.8.0
  xtables_find_target@Base 1.6.0+snapshot20161117
  xtables_find_target_revision@Base 1.8.0
+ xtables_fini@Base 1.8.5
  xtables_free_opts@Base 1.6.0+snapshot20161117
  xtables_getethertypebyname@Base 1.8.1
  xtables_getethertypebynumber@Base 1.8.1
@@ -59,6 +60,7 @@ libxtables.so.12 libxtables12 #MINVER#
  xtables_options_xfrm@Base 1.6.0+snapshot20161117
  xtables_param_act@Base 1.6.0+snapshot20161117
  xtables_parse_interface@Base 1.6.0+snapshot20161117
+ xtables_parse_mac_and_mask@Base 1.8.7
  xtables_parse_port@Base 1.6.0+snapshot20161117
  xtables_parse_protocol@Base 1.6.0+snapshot20161117
  xtables_parse_val_mask@Base 1.8.0
@@ -68,6 +70,7 @@ libxtables.so.12 libxtables12 #MINVER#
  xtables_print_mac_and_mask@Base 1.8.2
  xtables_print_num@Base 1.6.0+snapshot20161117
  xtables_print_val_mask@Base 1.8.0
+ xtables_print_well_known_mac_and_mask@Base 1.8.7
  xtables_realloc@Base 1.6.0+snapshot20161117
  xtables_register_match@Base 1.6.0+snapshot20161117
  xtables_register_matches@Base 1.6.0+snapshot20161117
