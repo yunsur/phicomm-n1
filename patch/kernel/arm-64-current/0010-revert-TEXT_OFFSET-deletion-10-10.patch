@@ -1,0 +1,31 @@
+diff --git a/arch/arm64/Makefile b/arch/arm64/Makefile
+index 485b7dbd4f9e..ff76792fd532 100644
+--- a/arch/arm64/Makefile
++++ b/arch/arm64/Makefile
+@@ -11,6 +11,7 @@
+ # Copyright (C) 1995-2001 by Russell King
+ 
+ LDFLAGS_vmlinux	:=--no-undefined -X
++CPPFLAGS_vmlinux.lds = -DTEXT_OFFSET=$(TEXT_OFFSET)
+ 
+ ifeq ($(CONFIG_RELOCATABLE), y)
+ # Pass --no-apply-dynamic-relocs to restore pre-binutils-2.27 behaviour
+@@ -134,6 +135,9 @@ endif
+ # Default value
+ head-y		:= arch/arm64/kernel/head.o
+ 
++# The byte offset of the kernel image in RAM from the start of RAM.
++TEXT_OFFSET := 0x01080000
++
+ ifeq ($(CONFIG_KASAN_SW_TAGS), y)
+ KASAN_SHADOW_SCALE_SHIFT := 4
+ else
+@@ -144,6 +148,8 @@ KBUILD_CFLAGS += -DKASAN_SHADOW_SCALE_SHIFT=$(KASAN_SHADOW_SCALE_SHIFT)
+ KBUILD_CPPFLAGS += -DKASAN_SHADOW_SCALE_SHIFT=$(KASAN_SHADOW_SCALE_SHIFT)
+ KBUILD_AFLAGS += -DKASAN_SHADOW_SCALE_SHIFT=$(KASAN_SHADOW_SCALE_SHIFT)
+ 
++export	TEXT_OFFSET
++
+ core-y		+= arch/arm64/
+ libs-y		:= arch/arm64/lib/ $(libs-y)
+ libs-$(CONFIG_EFI_STUB) += $(objtree)/drivers/firmware/efi/libstub/lib.a
