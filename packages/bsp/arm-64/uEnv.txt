@@ -1,4 +1,4 @@
-LINUX=/zImage
+LINUX=/Image
 INITRD=/uInitrd
 
 # aml s9xxx

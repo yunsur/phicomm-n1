@@ -1,17 +1,25 @@
 diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
-index f9119eea735e..a208dfec2e1c 100644
+index f9119eea735e..82ee2d95bce9 100644
 --- a/arch/arm64/kernel/head.S
 +++ b/arch/arm64/kernel/head.S
-@@ -36,7 +36,7 @@
- 
+@@ -36,10 +36,14 @@
+
  #include "efi-header.S"
- 
+
 -#define __PHYS_OFFSET	KERNEL_START
 +#define __PHYS_OFFSET	(KERNEL_START - TEXT_OFFSET)
- 
- #if (PAGE_OFFSET & 0x1fffff) != 0
+
+-#if (PAGE_OFFSET & 0x1fffff) != 0
++#if (TEXT_OFFSET & 0xfff) != 0
++#error TEXT_OFFSET must be at least 4KB aligned
++#elif (PAGE_OFFSET & 0x1fffff) != 0
  #error PAGE_OFFSET must be at least 2MB aligned
-@@ -51,7 +51,7 @@
++#elif TEXT_OFFSET > 0x1fffff
++#//error TEXT_OFFSET must be less than 2MB
+ #endif
+
+ /*
+@@ -51,7 +55,7 @@
   *   x0 = physical address to the FDT blob.
   *
   * This code is mostly position independent so you call this at
@@ -20,7 +28,7 @@ index f9119eea735e..a208dfec2e1c 100644
   *
   * Note that the callee-saved registers are used for storing variables
   * that are useful before the MMU is enabled. The allocations are described
-@@ -73,7 +73,7 @@ _head:
+@@ -73,7 +77,7 @@ _head:
  	b	primary_entry			// branch to kernel start, magic
  	.long	0				// reserved
  #endif
@@ -29,7 +37,7 @@ index f9119eea735e..a208dfec2e1c 100644
  	le64sym	_kernel_size_le			// Effective size of kernel image, little-endian
  	le64sym	_kernel_flags_le		// Informative flags, little-endian
  	.quad	0				// reserved
-@@ -379,7 +379,7 @@ SYM_FUNC_START_LOCAL(__create_page_tables)
+@@ -379,7 +383,7 @@ SYM_FUNC_START_LOCAL(__create_page_tables)
  	 * Map the kernel image (starting with PHYS_OFFSET).
  	 */
  	adrp	x0, init_pg_dir
@@ -38,8 +46,8 @@ index f9119eea735e..a208dfec2e1c 100644
  	add	x5, x5, x23			// add KASLR displacement
  	mov	x4, PTRS_PER_PGD
  	adrp	x6, _end			// runtime __pa(_end)
-@@ -471,7 +471,7 @@ SYM_FUNC_END(__primary_switched)
- 
+@@ -471,7 +475,7 @@ SYM_FUNC_END(__primary_switched)
+
  	.pushsection ".rodata", "a"
  SYM_DATA_START(kimage_vaddr)
 -	.quad		_text

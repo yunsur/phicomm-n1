@@ -121,7 +121,7 @@ index 1b11f8993..c21d931ea 100755
  # path instead
  case $ARCH in
 +aarch64|arm64)
-+	image_name=zImage
++	image_name=Image
 +	installed_image_path="boot/vmlinuz-$version"
 +
 +	;;
