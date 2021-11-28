@@ -1,20 +1,34 @@
 diff --git a/arch/arm64/boot/dts/amlogic/meson-gxl-s905d-phicomm-n1.dts b/arch/arm64/boot/dts/amlogic/meson-gxl-s905d-phicomm-n1.dts
-index 9ef210f17b4a..c2071ee183a2 100644
+index 9ef210f17b4a..2fc9d7df05b1 100644
 --- a/arch/arm64/boot/dts/amlogic/meson-gxl-s905d-phicomm-n1.dts
 +++ b/arch/arm64/boot/dts/amlogic/meson-gxl-s905d-phicomm-n1.dts
-@@ -1,6 +1,8 @@
+@@ -1,6 +1,9 @@
  // SPDX-License-Identifier: (GPL-2.0+ OR MIT)
  /*
   * Copyright (c) 2018 He Yangxuan
 + * Copyright (c) 2020 Flippy
 + * Copyright (c) 2020 Wgsun0592
++ * Copyright (c) 2021 isolated
   */
  
  /dts-v1/;
-@@ -11,6 +13,19 @@ / {
+@@ -11,6 +14,41 @@ / {
  	compatible = "phicomm,n1", "amlogic,s905d", "amlogic,meson-gxl";
  	model = "Phicomm N1";
  
++	aliases {
++		serial1 = &uart_A;
++	};
++
++	reserved-memory {
++		/* 1 MiB reserved for Hardware ROM Firmware */
++		/* @sa: https://github.com/khadas/linux/commit/698df2c6cfbb0d1a9359743208e83517b31da6ce */
++		hwrom_reserved: hwrom@0 {
++			reg = <0x0 0x0 0x0 0x100000>;
++			no-map;
++		};
++	};
++
 +	dc_in: regulator-vcc_12v {
 +		compatible = "regulator-fixed";
 +		regulator-name = "VCC_12V";
@@ -24,14 +38,23 @@ index 9ef210f17b4a..c2071ee183a2 100644
 +		regulator-always-on;
 +	};
 +
-+	aliases {
-+		serial1 = &uart_A;
++	soc {
++		usb: usb@d0078080 {
++			dwc3: usb@c9000000 {
++				/* Workaround for broken LPM implementation found in many USB3 devices. */
++				usb2-lpm-disable;
++			};
++		};
++	};
++
++	memory@0 {
++		linux,usable-memory = <0x0 0x0 0x0 0x80000000>;
 +	};
 +
  	cvbs-connector {
  		status = "disabled";
  	};
-@@ -33,3 +48,40 @@ &cvbs_vdac_port {
+@@ -33,3 +71,33 @@ &cvbs_vdac_port {
  &usb {
  	dr_mode = "host";
  };
@@ -41,20 +64,13 @@ index 9ef210f17b4a..c2071ee183a2 100644
 +};
 +
 +&sd_emmc_b {
-+	status = "okay";
++	/* disable SD CARD */
++	status = "disabled";
 +};
 +
 +&external_phy {
-+	reset-assert-us =    <30000>;
-+	reset-deassert-us = <100000>;
-+	reset-gpios = <&gpio GPIOZ_14 GPIO_ACTIVE_LOW>;
-+	interrupts = <25 IRQ_TYPE_LEVEL_LOW>;
-+};
-+
-+&ethmac {
-+	snps,rxpbl = <0x4>;
-+	snps,txpbl = <0x8>;
-+	snps,aal;
++	/delete-property/ interrupts;
++	/delete-property/ eee-broken-1000t;
 +};
 +
 +/* This is connected to the Bluetooth module: */

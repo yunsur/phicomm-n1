@@ -1,8 +1,8 @@
 diff --git a/arch/arm64/kernel/vmlinux.lds.S b/arch/arm64/kernel/vmlinux.lds.S
-index 30c102978942..27437fa69521 100644
+index f6b1a88245db..45177584945d 100644
 --- a/arch/arm64/kernel/vmlinux.lds.S
 +++ b/arch/arm64/kernel/vmlinux.lds.S
-@@ -115,7 +115,7 @@ SECTIONS
+@@ -141,7 +141,7 @@ SECTIONS
  		*(.dynsym .dynstr .hash .gnu.hash)
  	}
  
@@ -11,9 +11,12 @@ index 30c102978942..27437fa69521 100644
  
  	.head.text : {
  		_text = .;
-@@ -305,4 +305,4 @@ ASSERT((__entry_tramp_text_end - __entry_tramp_text_start) == PAGE_SIZE,
+@@ -339,7 +339,7 @@ ASSERT(__hyp_bss_start == __bss_start, "HYP and Host BSS are misaligned")
  /*
   * If padding is applied before .head.text, virt<->phys conversions will fail.
   */
 -ASSERT(_text == KIMAGE_VADDR, "HEAD is misaligned")
 +ASSERT(_text == (KIMAGE_VADDR + TEXT_OFFSET), "HEAD is misaligned")
+ 
+ ASSERT(swapper_pg_dir - reserved_pg_dir == RESERVED_SWAPPER_OFFSET,
+        "RESERVED_SWAPPER_OFFSET is wrong!")
