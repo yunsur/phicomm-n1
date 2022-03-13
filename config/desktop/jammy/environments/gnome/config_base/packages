@@ -55,6 +55,7 @@ gnome-shell
 gnome-shell-common
 gnome-shell-extension-appindicator
 gnome-shell-extension-trash
+gnome-system-monitor
 gvfs-backends
 hunspell-en-us
 inputattach
@@ -172,7 +173,7 @@ python3-xkit
 python3-yaml
 software-properties-gtk
 spice-vdagent
-system-config-printer-gnome
+system-config-printer
 terminator
 tracker
 tracker-extract

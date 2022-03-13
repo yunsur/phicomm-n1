@@ -400,7 +400,7 @@ POST_DETERMINE_CTHREADS
 
 if [[ $BETA == yes ]]; then
 	IMAGE_TYPE=nightly
-elif [[ $BETA != "yes" && $BUILD_ALL == yes && -n $GPG_PASS ]]; then
+elif [[ $BETA != "yes" && $BUILD_ALL == yes ]]; then
 	IMAGE_TYPE=stable
 else
 	IMAGE_TYPE=user-built
@@ -443,19 +443,30 @@ prepare_host
 if [[ $IGNORE_UPDATES != yes ]]; then
 	display_alert "Downloading sources" "" "info"
 	[[ -n $BOOTSOURCE ]] && fetch_from_repo "$BOOTSOURCE" "$BOOTDIR" "$BOOTBRANCH" "yes"
-	[[ -n $KERNELSOURCE ]] && fetch_from_repo "$KERNELSOURCE" "$KERNELDIR" "$KERNELBRANCH" "yes"
 	[[ -n $ATFSOURCE ]] && fetch_from_repo "$ATFSOURCE" "$ATFDIR" "$ATFBRANCH" "yes"
+
+	if [[ -n $KERNELSOURCE ]]; then
+		if $(declare -f var_origin_kernel >/dev/null); then
+			unset LINUXSOURCEDIR
+			LINUXSOURCEDIR="linux-mainline/$KERNEL_VERSION_LEVEL"
+			VAR_SHALLOW_ORIGINAL=var_origin_kernel
+			waiter_local_git "url=$KERNELSOURCE $KERNELSOURCENAME $KERNELBRANCH dir=$LINUXSOURCEDIR $KERNELSWITCHOBJ"
+			unset VAR_SHALLOW_ORIGINAL
+		else
+			fetch_from_repo "$KERNELSOURCE" "$KERNELDIR" "$KERNELBRANCH" "yes"
+		fi
+	fi
 
 	call_extension_method "fetch_sources_tools"  <<- 'FETCH_SOURCES_TOOLS'
 	*fetch host-side sources needed for tools and build*
 	Run early to fetch_from_repo or otherwise obtain sources for needed tools.
 	FETCH_SOURCES_TOOLS
-	
+
 	call_extension_method "build_host_tools"  <<- 'BUILD_HOST_TOOLS'
 	*build needed tools for the build, host-side*
 	After sources are fetched, build host-side tools needed for the build.
 	BUILD_HOST_TOOLS
-	
+
 	for option in $(tr ',' ' ' <<< "$CLEAN_LEVEL"); do
 		[[ $option != sources ]] && cleaning "$option"
 	done
@@ -517,7 +528,7 @@ overlayfs_wrapper "cleanup"
 
 
 # create board support package
-[[ -n "${RELEASE}" && ! -f "${DEB_STORAGE}/$RELEASE/${BSP_CLI_PACKAGE_FULLNAME}.deb" && "${REPOSITORY_INSTALL}" != *armbian-bsp-cli* ]] && create_board_package
+[[ -n "${RELEASE}" && ! -f "${DEB_STORAGE}/${BSP_CLI_PACKAGE_FULLNAME}.deb" && "${REPOSITORY_INSTALL}" != *armbian-bsp-cli* ]] && create_board_package
 
 
 
@@ -525,7 +536,11 @@ overlayfs_wrapper "cleanup"
 [[ -n "${RELEASE}" && "${DESKTOP_ENVIRONMENT}" && ! -f "${DEB_STORAGE}/$RELEASE/${CHOSEN_DESKTOP}_${REVISION}_all.deb" && "${REPOSITORY_INSTALL}" != *armbian-desktop* ]] && create_desktop_package
 [[ -n "${RELEASE}" && "${DESKTOP_ENVIRONMENT}" && ! -f "${DEB_STORAGE}/${RELEASE}/${BSP_DESKTOP_PACKAGE_FULLNAME}.deb"  && "${REPOSITORY_INSTALL}" != *armbian-bsp-desktop* ]] && create_bsp_desktop_package
 
-
+# skip image creation if exists. useful for CI when making a lot of images
+if [ "$IMAGE_PRESENT" == yes ] && ls "${FINALDEST}/${VENDOR}_${REVISION}_${BOARD^}_${RELEASE}_${BRANCH}_${VER/-$LINUXFAMILY/}${DESKTOP_ENVIRONMENT:+_$DESKTOP_ENVIRONMENT}"*.xz 1> /dev/null 2>&1; then
+	display_alert "Skipping image creation" "image already made - IMAGE_PRESENT is set" "wrn"
+	exit
+fi
 
 # build additional packages
 [[ $EXTERNAL_NEW == compile ]] && chroot_build_packages

@@ -172,25 +172,26 @@ install_common()
 
 	# create extlinux config file
 	if [[ $SRC_EXTLINUX == yes ]]; then
-
 		mkdir -p $SDCARD/boot/extlinux
 		cat <<-EOF > "$SDCARD/boot/extlinux/extlinux.conf"
-		LABEL ${VENDOR}
-		  LINUX /boot/$NAME_KERNEL
-		  INITRD /boot/$NAME_INITRD
+		label ${VENDOR}
+		  kernel /boot/$NAME_KERNEL
+		  initrd /boot/$NAME_INITRD
 	EOF
 		if [[ -n $BOOT_FDT_FILE ]]; then
-			echo "  FDT /boot/dtb/$BOOT_FDT_FILE" >> "$SDCARD/boot/extlinux/extlinux.conf"
+			if [[ $BOOT_FDT_FILE != "none" ]]; then
+				echo "  fdt /boot/dtb/$BOOT_FDT_FILE" >> "$SDCARD/boot/extlinux/extlinux.conf"
+			fi
 		else
-			echo "  FDTDIR /boot/dtb/" >> "$SDCARD/boot/extlinux/extlinux.conf"
+			echo "  fdtdir /boot/dtb/" >> "$SDCARD/boot/extlinux/extlinux.conf"
 		fi
 	else
 
 		if [[ "${BOOTCONFIG}" != "none" ]]; then
 			if [ -f "${USERPATCHES_PATH}/bootscripts/${bootscript_src}" ]; then
-				cp -R "${USERPATCHES_PATH}/bootscripts/${bootscript_src}" "${SDCARD}/boot/${bootscript_dst}"
+				cp "${USERPATCHES_PATH}/bootscripts/${bootscript_src}" "${SDCARD}/boot/${bootscript_dst}"
 			else
-				cp -R "${SRC}/config/bootscripts/${bootscript_src}" "${SDCARD}/boot/${bootscript_dst}"
+				cp "${SRC}/config/bootscripts/${bootscript_src}" "${SDCARD}/boot/${bootscript_dst}"
 			fi
 		fi
 
@@ -245,6 +246,9 @@ install_common()
 	# Prepare and export caching-related params common to all apt calls below, to maximize apt-cacher-ng usage
 	export APT_EXTRA_DIST_PARAMS=""
 	[[ $NO_APT_CACHER != yes ]] && APT_EXTRA_DIST_PARAMS="-o Acquire::http::Proxy=\"http://${APT_PROXY_ADDR:-localhost:3142}\" -o Acquire::http::Proxy::localhost=\"DIRECT\""
+
+	display_alert "Cleaning" "package lists"
+	chroot "${SDCARD}" /bin/bash -c "apt-get clean"
 
 	display_alert "Updating" "package lists"
 	chroot "${SDCARD}" /bin/bash -c "apt-get ${APT_EXTRA_DIST_PARAMS} update" >> "${DEST}"/${LOG_SUBPATH}/install.log 2>&1
@@ -327,7 +331,7 @@ POST_INSTALL_KERNEL_DEBS
 
 	# install board support packages
 	if [[ "${REPOSITORY_INSTALL}" != *bsp* ]]; then
-		install_deb_chroot "${DEB_STORAGE}/$RELEASE/${BSP_CLI_PACKAGE_FULLNAME}.deb" | tee "${DEST}"/${LOG_SUBPATH}/install.log 2>&1
+		install_deb_chroot "${DEB_STORAGE}/${BSP_CLI_PACKAGE_FULLNAME}.deb" | tee "${DEST}"/${LOG_SUBPATH}/install.log 2>&1
 	else
 		install_deb_chroot "${CHOSEN_ROOTFS}" "remote"
 	fi
@@ -398,8 +402,8 @@ POST_INSTALL_KERNEL_DEBS
 	# freeze armbian packages
 	if [[ $BSPFREEZE == yes ]]; then
 		display_alert "Freezing Armbian packages" "$BOARD" "info"
-		chroot "${SDCARD}" /bin/bash -c "apt-mark hold ${CHOSEN_KERNEL} \
-		${CHOSEN_KERNEL/image/headers} ${CHOSEN_KERNEL/image/dtb}" >> "${DEST}"/${LOG_SUBPATH}/install.log 2>&1
+		chroot "${SDCARD}" /bin/bash -c "apt-mark hold ${CHOSEN_KERNEL} ${CHOSEN_KERNEL/image/headers} \
+		linux-u-boot-${BOARD}-${BRANCH} ${CHOSEN_KERNEL/image/dtb}" >> "${DEST}"/${LOG_SUBPATH}/install.log 2>&1
 	fi
 
 	# remove deb files
@@ -581,6 +585,9 @@ FAMILY_TWEAKS
 	# build logo in any case
 	boot_logo
 
+	# disable MOTD for first boot - we want as clean 1st run as possible
+	chmod -x "${SDCARD}"/etc/update-motd.d/*
+
 }
 
 install_rclocal()
@@ -698,6 +705,12 @@ install_distribution_specific()
 
 	esac
 
+	# use list modules INITRAMFS
+	if [ -f "${SRC}"/config/modules/"${MODULES_INITRD}" ]; then
+		display_alert "Use file list modules INITRAMFS" "${MODULES_INITRD}"
+		sed -i "s/^MODULES=.*/MODULES=list/" "${SDCARD}"/etc/initramfs-tools/initramfs.conf
+		cat "${SRC}"/config/modules/"${MODULES_INITRD}" >> "${SDCARD}"/etc/initramfs-tools/modules
+	fi
 }
 
 

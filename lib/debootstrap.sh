@@ -362,7 +362,7 @@ create_rootfs_cache()
 		[[ ${EVALPIPE[0]} -ne 0 ]] && exit_with_error "Purging of residual Armbian packages failed"
 
 		# stage: remove downloaded packages
-		chroot $SDCARD /bin/bash -c "apt-get clean"
+		chroot $SDCARD /bin/bash -c "apt-get -y autoremove; apt-get clean"
 
 		# DEBUG: print free space
 		local freespace=$(LC_ALL=C df -h)
@@ -391,7 +391,7 @@ create_rootfs_cache()
 		umount_chroot "$SDCARD"
 
 		tar cp --xattrs --directory=$SDCARD/ --exclude='./dev/*' --exclude='./proc/*' --exclude='./run/*' --exclude='./tmp/*' \
-			--exclude='./sys/*' . | pv -p -b -r -s $(du -sb $SDCARD/ | cut -f1) -N "$display_name" | lz4 -5 -c > $cache_fname
+			--exclude='./sys/*' --exclude='./home/*' --exclude='./root/*' . | pv -p -b -r -s $(du -sb $SDCARD/ | cut -f1) -N "$display_name" | lz4 -5 -c > $cache_fname
 
 		# sign rootfs cache archive that it can be used for web cache once. Internal purposes
 		if [[ -n "${GPG_PASS}" && "${SUDO_USER}" ]]; then
@@ -551,26 +551,13 @@ PREPARE_IMAGE_SIZE
 		fi
 	else
 		local imagesize=$(( $rootfs_size + $OFFSET + $BOOTSIZE + $UEFISIZE + $EXTRA_ROOTFS_MIB_SIZE)) # MiB
-		case $ROOTFS_TYPE in
-			btrfs)
-				# Used for server images, currently no swap functionality, so disk space
-				if [[ $BTRFS_COMPRESSION == none ]]; then
-					local sdsize=$(bc -l <<< "scale=0; (($imagesize * 1.25) / 4 + 1) * 4")
-				else
-					# requirements are rather low since rootfs gets filled with compress-force=zlib
-					local sdsize=$(bc -l <<< "scale=0; (($imagesize * 0.8) / 4 + 1) * 4")
-				fi
-				;;
-			*)
-				# Hardcoded overhead +25% is needed for desktop images,
-				# for CLI it could be lower. Align the size up to 4MiB
-				if [[ $BUILD_DESKTOP == yes ]]; then
-					local sdsize=$(bc -l <<< "scale=0; ((($imagesize * 1.30) / 1 + 0) / 4 + 1) * 4")
-				else
-					local sdsize=$(bc -l <<< "scale=0; ((($imagesize * 1.25) / 1 + 0) / 4 + 1) * 4")
-				fi
-				;;
-		esac
+		# Hardcoded overhead +25% is needed for desktop images,
+		# for CLI it could be lower. Align the size up to 4MiB
+		if [[ $BUILD_DESKTOP == yes ]]; then
+			local sdsize=$(bc -l <<< "scale=0; ((($imagesize * 1.30) / 1 + 0) / 4 + 1) * 4")
+		else
+			local sdsize=$(bc -l <<< "scale=0; ((($imagesize * 1.25) / 1 + 0) / 4 + 1) * 4")
+		fi
 	fi
 
 	# stage: create blank image
@@ -765,7 +752,7 @@ PREPARE_IMAGE_SIZE
 
 	# create extlinux config
 	if [[ -f $SDCARD/boot/extlinux/extlinux.conf ]]; then
-		echo "  APPEND root=$rootfs $SRC_CMDLINE $MAIN_CMDLINE" >> $SDCARD/boot/extlinux/extlinux.conf
+		echo "  append root=$rootfs $SRC_CMDLINE $MAIN_CMDLINE" >> $SDCARD/boot/extlinux/extlinux.conf
 		[[ -f $SDCARD/boot/armbianEnv.txt ]] && rm $SDCARD/boot/armbianEnv.txt
 	fi
 
@@ -878,7 +865,12 @@ PRE_UPDATE_INITRAMFS
 	display_alert "Mount point" "$(echo -e "$freespace" | grep $MOUNT | head -1 | awk '{print $5}')" "info"
 
 	# stage: write u-boot, unless the deb is not there, which would happen if BOOTCONFIG=none
-	[[ -f "${DEB_STORAGE}"/${CHOSEN_UBOOT}_${REVISION}_${ARCH}.deb ]] &&  write_uboot $LOOP
+	# exception: if we use the one from repository, install version which was downloaded from repo
+	if [[ -f "${DEB_STORAGE}"/${CHOSEN_UBOOT}_${REVISION}_${ARCH}.deb ]]; then
+		 write_uboot $LOOP
+	elif [[ "${UPSTREM_VER}" ]]; then
+		 write_uboot $LOOP
+	fi
 
 	# fix wrong / permissions
 	chmod 755 $MOUNT
@@ -913,21 +905,6 @@ POST_UMOUNT_FINAL_IMAGE
 
 	mkdir -p $DESTIMG
 	mv ${SDCARD}.raw $DESTIMG/${version}.img
-
-	FINALDEST=$DEST/images
-	[[ "${BUILD_ALL}" == yes ]] && MAKE_FOLDERS="yes"
-
-	if [[ "${MAKE_FOLDERS}" == yes ]]; then
-		if [[ "$RC" == yes ]]; then
-			FINALDEST=$DEST/images/"${BOARD}"/RC
-		elif [[ "$BETA" == yes ]]; then
-			FINALDEST=$DEST/images/"${BOARD}"/nightly
-		else
-			FINALDEST=$DEST/images/"${BOARD}"/archive
-		fi
-		install -d ${FINALDEST}
-	fi
-
 
 	# custom post_build_image_modify hook to run before fingerprinting and compression
 	[[ $(type -t post_build_image_modify) == function ]] && display_alert "Custom Hook Detected" "post_build_image_modify" "info" && post_build_image_modify "${DESTIMG}/${version}.img"

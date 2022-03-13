@@ -14,8 +14,8 @@
 # exit_with_error
 # get_package_list_hash
 # create_sources_list
-# clean_up_repo
-# waiter_local_repo
+# clean_up_git
+# waiter_local_git
 # fetch_from_repo
 # improved_git
 # display_alert
@@ -24,10 +24,13 @@
 # addtorepo
 # repo-remove-old-packages
 # wait_for_package_manager
+# install_pkg_deb
 # prepare_host_basic
 # prepare_host
 # webseed
 # download_and_verify
+# show_developer_warning
+# show_checklist_variables
 
 
 # cleaning <target>
@@ -260,6 +263,7 @@ create_sources_list()
 
 #
 # This function retries Git operations to avoid failure in case remote is borked
+# If the git team needs to call a remote server, use this function.
 #
 improved_git()
 {
@@ -280,26 +284,35 @@ improved_git()
 
 }
 
-clean_up_repo ()
+clean_up_git ()
 {
 	local target_dir=$1
 
 	# Files that are not tracked by git and were added
 	# when the patch was applied must be removed.
-	improved_git -C $target_dir clean -qdf
+	git -C $target_dir clean -qdf
 
 	# Return the files that are tracked by git to the initial state.
-	improved_git -C $target_dir checkout -qf HEAD
+	git -C $target_dir checkout -qf HEAD
 }
 
-# used : waiter_local_repo arg1='value' arg2:'value'
-#		 waiter_local_repo \
+# used : waiter_local_git arg1='value' arg2:'value'
+#		 waiter_local_git \
 #			url='https://github.com/megous/linux' \
 #			name='megous' \
 #			dir='linux-mainline/5.14' \
 #			branch='orange-pi-5.14' \
 #			obj=<tag|commit> or tag:$tag ...
-waiter_local_repo ()
+# An optional parameter for switching to a git object such as a tag, commit,
+# or a specific branch. The object must exist in the local repository.
+# This optional parameter takes precedence. If it is specified, then
+# the commit state corresponding to the specified git object will be extracted
+# to the working directory. Otherwise, the commit corresponding to the top of
+# the branch will be extracted.
+# The settings for the kernel variables of the original kernel
+# VAR_SHALLOW_ORIGINAL=var_origin_kernel must be in the main script
+# before calling the function
+waiter_local_git ()
 {
 	for arg in $@;do
 
@@ -332,14 +345,7 @@ waiter_local_repo ()
 	mkdir -p $work_dir
 	cd $work_dir || exit_with_error
 
-	display_alert "Checking git sources" "$dir $name/$branch" "info"
-
-	# Check the exception for 5.15 sunxi. We will remove this after a while.
-	if [ "$dir" == "linux-mainline/5.15" ] && \
-	   [ "$(git remote show | grep megous)" == "megous" ]; then
-			display_alert "Remove mistakenly created and excessively large" "$dir" "info"
-			rm -rf .git ./*
-	fi
+	display_alert "Checking git sources" "$dir $url$name/$branch" "info"
 
 	if [ "$(git rev-parse --git-dir 2>/dev/null)" != ".git" ]; then
 		git init -q .
@@ -350,15 +356,26 @@ waiter_local_repo ()
 			$VAR_SHALLOW_ORIGINAL
 
 			display_alert "Add original git sources" "$dir $name/$branch" "info"
-			if [ "$(git ls-remote -h $url $branch | \
+			if [ "$(improved_git ls-remote -h $url $branch | \
 				awk -F'/' '{if (NR == 1) print $NF}')" != "$branch" ];then
 				display_alert "Bad $branch for $url in $VAR_SHALLOW_ORIGINAL"
 				exit 177
 			fi
 
 			git remote add -t $branch $name $url
-			git fetch --shallow-exclude=$start_tag $name
-			git fetch --deepen=1 $name
+
+			# Handle an exception if the initial tag is the top of the branch
+			# As v5.16 == HEAD
+			if [ "${start_tag}.1" == "$(improved_git ls-remote -t $url ${start_tag}.1 | \
+					awk -F'/' '{ print $NF }')" ]
+			then
+				improved_git fetch --shallow-exclude=$start_tag $name
+			else
+				improved_git fetch --depth 1 $name
+			fi
+			improved_git fetch --deepen=1 $name
+			# For a shallow clone, this works quickly and saves space.
+			git gc
 			)
 
 			[ "$?" == "177" ] && exit
@@ -368,7 +385,7 @@ waiter_local_repo ()
 	files_for_clean="$(git status -s | wc -l)"
 	if [ "$files_for_clean" != "0" ];then
 		display_alert " Cleaning .... " "$files_for_clean files"
-		clean_up_repo $work_dir
+		clean_up_git $work_dir
 	fi
 
 	if [ "$name" != "$(git remote show | grep $name)" ];then
@@ -377,7 +394,7 @@ waiter_local_repo ()
 
 	if ! $offline; then
 		for t_name in $(git remote show);do
-			git fetch $t_name
+			improved_git fetch $t_name
 		done
 	fi
 
@@ -439,15 +456,6 @@ fetch_from_repo()
 	# Set GitHub mirror before anything else touches $url
 	url=${url//'https://github.com/'/$GITHUB_SOURCE}
 
-	if [ "$dir" == "linux-mainline" ] && [[ "$LINUXFAMILY" == sunxi* ]]; then
-		unset LINUXSOURCEDIR
-		LINUXSOURCEDIR="linux-mainline/$KERNEL_VERSION_LEVEL"
-		VAR_SHALLOW_ORIGINAL=var_origin_kernel
-		waiter_local_repo "url=$url $KERNELSOURCENAME $KERNELBRANCH dir=$LINUXSOURCEDIR $KERNELSWITCHOBJ"
-		unset VAR_SHALLOW_ORIGINAL
-		return
-	fi
-
 	# The 'offline' variable must always be set to 'true' or 'false'
 	if [ "$OFFLINE_WORK" == "yes" ]; then
 		local offline=true
@@ -485,16 +493,16 @@ fetch_from_repo()
 	#  Check the folder as a git repository.
 	#  Then the target URL matches the local URL.
 
-	if [[ "$(improved_git rev-parse --git-dir 2>/dev/null)" == ".git" && \
-		  "$url" != *"$(improved_git remote get-url origin | sed 's/^.*@//' | sed 's/^.*\/\///' 2>/dev/null)" ]]; then
+	if [[ "$(git rev-parse --git-dir 2>/dev/null)" == ".git" && \
+		  "$url" != *"$(git remote get-url origin | sed 's/^.*@//' | sed 's/^.*\/\///' 2>/dev/null)" ]]; then
 		display_alert "Remote URL does not match, removing existing local copy"
 		rm -rf .git ./*
 	fi
 
-	if [[ "$(improved_git rev-parse --git-dir 2>/dev/null)" != ".git" ]]; then
+	if [[ "$(git rev-parse --git-dir 2>/dev/null)" != ".git" ]]; then
 		display_alert "Creating local copy"
-		improved_git init -q .
-		improved_git remote add origin "${url}"
+		git init -q .
+		git remote add origin "${url}"
 		# Here you need to upload from a new address
 		offline=false
 	fi
@@ -556,33 +564,33 @@ fetch_from_repo()
 
 				display_alert "Commit checkout not supported on this repository. Doing full clone." "" "wrn"
 				improved_git pull
-				improved_git checkout -fq "${ref_name}"
-				display_alert "Checkout out to" "$(improved_git --no-pager log -2 --pretty=format:"$ad%s [%an]" | head -1)" "info"
+				git checkout -fq "${ref_name}"
+				display_alert "Checkout out to" "$(git --no-pager log -2 --pretty=format:"$ad%s [%an]" | head -1)" "info"
 
 			else
 
 				display_alert "Checking out"
-				improved_git checkout -f -q FETCH_HEAD
-				improved_git clean -qdf
+				git checkout -f -q FETCH_HEAD
+				git clean -qdf
 
 			fi
 		else
 
 			display_alert "Checking out"
-			improved_git checkout -f -q FETCH_HEAD
-			improved_git clean -qdf
+			git checkout -f -q FETCH_HEAD
+			git clean -qdf
 
 		fi
-	elif [[ -n $(improved_git status -uno --porcelain --ignore-submodules=all) ]]; then
+	elif [[ -n $(git status -uno --porcelain --ignore-submodules=all) ]]; then
 		# working directory is not clean
-		display_alert " Cleaning .... " "$(improved_git status -s | wc -l) files"
+		display_alert " Cleaning .... " "$(git status -s | wc -l) files"
 
 		# Return the files that are tracked by git to the initial state.
-		improved_git checkout -f -q HEAD
+		git checkout -f -q HEAD
 
 		# Files that are not tracked by git and were added
 		# when the patch was applied must be removed.
-		improved_git clean -qdf
+		git clean -qdf
 	else
 		# working directory is clean, nothing to do
 		display_alert "Up to date"
@@ -591,11 +599,11 @@ fetch_from_repo()
 	if [[ -f .gitmodules ]]; then
 		display_alert "Updating submodules" "" "ext"
 		# FML: http://stackoverflow.com/a/17692710
-		for i in $(improved_git config -f .gitmodules --get-regexp path | awk '{ print $2 }'); do
+		for i in $(git config -f .gitmodules --get-regexp path | awk '{ print $2 }'); do
 			cd "${SRC}/cache/sources/${workdir}" || exit
 			local surl sref
-			surl=$(improved_git config -f .gitmodules --get "submodule.$i.url")
-			sref=$(improved_git config -f .gitmodules --get "submodule.$i.branch")
+			surl=$(git config -f .gitmodules --get "submodule.$i.url")
+			sref=$(git config -f .gitmodules --get "submodule.$i.branch")
 			if [[ -n $sref ]]; then
 				sref="branch:$sref"
 			else
@@ -648,7 +656,7 @@ fingerprint_image()
 {
 	cat <<-EOF > "${1}"
 	--------------------------------------------------------------------------------
-	Title:			${VENDOR} $REVISION ${BOARD^} $DISTRIBUTION $RELEASE $BRANCH
+	Title:			${VENDOR} $REVISION ${BOARD^} $BRANCH
 	Kernel:			Linux $VER
 	Build date:		$(date +'%d.%m.%Y')
 	Maintainer:		$MAINTAINER <$MAINTAINERMAIL>
@@ -706,7 +714,7 @@ display_alert "Building kernel splash logo" "$RELEASE" "info"
 	THROBBER_HEIGHT=$(identify $THROBBER | head -1 | cut -d " " -f 3 | cut -d x -f 2)
 	convert -alpha remove -background "#000000"	$LOGO "${SDCARD}"/tmp/logo.rgb
 	convert -alpha remove -background "#000000" $THROBBER "${SDCARD}"/tmp/throbber%02d.rgb
-	${SRC}/packages/blobs/splash/bootsplash-packer \
+	$PKG_PREFIX${SRC}/packages/blobs/splash/bootsplash-packer \
 	--bg_red 0x00 \
 	--bg_green 0x00 \
 	--bg_blue 0x00 \
@@ -1184,6 +1192,114 @@ wait_for_package_manager()
 
 
 
+# Installing debian packages in the armbian build system.
+# The function accepts four optional parameters:
+# autoupdate - If the installation list is not empty then update first.
+# upgrade, clean - the same name for apt
+# verbose - detailed log for the function
+#
+# list="pkg1 pkg2 pkg3 pkgbadname pkg-1.0 | pkg-2.0 pkg5 (>= 9)"
+# install_pkg_deb upgrade verbose $list
+# or
+# install_pkg_deb autoupdate $list
+#
+# If the package has a bad name, we will see it in the log file.
+# If there is an LOG_OUTPUT_FILE variable and it has a value as
+# the full real path to the log file, then all the information will be there.
+#
+# The LOG_OUTPUT_FILE variable must be defined in the calling function
+# before calling the install_pkg_deb function and unset after.
+#
+install_pkg_deb ()
+{
+	local list=""
+	local log_file
+	local for_install
+	local need_autoup=false
+	local need_upgrade=false
+	local need_clean=false
+	local need_verbose=false
+	local _line=${BASH_LINENO[0]}
+	local _function=${FUNCNAME[1]}
+	local _file=$(basename "${BASH_SOURCE[1]}")
+	local tmp_file=$(mktemp /tmp/install_log_XXXXX)
+	export DEBIAN_FRONTEND=noninteractive
+
+	list=$(
+	for p in $*;do
+		case $p in
+			autoupdate) need_autoup=true; continue ;;
+			upgrade) need_upgrade=true; continue ;;
+			clean) need_clean=true; continue ;;
+			verbose) need_verbose=true; continue ;;
+			\||\(*|*\)) continue ;;
+		esac
+		echo " $p"
+	done
+	)
+
+	if [ -d $(dirname $LOG_OUTPUT_FILE) ]; then
+		log_file=${LOG_OUTPUT_FILE}
+	else
+		log_file="${SRC}/output/${LOG_SUBPATH}/install.log"
+	fi
+
+	# This is necessary first when there is no apt cache.
+	if $need_upgrade; then
+		apt-get -q update || echo "apt cannot update" >>$tmp_file
+		apt-get -y upgrade || echo "apt cannot upgrade" >>$tmp_file
+	fi
+
+	# If the package is not installed, check the latest
+	# up-to-date version in the apt cache.
+	# Exclude bad package names and send a message to the log.
+	for_install=$(
+	for p in $list;do
+	  if $(dpkg-query -W -f '${db:Status-Abbrev}' $p |& awk '/ii/{exit 1}');then
+		apt-cache  show $p -o APT::Cache::AllVersions=no |& \
+		awk -v p=$p -v tmp_file=$tmp_file \
+		'/^Package:/{print $2} /^E:/{print "Bad package name: ",p >>tmp_file}'
+	  fi
+	done
+	)
+
+	# This information should be logged.
+	if [ -s $tmp_file ]; then
+		echo -e "\nInstalling packages in function: $_function" "[$_file:$_line]" \
+		>>$log_file
+		echo -e "\nIncoming list:" >>$log_file
+		printf "%-30s %-30s %-30s %-30s\n" $list >>$log_file
+		echo "" >>$log_file
+		cat $tmp_file >>$log_file
+	fi
+
+	if [ -n "$for_install" ]; then
+		if $need_autoup; then
+			apt-get -q update
+			apt-get -y upgrade
+		fi
+		apt-get install -qq -y --no-install-recommends $for_install
+		echo -e "\nPackages installed:" >>$log_file
+		dpkg-query -W \
+		  -f '${binary:Package;-27} ${Version;-23}\n' \
+		  $for_install >>$log_file
+
+	fi
+
+	# We will show the status after installation all listed
+	if $need_verbose; then
+		echo -e "\nstatus after installation:" >>$log_file
+		dpkg-query -W \
+		  -f '${binary:Package;-27} ${Version;-23} [ ${Status} ]\n' \
+		  $list >>$log_file
+	fi
+
+	if $need_clean;then apt-get clean; fi
+	rm $tmp_file
+}
+
+
+
 # prepare_host_basic
 #
 # * installs only basic packages
@@ -1210,7 +1326,7 @@ prepare_host_basic()
 
 	if [[ -n $install_pack ]]; then
 		display_alert "Installing basic packages" "$install_pack"
-		apt-get -qq update && apt-get install -qq -y --no-install-recommends $install_pack
+		sudo bash -c "apt-get -qq update && apt-get install -qq -y --no-install-recommends $install_pack"
 	fi
 
 }
@@ -1234,17 +1350,6 @@ prepare_host()
 	else
 		local offline=false
 	fi
-# build aarch64
-  if [[ $(dpkg --print-architecture) != arm64 ]]; then
-
-	if [[ $(dpkg --print-architecture) != amd64 ]]; then
-		display_alert "Please read documentation to set up proper compilation environment"
-		display_alert "https://www.armbian.com/using-armbian-tools/"
-		exit_with_error "Running this tool on non x86_64 build host is not supported"
-	fi
-
-# build aarch64
-  fi
 
 	# wait until package manager finishes possible system maintanace
 	wait_for_package_manager
@@ -1260,31 +1365,34 @@ prepare_host()
 	# packages list for host
 	# NOTE: please sync any changes here with the Dockerfile and Vagrantfile
 
-# build aarch64
+	local hostdeps="acl aptly aria2 bc binfmt-support bison btrfs-progs       \
+	build-essential  ca-certificates ccache cpio cryptsetup curl              \
+	debian-archive-keyring debian-keyring debootstrap device-tree-compiler    \
+	dialog dirmngr dosfstools dwarves f2fs-tools fakeroot flex gawk           \
+	gcc-arm-linux-gnueabihf gdisk gnupg1 gpg imagemagick jq kmod libbison-dev \
+	libc6-dev-armhf-cross libelf-dev libfdt-dev libfile-fcntllock-perl        \
+	libfl-dev liblz4-tool libncurses-dev libpython2.7-dev libssl-dev          \
+	libusb-1.0-0-dev linux-base locales lzop ncurses-base ncurses-term        \
+	nfs-kernel-server ntpdate p7zip-full parted patchutils pigz pixz          \
+	pkg-config pv python3-dev python3-distutils qemu-user-static rsync swig   \
+	systemd-container u-boot-tools udev unzip uuid-dev wget whiptail zip      \
+	zlib1g-dev"
+
   if [[ $(dpkg --print-architecture) == amd64 ]]; then
 
-	local hostdeps="wget ca-certificates device-tree-compiler pv bc lzop zip binfmt-support build-essential ccache debootstrap ntpdate \
-	gawk gcc-arm-linux-gnueabihf qemu-user-static u-boot-tools uuid-dev zlib1g-dev unzip libusb-1.0-0-dev fakeroot \
-	parted pkg-config libncurses5-dev whiptail debian-keyring debian-archive-keyring f2fs-tools libfile-fcntllock-perl rsync libssl-dev \
-	nfs-kernel-server btrfs-progs ncurses-term p7zip-full kmod dosfstools libc6-dev-armhf-cross imagemagick \
-	curl patchutils liblz4-tool libpython2.7-dev linux-base swig aptly acl python3-dev python3-distutils \
-	locales ncurses-base pixz dialog systemd-container udev libfdt-dev libelf-dev lib32stdc++6 libc6-i386 lib32ncurses5 lib32tinfo5 \
-	bison libbison-dev flex libfl-dev cryptsetup gpg gnupg1 cpio aria2 pigz dirmngr python3-distutils jq distcc gdisk dwarves"
+	hostdeps+=" distcc lib32ncurses-dev lib32stdc++6 libc6-i386"
+	grep -q i386 <(dpkg --print-foreign-architectures) || dpkg --add-architecture i386
 
-# build aarch64
+  elif [[ $(dpkg --print-architecture) == arm64 ]]; then
+
+	hostdeps+=" gcc-arm-linux-gnueabi gcc-arm-none-eabi libc6 libc6-amd64-cross qemu"
+
   else
 
-	local hostdeps="wget ca-certificates device-tree-compiler pv bc lzop zip binfmt-support build-essential ccache debootstrap ntpdate \
-	gawk gcc-arm-linux-gnueabihf gcc-arm-linux-gnueabi gcc-arm-none-eabi \
-	qemu-user-static u-boot-tools uuid-dev zlib1g-dev unzip libusb-1.0-0-dev fakeroot \
-	parted pkg-config libncurses5-dev whiptail debian-keyring debian-archive-keyring f2fs-tools libfile-fcntllock-perl rsync libssl-dev \
-	nfs-kernel-server btrfs-progs ncurses-term p7zip-full kmod dosfstools libc6-amd64-cross libc6-dev-armhf-cross imagemagick \
-	curl patchutils liblz4-tool libpython2.7-dev linux-base swig aptly acl python3-dev \
-	locales ncurses-base pixz dialog systemd-container udev libfdt-dev libelf-dev libc6 qemu \
-	bison libbison-dev flex libfl-dev cryptsetup gpg gnupg1 cpio aria2 pigz \
-	dirmngr python3-distutils jq gdisk dwarves"
+	display_alert "Please read documentation to set up proper compilation environment"
+	display_alert "https://www.armbian.com/using-armbian-tools/"
+	exit_with_error "Running this tool on non x86_64 build host is not supported"
 
-# build aarch64
   fi
 
 	# Add support for Ubuntu 20.04, 21.04 and Mint 20.x
@@ -1320,17 +1428,6 @@ prepare_host()
 		fi
 	fi
 
-# build aarch64
-  if [[ $(dpkg --print-architecture) == amd64 ]]; then
-
-	if [[ -z $HOSTRELEASE || $HOSTRELEASE =~ ^(focal|debbie|buster|bullseye|impish|hirsute|ulyana|ulyssa|uma)$ ]]; then
-	    hostdeps="${hostdeps/lib32ncurses5 lib32tinfo5/lib32ncurses6 lib32tinfo6}"
-	fi
-
-	grep -q i386 <(dpkg --print-foreign-architectures) || dpkg --add-architecture i386
-# build aarch64
-  fi
-
 	if systemd-detect-virt -q -c; then
 		display_alert "Running in container" "$(systemd-detect-virt)" "info"
 		# disable apt-cacher unless NO_APT_CACHER=no is not specified explicitly
@@ -1351,12 +1448,10 @@ prepare_host()
 	# Skip verification if you are working offline
 	if ! $offline; then
 
-	# warning: apt-cacher-ng will fail if installed and used both on host and in container/chroot environment with shared network
+	# warning: apt-cacher-ng will fail if installed and used both on host and in
+	# container/chroot environment with shared network
 	# set NO_APT_CACHER=yes to prevent installation errors in such case
-	if [[ $NO_APT_CACHER != yes ]]; then hostdeps="$hostdeps apt-cacher-ng"; fi
-
-	local deps=()
-	local installed=$(dpkg-query -W -f '${db:Status-Abbrev}|${binary:Package}\n' '*' 2>/dev/null | grep '^ii' | awk -F '|' '{print $2}' | cut -d ':' -f 1)
+	if [[ $NO_APT_CACHER != yes ]]; then hostdeps+=" apt-cacher-ng"; fi
 
 	export EXTRA_BUILD_DEPS=""
 	call_extension_method "add_host_dependencies" <<- 'ADD_HOST_DEPENDENCIES'
@@ -1364,39 +1459,17 @@ prepare_host()
 	you can add packages to install, space separated, to ${EXTRA_BUILD_DEPS} here.
 	ADD_HOST_DEPENDENCIES
 
-	for packet in $hostdeps ${EXTRA_BUILD_DEPS}; do
-		if ! grep -q -x -e "$packet" <<< "$installed"; then deps+=("$packet"); fi
-	done
+	if [ -n "${EXTRA_BUILD_DEPS}" ]; then hostdeps+=" ${EXTRA_BUILD_DEPS}"; fi
 
-	# distribution packages are buggy, download from author
+	display_alert "Installing build dependencies"
+	# don't prompt for apt cacher selection
+	sudo echo "apt-cacher-ng    apt-cacher-ng/tunnelenable      boolean false" | sudo debconf-set-selections
 
-# build aarch64
-  if [[ $(dpkg --print-architecture) == amd64 ]]; then
+	LOG_OUTPUT_FILE="${DEST}"/${LOG_SUBPATH}/hostdeps.log
+	install_pkg_deb "autoupdate $hostdeps"
+	unset LOG_OUTPUT_FILE
 
-	if [[ ! -f /etc/apt/sources.list.d/aptly.list ]]; then
-		display_alert "Updating from external repository" "aptly" "info"
-		if [ x"" != x"${http_proxy}" ]; then
-			curl -fsSL -x $http_proxy https://www.aptly.info/pubkey.txt | gpg --dearmor | tee /usr/share/keyrings/aptly-archive-keyring.gpg >/dev/null 2>&1
-		else
-			curl -fsSL https://www.aptly.info/pubkey.txt | gpg --dearmor | tee /usr/share/keyrings/aptly-archive-keyring.gpg >/dev/null 2>&1
-		fi
-		echo "deb [signed-by=/usr/share/keyrings/aptly-archive-keyring.gpg] http://repo.aptly.info/ nightly main" > /etc/apt/sources.list.d/aptly.list
-	else
-		sed "s/squeeze/nightly/" -i /etc/apt/sources.list.d/aptly.list
-	fi
-
-# build aarch64
-  fi
-
-	if [[ ${#deps[@]} -gt 0 ]]; then
-		display_alert "Installing build dependencies"
-		# don't prompt for apt cacher selection
-		sudo echo "apt-cacher-ng    apt-cacher-ng/tunnelenable      boolean false" | sudo debconf-set-selections
-		apt-get -q update
-		apt-get -y upgrade
-		apt-get -q -y --no-install-recommends install -o Dpkg::Options::='--force-confold' "${deps[@]}" | tee -a "${DEST}"/${LOG_SUBPATH}/hostdeps.log
-		update-ccache-symlinks
-	fi
+	update-ccache-symlinks
 
 	export FINAL_HOST_DEPS="$hostdeps ${EXTRA_BUILD_DEPS}"
 	call_extension_method "host_dependencies_ready" <<- 'HOST_DEPENDENCIES_READY'
@@ -1412,16 +1485,6 @@ prepare_host()
 		display_alert "Syncing clock" "host" "info"
 		ntpdate -s "${NTP_SERVER:-pool.ntp.org}"
 	fi
-
-# build aarch64
-  if [[ $(dpkg --print-architecture) == amd64 ]]; then
-
-	if [[ $(dpkg-query -W -f='${db:Status-Abbrev}\n' 'zlib1g:i386' 2>/dev/null) != *ii* ]]; then
-		apt-get install -qq -y --no-install-recommends zlib1g:i386 >/dev/null 2>&1
-	fi
-
-# build aarch64
-  fi
 
 	# create directory structure
 	mkdir -p "${SRC}"/{cache,output} "${USERPATCHES_PATH}"
@@ -1484,7 +1547,9 @@ prepare_host()
 		else
 			display_alert "Ignoring toolchains" "SKIP_EXTERNAL_TOOLCHAINS: ${SKIP_EXTERNAL_TOOLCHAINS}" "info"
 		fi
-	fi # check offline
+	fi
+
+  fi # check offline
 
 	# enable arm binary format so that the cross-architecture chroot environment will work
 	if [[ $KERNEL_ONLY != yes ]]; then
@@ -1495,9 +1560,6 @@ prepare_host()
 			test -e /proc/sys/fs/binfmt_misc/qemu-aarch64 || update-binfmts --enable qemu-aarch64
 		fi
 	fi
-
-# build aarch64
-  fi
 
 	[[ ! -f "${USERPATCHES_PATH}"/customize-image.sh ]] && cp "${SRC}"/config/templates/customize-image.sh.template "${USERPATCHES_PATH}"/customize-image.sh
 
@@ -1527,23 +1589,22 @@ function webseed ()
 {
 	# list of mirrors that host our files
 	unset text
-	WEBSEED=($(curl -s https://redirect.armbian.com/mirrors | jq '.[] |.[] | values' | grep https | awk '!a[$0]++'))
+	# Hardcoded to EU mirrors since
+	local CCODE=$(curl -s redirect.armbian.com/geoip | jq '.continent.code' -r)
+	WEBSEED=($(curl -s https://redirect.armbian.com/mirrors | jq -r '.'${CCODE}' | .[] | values'))
 	# aria2 simply split chunks based on sources count not depending on download speed
 	# when selecting china mirrors, use only China mirror, others are very slow there
 	if [[ $DOWNLOAD_MIRROR == china ]]; then
 		WEBSEED=(
-		"https://mirrors.tuna.tsinghua.edu.cn/armbian-releases/"
+		https://mirrors.tuna.tsinghua.edu.cn/armbian-releases/
 		)
 	elif [[ $DOWNLOAD_MIRROR == bfsu ]]; then
 		WEBSEED=(
-		"https://mirrors.bfsu.edu.cn/armbian-releases/"
+		https://mirrors.bfsu.edu.cn/armbian-releases/
 		)
 	fi
 	for toolchain in ${WEBSEED[@]}; do
-		# use only live, tnahosting return ok also when file is absent
-		if [[ $(wget -S --spider "${toolchain}${1}" 2>&1 >/dev/null | grep 'HTTP/1.1 200 OK') && ${toolchain} != *tnahosting* ]]; then
-			text="${text} ${toolchain}${1}"
-		fi
+		text="${text} ${toolchain}${1}"
 	done
 	text="${text:1}"
 	echo "${text}"
@@ -1632,7 +1693,7 @@ download_and_verify()
 	# direct download if torrent fails
 	if [[ ! -f "${localdir}/${filename}.complete" ]]; then
 		if [[ ! `timeout 10 curl --head --fail --silent ${server}${remotedir}/${filename} 2>&1 >/dev/null` ]]; then
-			display_alert "downloading from $(echo $server | cut -d'/' -f3 | cut -d':' -f1) using http(s) network" "$filename"
+			display_alert "downloading using http(s) network" "$filename"
 			aria2c --download-result=hide --rpc-save-upload-metadata=false --console-log-level=error \
 			--dht-file-path="${SRC}"/cache/.aria2/dht.dat --disable-ipv6=true --summary-interval=0 --auto-file-renaming=false --dir="${localdir}" ${server}${remotedir}/${filename} $(webseed "${remotedir}/${filename}") -o "${filename}"
 			# mark complete
@@ -1748,7 +1809,7 @@ show_checklist_variables ()
 	for var in $checklist;do
 		eval pval=\$$var
 		echo -e "\n$var =:" >>$log_file
-		if [ $(echo "$pval" | gawk -F"/" '{print NF}') -ge 4 ];then
+		if [ $(echo "$pval" | awk -F"/" '{print NF}') -ge 4 ];then
 			printf "%s\n" $pval >>$log_file
 		else
 			printf "%-30s %-30s %-30s %-30s\n" $pval >>$log_file

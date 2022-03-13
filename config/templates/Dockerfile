@@ -10,20 +10,12 @@ RUN apt-get update && apt-get -y install \
     && rm -rf /var/lib/apt/lists/*
 RUN sh -c " \
     if [ $(dpkg --print-architecture) = amd64 ]; then \
-        if [ x'' != x$http_proxy ]; then \
-            curl -fsSL -x $http_proxy https://www.aptly.info/pubkey.txt | gpg --dearmor | tee /usr/share/keyrings/aptly-archive-keyring.gpg >/dev/null 2>&1; \
-        else \
-            curl -fsSL https://www.aptly.info/pubkey.txt | gpg --dearmor | tee /usr/share/keyrings/aptly-archive-keyring.gpg >/dev/null 2>&1; \
-        fi; \
-        echo \"deb [signed-by=/usr/share/keyrings/aptly-archive-keyring.gpg] http://repo.aptly.info/ nightly main\" > /etc/apt/sources.list.d/aptly.list; \
-        dpkg --add-architecture i386 \
-        && apt-get update \
+        apt-get update \
         && apt-get install -y --no-install-recommends \
         lib32ncurses6 \
         lib32stdc++6 \
         lib32tinfo6 \
-        libc6-i386 \
-        zlib1g:i386; \
+        libc6-i386; \
     fi"
 RUN apt-get update \
     && apt-get -y upgrade \
@@ -66,7 +58,8 @@ RUN apt-get update \
        libbison-dev \
        libc6-amd64-cross \
        libc6-dev-armhf-cross \
-       libfdt-dev libelf-dev \
+       libfdt-dev \
+       libelf-dev \
        libfile-fcntllock-perl \
        libfl-dev \
        liblz4-tool \
@@ -126,6 +119,13 @@ RUN sed -i 's/\(^STATDOPTS=\).*/\1"--port 32765 --outgoing-port 32766"/' /etc/de
     && sed -i 's/\(^RPCMOUNTDOPTS=\).*/\1"--port 32767"/' /etc/default/nfs-kernel-server
 
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8' TERM=screen
-WORKDIR /root/armbian
-LABEL org.opencontainers.image.source="https://github.com/yunsur/phicomm-n1"
-ENTRYPOINT [ "/bin/bash", "/root/armbian/compile.sh" ]
+WORKDIR /root/phicomm-n1
+LABEL org.opencontainers.image.source="https://github.com/yunsur/phicomm-n1/blob/main/config/templates/Dockerfile" \
+    org.opencontainers.image.url="https://github.com/yunsur/phicomm-n1/pkgs/container/build"  \
+    org.opencontainers.image.vendor="yunsur" \
+    org.opencontainers.image.title="Armbian build framework" \
+    org.opencontainers.image.description="Custom Linux build framework" \
+    org.opencontainers.image.documentation="https://docs.armbian.com" \
+    org.opencontainers.image.authors="Igor Pecovnik" \
+    org.opencontainers.image.licenses="GPL-2.0"
+ENTRYPOINT [ "/bin/bash", "/root/phicomm-n1/compile.sh" ]
