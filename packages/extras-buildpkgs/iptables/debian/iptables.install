@@ -1,9 +1,0 @@
-iptables/iptables-apply		usr/sbin
-iptables/iptables.xslt usr/share/iptables
-usr/lib/*/xtables/libarpt_*.so
-usr/lib/*/xtables/libebt_*.so
-usr/lib/*/xtables/libip*.so
-usr/lib/*/xtables/libxt_*.so
-usr/sbin/*
-usr/share/man/man1
-usr/share/man/man8

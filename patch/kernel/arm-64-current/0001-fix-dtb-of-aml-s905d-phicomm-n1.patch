@@ -1,0 +1,90 @@
+diff --git a/arch/arm64/boot/dts/amlogic/meson-gxl-s905d-phicomm-n1.dts b/arch/arm64/boot/dts/amlogic/meson-gxl-s905d-phicomm-n1.dts
+index 9ef210f17b4a..2fc9d7df05b1 100644
+--- a/arch/arm64/boot/dts/amlogic/meson-gxl-s905d-phicomm-n1.dts
++++ b/arch/arm64/boot/dts/amlogic/meson-gxl-s905d-phicomm-n1.dts
+@@ -1,6 +1,9 @@
+ // SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+ /*
+  * Copyright (c) 2018 He Yangxuan
++ * Copyright (c) 2020 Flippy
++ * Copyright (c) 2020 Wgsun0592
++ * Copyright (c) 2021 isolated
+  */
+ 
+ /dts-v1/;
+@@ -11,6 +14,41 @@ / {
+ 	compatible = "phicomm,n1", "amlogic,s905d", "amlogic,meson-gxl";
+ 	model = "Phicomm N1";
+ 
++	aliases {
++		serial1 = &uart_A;
++	};
++
++	reserved-memory {
++		/* 1 MiB reserved for Hardware ROM Firmware */
++		/* @sa: https://github.com/khadas/linux/commit/698df2c6cfbb0d1a9359743208e83517b31da6ce */
++		hwrom_reserved: hwrom@0 {
++			reg = <0x0 0x0 0x0 0x100000>;
++			no-map;
++		};
++	};
++
++	dc_in: regulator-vcc_12v {
++		compatible = "regulator-fixed";
++		regulator-name = "VCC_12V";
++		regulator-min-microvolt = <12000000>;
++		regulator-max-microvolt = <12000000>;
++		regulator-boot-on;
++		regulator-always-on;
++	};
++
++	soc {
++		usb: usb@d0078080 {
++			dwc3: usb@c9000000 {
++				/* Workaround for broken LPM implementation found in many USB3 devices. */
++				usb2-lpm-disable;
++			};
++		};
++	};
++
++	memory@0 {
++		linux,usable-memory = <0x0 0x0 0x0 0x80000000>;
++	};
++
+ 	cvbs-connector {
+ 		status = "disabled";
+ 	};
+@@ -33,3 +71,33 @@ &cvbs_vdac_port {
+ &usb {
+ 	dr_mode = "host";
+ };
++
++&sd_emmc_a {
++	max-frequency = <100000000>;
++};
++
++&sd_emmc_b {
++	/* disable SD CARD */
++	status = "disabled";
++};
++
++&external_phy {
++	/delete-property/ interrupts;
++	/delete-property/ eee-broken-1000t;
++};
++
++/* This is connected to the Bluetooth module: */
++&uart_A {
++	status = "okay";
++	pinctrl-0 = <&uart_a_pins>, <&uart_a_cts_rts_pins>;
++	pinctrl-names = "default";
++	uart-has-rtscts;
++
++	bluetooth {
++		compatible = "brcm,bcm43438-bt";
++		shutdown-gpios = <&gpio GPIOX_17 GPIO_ACTIVE_HIGH>;
++		max-speed = <2000000>;
++		clocks = <&wifi32k>;
++		clock-names = "lpo";
++	};
++};
