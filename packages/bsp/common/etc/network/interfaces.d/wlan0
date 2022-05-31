@@ -1,0 +1,11 @@
+# Wireless adapter #1
+#allow-hotplug wlan0
+#iface wlan0 inet dhcp
+#address 192.168.0.100
+#netmask 255.255.255.0
+#gateway 192.168.0.1
+#dns-nameservers 8.8.8.8 8.8.4.4
+#   wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+# Disable power saving on compatible chipsets (prevents SSH/connection dropouts over WiFi)
+#wireless-mode Managed
+#wireless-power off

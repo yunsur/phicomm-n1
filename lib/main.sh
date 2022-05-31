@@ -131,25 +131,25 @@ fi
 
 if [[ -n $REPOSITORY_UPDATE ]]; then
 
-	# select stable/beta configuration
-	if [[ $BETA == yes ]]; then
-		DEB_STORAGE=$DEST/debs-beta
-		REPO_STORAGE=$DEST/repository-beta
-		REPO_CONFIG="aptly-beta.conf"
-	else
-		DEB_STORAGE=$DEST/debs
-		REPO_STORAGE=$DEST/repository
-		REPO_CONFIG="aptly.conf"
-	fi
+		# select stable/beta configuration
+		if [[ $BETA == yes ]]; then
+				DEB_STORAGE=$DEST/debs-beta
+				REPO_STORAGE=$DEST/repository-beta
+				REPO_CONFIG="aptly-beta.conf"
+		else
+				DEB_STORAGE=$DEST/debs
+				REPO_STORAGE=$DEST/repository
+				REPO_CONFIG="aptly.conf"
+		fi
 
-	# For user override
-	if [[ -f "${USERPATCHES_PATH}"/lib.config ]]; then
-		display_alert "Using user configuration override" "userpatches/lib.config" "info"
-		source "${USERPATCHES_PATH}"/lib.config
-	fi
+		# For user override
+		if [[ -f "${USERPATCHES_PATH}"/lib.config ]]; then
+				display_alert "Using user configuration override" "userpatches/lib.config" "info"
+			source "${USERPATCHES_PATH}"/lib.config
+		fi
 
-	repo-manipulate "$REPOSITORY_UPDATE"
-	exit
+		repo-manipulate "$REPOSITORY_UPDATE"
+		exit
 
 fi
 
@@ -316,7 +316,6 @@ if [[ $KERNEL_ONLY != yes && -z $RELEASE ]]; then
 
 	RELEASE=$(dialog --stdout --title "Choose a release package base" --backtitle "$backtitle" \
 	--menu "Select the target OS release package base" $TTY_Y $TTY_X $((TTY_Y - 8)) "${options[@]}")
-	echo "options : ${options}"
 	[[ -z $RELEASE ]] && exit_with_error "No release selected"
 
 	unset options

@@ -6,8 +6,8 @@ bluez-cups
 bluez-tools
 brltty
 brltty-x11
-caffeine
 cifs-utils
+colord
 cups
 cups-bsd
 cups-client
@@ -37,7 +37,7 @@ fonts-ubuntu-console
 foomatic-db-compressed-ppds
 gdebi
 ghostscript-x
-gir1.2-appindicator3-0.1
+gist
 gnome-orca
 gnome-screenshot
 gnome-user-docs-de
@@ -54,9 +54,9 @@ gtk2-engines-murrine
 gtk2-engines-pixbuf
 gvfs-backends
 hplip
-hunspell-en-us
 indicator-printers
 inputattach
+inxi
 kde-plasma-desktop
 kerneloops
 keyutils
@@ -69,7 +69,6 @@ language-pack-gnome-pt
 language-pack-gnome-ru
 language-pack-gnome-sl
 laptop-detect
-libappindicator3-1
 libatk-adaptor
 libcvc0
 libfont-afm-perl
@@ -85,6 +84,7 @@ libproxy1-plugin-gsettings
 libproxy1-plugin-networkmanager
 libu2f-udev
 libwmf0.2-7-gtk
+libxapp1
 libxcursor1
 lightdm
 lightdm-settings
@@ -92,10 +92,7 @@ mesa-utils
 mousepad
 mousetweaks
 network-manager-config-connectivity-ubuntu
-network-manager-l2tp
-network-manager-openconnect
 network-manager-openvpn
-network-manager-pptp
 network-manager-ssh
 network-manager-vpnc
 numix-gtk-theme
@@ -126,7 +123,7 @@ terminator
 tracker
 tracker-extract
 tracker-miner-fs
-ttf-ubuntu-font-family
+tree
 ubuntu-drivers-common
 update-inetd
 update-manager
@@ -143,7 +140,10 @@ wportuguese
 wspanish
 wswiss
 x11-apps
+x11-utils
 x11-xserver-utils
+xapp
+xapps-common
 xarchiver
 xbacklight
 xcursor-themes
@@ -155,13 +155,8 @@ xfonts-base
 xfonts-encodings
 xfonts-scalable
 xfonts-utils
-xinit
 xorg-docs-core
 xscreensaver
 xserver-xorg
 xserver-xorg-video-fbdev
-xterm
-xtermcontrol
-xtermset
 xwallpaper
-zip

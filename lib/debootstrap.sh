@@ -275,6 +275,7 @@ create_rootfs_cache()
 		# this should fix resolvconf installation failure in some cases
 		chroot $SDCARD /bin/bash -c 'echo "resolvconf resolvconf/linkify-resolvconf boolean false" | debconf-set-selections'
 
+		add_desktop_package_sources
 		# stage: update packages list
 		display_alert "Updating package list" "$RELEASE" "info"
 		eval 'LC_ALL=C LANG=C chroot $SDCARD /bin/bash -e -c "apt-get -q -y $apt_extra update"' \
@@ -315,8 +316,6 @@ create_rootfs_cache()
 			# or should we extend this to CLI users too ?
 			# There might be some clunky boards that require Debian packages from
 			# specific repos...
-			display_alert "Adding apt sources for Desktop packages"
-			add_desktop_package_sources
 
 			local apt_desktop_install_flags=""
 			if [[ ! -z ${DESKTOP_APT_FLAGS_SELECTED+x} ]]; then
@@ -449,10 +448,8 @@ prepare_partitions()
 	# add -N number of inodes to keep mount from running out
 	# create bigger number for desktop builds
 	if [[ $BUILD_DESKTOP == yes ]]; then local node_number=4096; else local node_number=1024; fi
-	if [[ $HOSTRELEASE =~ bionic|buster|bullseye|cosmic|focal|hirsute|impish|jammy|sid ]]; then
+	if [[ $HOSTRELEASE =~ buster|bullseye|focal|jammy|sid ]]; then
 		mkopts[ext4]="-q -m 2 -O ^64bit,^metadata_csum -N $((128*${node_number}))"
-	elif [[ $HOSTRELEASE == xenial ]]; then
-		mkopts[ext4]="-q -m 2 -N $((128*${node_number}))"
 	fi
 	mkopts[fat]='-n BOOT'
 	mkopts[ext2]='-q'
@@ -740,15 +737,18 @@ PREPARE_IMAGE_SIZE
 	# if we have a headless device, set console to DEFAULT_CONSOLE
 	if [[ -n $DEFAULT_CONSOLE && -f $SDCARD/boot/armbianEnv.txt ]]; then
 		if grep -lq "^console=" $SDCARD/boot/armbianEnv.txt; then
-			sed -i "s/console=.*/console=$DEFAULT_CONSOLE/" $SDCARD/boot/armbianEnv.txt
+			sed -i "s/^console=.*/console=$DEFAULT_CONSOLE/" $SDCARD/boot/armbianEnv.txt
 		else
 			echo "console=$DEFAULT_CONSOLE" >> $SDCARD/boot/armbianEnv.txt
 	        fi
 	fi
 
 	# recompile .cmd to .scr if boot.cmd exists
-	[[ -f $SDCARD/boot/boot.cmd ]] && \
-		mkimage -C none -A arm -T script -d $SDCARD/boot/boot.cmd $SDCARD/boot/boot.scr > /dev/null 2>&1
+    
+	if [[ -f $SDCARD/boot/boot.cmd ]]; then
+		if [ -z $BOOTSCRIPT_OUTPUT ]; then BOOTSCRIPT_OUTPUT=boot.scr; fi
+		mkimage -C none -A arm -T script -d $SDCARD/boot/boot.cmd $SDCARD/boot/$BOOTSCRIPT_OUTPUT > /dev/null 2>&1
+	fi
 
 	# create extlinux config
 	if [[ -f $SDCARD/boot/extlinux/extlinux.conf ]]; then

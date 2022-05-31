@@ -29,6 +29,11 @@ fi
 
 if [[ -f "${SRC}"/lib/general.sh ]]; then
 
+	# Declare this folder as safe
+	if [[ -z $(cat ${HOME}/.gitconfig | grep "directory = \*") ]]; then
+		git config --global --add safe.directory "*"
+	fi
+
 	# shellcheck source=lib/general.sh
 	source "${SRC}"/lib/general.sh
 
@@ -209,12 +214,12 @@ mkdir -p "${SRC}"/userpatches
 
 
 # Create example configs if none found in userpatches
-if ! ls "${SRC}"/userpatches/{config-example.conf,config-docker.conf,config-vagrant.conf} 1> /dev/null 2>&1; then
+if ! ls "${SRC}"/userpatches/{config-default.conf,config-docker.conf,config-vagrant.conf} 1> /dev/null 2>&1; then
 
 	# Migrate old configs
 	if ls "${SRC}"/*.conf 1> /dev/null 2>&1; then
 		display_alert "Migrate config files to userpatches directory" "all *.conf" "info"
-        cp "${SRC}"/*.conf "${SRC}"/userpatches  || exit 1
+                cp "${SRC}"/*.conf "${SRC}"/userpatches  || exit 1
 		rm "${SRC}"/*.conf
 		[[ ! -L "${SRC}"/userpatches/config-example.conf ]] && ln -fs config-example.conf "${SRC}"/userpatches/config-default.conf || exit 1
 	fi
@@ -224,7 +229,11 @@ if ! ls "${SRC}"/userpatches/{config-example.conf,config-docker.conf,config-vagr
 	# Create example config
 	if [[ ! -f "${SRC}"/userpatches/config-example.conf ]]; then
 		cp "${SRC}"/config/templates/config-example.conf "${SRC}"/userpatches/config-example.conf || exit 1
-        ln -fs config-example.conf "${SRC}"/userpatches/config-default.conf || exit 1
+	fi
+
+	# Link default config to example config
+	if [[ ! -f "${SRC}"/userpatches/config-default.conf ]]; then
+                ln -fs config-example.conf "${SRC}"/userpatches/config-default.conf || exit 1
 	fi
 
 	# Create Docker config
@@ -233,13 +242,13 @@ if ! ls "${SRC}"/userpatches/{config-example.conf,config-docker.conf,config-vagr
 	fi
 
 	# Create Docker file
-	if [[ ! -f "${SRC}"/userpatches/Dockerfile ]]; then
+        if [[ ! -f "${SRC}"/userpatches/Dockerfile ]]; then
 		cp "${SRC}"/config/templates/Dockerfile "${SRC}"/userpatches/Dockerfile || exit 1
-	fi
+        fi
 
 	# Create Vagrant config
 	if [[ ! -f "${SRC}"/userpatches/config-vagrant.conf ]]; then
-	    cp "${SRC}"/config/templates/config-vagrant.conf "${SRC}"/userpatches/config-vagrant.conf || exit 1
+	        cp "${SRC}"/config/templates/config-vagrant.conf "${SRC}"/userpatches/config-vagrant.conf || exit 1
 	fi
 
 	# Create Vagrant file

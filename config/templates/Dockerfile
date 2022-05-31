@@ -1,4 +1,7 @@
-FROM ubuntu:21.04
+ARG BASE_IMAGE=ubuntu:jammy
+FROM $BASE_IMAGE as armbian_builder
+ARG CUSTOM_PACKAGES='g++-11-arm-linux-gnueabihf libssl3'
+ENV CUSTOM_PACKAGES $CUSTOM_PACKAGES
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get -y install \
        joe \
@@ -20,6 +23,7 @@ RUN sh -c " \
 RUN apt-get update \
     && apt-get -y upgrade \
     && apt-get install -y --no-install-recommends \
+       $CUSTOM_PACKAGES \
        acl \
        aptly \
        aria2 \
@@ -29,6 +33,7 @@ RUN apt-get update \
        bison \
        btrfs-progs \
        build-essential \
+       busybox \
        ca-certificates \
        ccache \
        cpio \
@@ -45,8 +50,8 @@ RUN apt-get update \
        f2fs-tools \
        fakeroot \
        flex \
-       g++-8-arm-linux-gnueabihf \
        gawk \
+       gcc-aarch64-linux-gnu \
        gcc-arm-linux-gnueabihf \
        gcc-arm-linux-gnueabi \
        gcc-arm-none-eabi \
@@ -79,6 +84,7 @@ RUN apt-get update \
        openssh-client \
        p7zip-full \
        parted \
+       parallel \
        patchutils \
        pigz \
        pixz \
@@ -91,13 +97,11 @@ RUN apt-get update \
        python3-distutils \
        python3-pkg-resources \
        python3-setuptools \
-       qemu \
        qemu-utils \
        qemu-user-static \
        rsync \
        swig \
        sudo \
-       systemd-container \
        tzdata \
        u-boot-tools \
        udev \
@@ -122,7 +126,7 @@ ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8' TERM=screen
 WORKDIR /root/phicomm-n1
 LABEL org.opencontainers.image.source="https://github.com/yunsur/phicomm-n1/blob/main/config/templates/Dockerfile" \
     org.opencontainers.image.url="https://github.com/yunsur/phicomm-n1/pkgs/container/build"  \
-    org.opencontainers.image.vendor="yunsur" \
+    org.opencontainers.image.vendor="armbian" \
     org.opencontainers.image.title="Armbian build framework" \
     org.opencontainers.image.description="Custom Linux build framework" \
     org.opencontainers.image.documentation="https://docs.armbian.com" \
