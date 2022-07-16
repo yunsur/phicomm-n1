@@ -251,12 +251,14 @@ create_rootfs_cache()
 		chmod 755 $SDCARD/sbin/start-stop-daemon
 
 		# stage: configure language and locales
-		display_alert "Configuring locales" "$DEST_LANG" "info"
-
-		[[ -f $SDCARD/etc/locale.gen ]] && sed -i "s/^# $DEST_LANG/$DEST_LANG/" $SDCARD/etc/locale.gen
-		eval 'LC_ALL=C LANG=C chroot $SDCARD /bin/bash -c "locale-gen $DEST_LANG"' ${OUTPUT_VERYSILENT:+' >/dev/null 2>/dev/null'}
-		eval 'LC_ALL=C LANG=C chroot $SDCARD /bin/bash -c "update-locale LANG=$DEST_LANG LANGUAGE=$DEST_LANG LC_MESSAGES=$DEST_LANG"' \
-			${OUTPUT_VERYSILENT:+' >/dev/null 2>/dev/null'}
+		display_alert "Generatining default locale" "info"
+		if [[ -f $SDCARD/etc/locale.gen ]]; then
+			sed -i '/ C.UTF-8/s/^# //g' $SDCARD/etc/locale.gen
+			sed -i '/en_US.UTF-8/s/^# //g' $SDCARD/etc/locale.gen
+		fi
+		eval 'LC_ALL=C LANG=C chroot $SDCARD /bin/bash -c "locale-gen"' ${OUTPUT_VERYSILENT:+' >/dev/null 2>&1'}
+		eval 'LC_ALL=C LANG=C chroot $SDCARD /bin/bash -c "update-locale --reset LANG=en_US.UTF-8"' \
+			${OUTPUT_VERYSILENT:+' >/dev/null 2>&1'}
 
 		if [[ -f $SDCARD/etc/default/console-setup ]]; then
 			sed -e 's/CHARMAP=.*/CHARMAP="UTF-8"/' -e 's/FONTSIZE=.*/FONTSIZE="8x16"/' \
@@ -275,7 +277,9 @@ create_rootfs_cache()
 		# this should fix resolvconf installation failure in some cases
 		chroot $SDCARD /bin/bash -c 'echo "resolvconf resolvconf/linkify-resolvconf boolean false" | debconf-set-selections'
 
+		# TODO change name of the function from "desktop" and move to appropriate location
 		add_desktop_package_sources
+
 		# stage: update packages list
 		display_alert "Updating package list" "$RELEASE" "info"
 		eval 'LC_ALL=C LANG=C chroot $SDCARD /bin/bash -e -c "apt-get -q -y $apt_extra update"' \
@@ -293,12 +297,6 @@ create_rootfs_cache()
 			${OUTPUT_DIALOG:+' | dialog --backtitle "$backtitle" --progressbox "Upgrading base packages..." $TTY_Y $TTY_X'} \
 			${OUTPUT_VERYSILENT:+' >/dev/null 2>/dev/null'} ';EVALPIPE=(${PIPESTATUS[@]})'
 
-		# Myy: Dividing the desktop packages installation steps into multiple
-		# ones. We first install the "ADDITIONAL_PACKAGES" in order to get
-		# access to software-common-properties installation.
-		# THEN we add the APT sources and install the Desktop packages.
-		# TODO : Find a way to add APT sources WITHOUT software-common-properties
-
 		[[ ${EVALPIPE[0]} -ne 0 ]] && display_alert "Upgrading base packages" "failed" "wrn"
 
 		# stage: install additional packages
@@ -312,10 +310,6 @@ create_rootfs_cache()
 		[[ ${EVALPIPE[0]} -ne 0 ]] && exit_with_error "Installation of Armbian main packages for ${BRANCH} ${BOARD} ${RELEASE} ${DESKTOP_APPGROUPS_SELECTED} ${DESKTOP_ENVIRONMENT} ${BUILD_MINIMAL} failed"
 
 		if [[ $BUILD_DESKTOP == "yes" ]]; then
-			# FIXME Myy : Are we keeping this only for Desktop users,
-			# or should we extend this to CLI users too ?
-			# There might be some clunky boards that require Debian packages from
-			# specific repos...
 
 			local apt_desktop_install_flags=""
 			if [[ ! -z ${DESKTOP_APT_FLAGS_SELECTED+x} ]]; then
@@ -642,7 +636,7 @@ PREPARE_IMAGE_SIZE
 
 	check_loop_device "$LOOP"
 
-	losetup $LOOP ${SDCARD}.raw
+	losetup -P $LOOP ${SDCARD}.raw
 
 	# loop device was grabbed here, unlock
 	flock -u $FD
@@ -744,11 +738,12 @@ PREPARE_IMAGE_SIZE
 	fi
 
 	# recompile .cmd to .scr if boot.cmd exists
-    
+
 	if [[ -f $SDCARD/boot/boot.cmd ]]; then
 		if [ -z $BOOTSCRIPT_OUTPUT ]; then BOOTSCRIPT_OUTPUT=boot.scr; fi
 		mkimage -C none -A arm -T script -d $SDCARD/boot/boot.cmd $SDCARD/boot/$BOOTSCRIPT_OUTPUT > /dev/null 2>&1
 	fi
+
 
 	# create extlinux config
 	if [[ -f $SDCARD/boot/extlinux/extlinux.conf ]]; then

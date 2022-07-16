@@ -189,6 +189,7 @@ compile_uboot()
 
 		if [[ -n $ATFSOURCE ]]; then
 			cp -Rv "${atftempdir}"/*.bin .
+			cp -Rv "${atftempdir}"/*.elf .
 			rm -rf "${atftempdir}"
 		fi
 
@@ -547,7 +548,7 @@ CUSTOM_KERNEL_CONFIG
 	if  [[ -z ${KERNEL_VERSION_LEVEL} ]]; then
 		git -C ${kerneldir} cat-file -t ${OLDHASHTARGET} >/dev/null 2>&1
 		[[ $? -ne 0 ]] && OLDHASHTARGET=$(git -C ${kerneldir} show HEAD~199 --pretty=format:"%H" --no-patch)
-		else
+	else
 		git -C ${kerneldir} cat-file -t ${OLDHASHTARGET} >/dev/null 2>&1
 		[[ $? -ne 0 ]] && OLDHASHTARGET=$(git -C ${kerneldir} rev-list --max-parents=0 HEAD)
 	fi
@@ -567,10 +568,15 @@ CUSTOM_KERNEL_CONFIG
 	# create change log
 	git --no-pager -C ${kerneldir} log --abbrev-commit --oneline --no-patch --no-merges --date-order --date=format:'%Y-%m-%d %H:%M:%S' --pretty=format:'%C(black bold)%ad%Creset%C(auto) | %s | <%an> | <a href='$URL'%H>%H</a>' ${OLDHASHTARGET}..${hash} > "${HASHTARGET}.gitlog"
 
+	# hash origin
 	echo "${hash}" > "${HASHTARGET}.githash"
+
+	# hash_patches
 	CALC_PATCHES=$(git -C $SRC log --format="%H" -1 -- $(realpath --relative-base="$SRC" "${SRC}/patch/kernel/${KERNELPATCHDIR}"))
 	[[ -z "$CALC_PATCHES" ]] && CALC_PATCHES="null"
 	echo "$CALC_PATCHES" >> "${HASHTARGET}.githash"
+
+	# hash_kernel_config
 	CALC_CONFIG=$(git -C $SRC log --format="%H" -1 -- $(realpath --relative-base="$SRC" "${SRC}/config/kernel/${LINUXCONFIG}.config"))
 	[[ -z "$CALC_CONFIG" ]] && CALC_CONFIG="null"
 	echo "$CALC_CONFIG" >> "${HASHTARGET}.githash"
@@ -691,13 +697,13 @@ compile_armbian-zsh()
 	sed -i "/^export ZSH=.*/a export ZSH_CACHE_DIR=~\/.oh-my-zsh\/cache" "${tmp_dir}/${armbian_zsh_dir}"/etc/skel/.zshrc
 
 	# define theme
-	sed -i 's/^ZSH_THEME=.*/ZSH_THEME="ys"/' "${tmp_dir}/${armbian_zsh_dir}"/etc/skel/.zshrc
+	sed -i 's/^ZSH_THEME=.*/ZSH_THEME="mrtazz"/' "${tmp_dir}/${armbian_zsh_dir}"/etc/skel/.zshrc
 
 	# disable auto update since we provide update via package
 	sed -i "s/^# zstyle ':omz:update' mode disabled.*/zstyle ':omz:update' mode disabled/g" "${tmp_dir}/${armbian_zsh_dir}"/etc/skel/.zshrc
 
 	# define default plugins
-	sed -i 's/^plugins=.*/plugins=(evalcache git git-extras debian tmux screen history extract colorize web-search docker autojump command-not-found common-aliases colored-man-pages last-working-dir safe-paste)/' "${tmp_dir}/${armbian_zsh_dir}"/etc/skel/.zshrc
+	sed -i 's/^plugins=.*/plugins=(evalcache git git-extras debian tmux screen history extract colorize web-search docker)/' "${tmp_dir}/${armbian_zsh_dir}"/etc/skel/.zshrc
 
 	chmod 755 "${tmp_dir}/${armbian_zsh_dir}"/DEBIAN/postinst
 

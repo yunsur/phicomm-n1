@@ -159,7 +159,7 @@ get_package_list_hash()
 
 # create_sources_list <release> <basedir>
 #
-# <release>: buster|bullseye|bionic|focal|hirsute|impish|jammy|sid
+# <release>: bullseye|focal|jammy|sid
 # <basedir>: path to root directory
 #
 create_sources_list()
@@ -226,15 +226,21 @@ create_sources_list()
 	esac
 
 	display_alert "Adding Armbian repository and authentication key" "/etc/apt/sources.list.d/armbian.list" "info"
+
+	# apt-key add is getting deprecated
 	APT_VERSION=$(chroot "${basedir}" /bin/bash -c "apt --version | cut -d\" \" -f2")
 	if linux-version compare "${APT_VERSION}" ge 2.4.1; then
+		# add armbian key
 		mkdir -p "${basedir}"/usr/share/keyrings
+		# change to binary form
 		gpg --dearmor < "${SRC}"/config/armbian.key > "${basedir}"/usr/share/keyrings/armbian.gpg
 		SIGNED_BY="[signed-by=/usr/share/keyrings/armbian.gpg] "
 	else
+		# use old method for compatibility reasons
 		cp "${SRC}"/config/armbian.key "${basedir}"
 		chroot "${basedir}" /bin/bash -c "cat armbian.key | apt-key add - > /dev/null 2>&1"
 	fi
+
 	# stage: add armbian repository and install key
 	if [[ $DOWNLOAD_MIRROR == "china" ]]; then
 		echo "deb ${SIGNED_BY}https://mirrors.tuna.tsinghua.edu.cn/armbian $RELEASE main ${RELEASE}-utils ${RELEASE}-desktop" > "${basedir}"/etc/apt/sources.list.d/armbian.list
@@ -918,6 +924,7 @@ addtorepo()
 			display_alert "Skipping adding packages (not supported)" "$release" "wrn"
 			continue
 		fi
+
 		local forceoverwrite=""
 
 		# let's drop from publish if exits
@@ -1389,7 +1396,7 @@ prepare_host()
 	dialog dirmngr dosfstools dwarves f2fs-tools fakeroot flex gawk           \
 	gcc-arm-linux-gnueabi gcc-aarch64-linux-gnu gdisk gpg busybox             \
 	imagemagick jq kmod libbison-dev libc6-dev-armhf-cross libcrypto++-dev    \
-	libelf-dev libfdt-dev libfile-fcntllock-perl parallel                     \
+	libelf-dev libfdt-dev libfile-fcntllock-perl parallel libmpc-dev          \
 	libfl-dev liblz4-tool libncurses-dev libpython2.7-dev libssl-dev          \
 	libusb-1.0-0-dev linux-base locales lzop ncurses-base ncurses-term        \
 	nfs-kernel-server ntpdate p7zip-full parted patchutils pigz pixz          \
@@ -1624,6 +1631,7 @@ function webseed ()
 	do
 	echo "$k$FILE"
 	done | parallel --halt soon,fail=10 --jobs 32 wget -q --spider --timeout=15 --tries=4 --retry-connrefused {} 2>&1 >/dev/null)
+
 	# aria2 simply split chunks based on sources count not depending on download speed
 	# when selecting china mirrors, use only China mirror, others are very slow there
 	if [[ $DOWNLOAD_MIRROR == china ]]; then
@@ -1652,6 +1660,7 @@ download_and_verify()
 	local filename=$2
 	local localdir=$SRC/cache/${remotedir//_}
 	local dirname=${filename//.tar.xz}
+
 	[[ -z $DISABLE_IPV6 ]] && DISABLE_IPV6="true"
 
         if [[ $DOWNLOAD_MIRROR == china ]]; then
@@ -1849,5 +1858,3 @@ show_checklist_variables ()
 		fi
 	done
 }
-
-
