@@ -6,7 +6,6 @@ bluez-cups
 bluez-tools
 brltty
 brltty-x11
-caffeine
 cifs-utils
 cinnamon
 cinnamon-common
@@ -18,6 +17,7 @@ cinnamon-screensaver
 cinnamon-session
 cinnamon-session-common
 cinnamon-settings-daemon
+colord
 cups
 cups-bsd
 cups-client
@@ -47,10 +47,10 @@ fonts-ubuntu-console
 foomatic-db-compressed-ppds
 gdebi
 ghostscript-x
-gir1.2-appindicator3-0.1
 gir1.2-cinnamondesktop-3.0
 gir1.2-cmenu-3.0
 gir1.2-cvc-1.0
+gist
 gnome-orca
 gnome-screenshot
 gnome-user-docs-de
@@ -60,6 +60,7 @@ gnome-user-docs-pt
 gnome-user-docs-ru
 gnome-user-docs-sl
 gnome-system-monitor
+gnome-terminal
 gstreamer1.0-packagekit
 gstreamer1.0-plugins-base-apps
 gstreamer1.0-pulseaudio
@@ -68,8 +69,8 @@ gtk2-engines-murrine
 gtk2-engines-pixbuf
 gvfs-backends
 hplip
-hunspell-en-us
 indicator-printers
+inxi
 inputattach
 kerneloops
 keyutils
@@ -82,7 +83,6 @@ language-pack-gnome-pt
 language-pack-gnome-ru
 language-pack-gnome-sl
 laptop-detect
-libappindicator3-1
 libatk-adaptor
 libcinnamon-desktop4
 libcinnamon-menu-3-0
@@ -101,6 +101,7 @@ libproxy1-plugin-gsettings
 libproxy1-plugin-networkmanager
 libu2f-udev
 libwmf0.2-7-gtk
+libxapp1
 libxcursor1
 lightdm
 lightdm-settings
@@ -115,10 +116,7 @@ nemo-fileroller
 nemo-font-manager
 nemo-gtkhash
 network-manager-config-connectivity-ubuntu
-network-manager-l2tp
-network-manager-openconnect
 network-manager-openvpn
-network-manager-pptp
 network-manager-ssh
 network-manager-vpnc
 numix-gtk-theme
@@ -146,7 +144,7 @@ spice-vdagent
 system-config-printer
 system-config-printer-common
 terminator
-ttf-ubuntu-font-family
+tree
 ubuntu-drivers-common
 update-inetd
 update-manager
@@ -163,7 +161,10 @@ wportuguese
 wspanish
 wswiss
 x11-apps
+x11-utils
 x11-xserver-utils
+xapp
+xapps-common
 xarchiver
 xbacklight
 xcursor-themes
@@ -175,14 +176,9 @@ xfonts-base
 xfonts-encodings
 xfonts-scalable
 xfonts-utils
-xinit
 xorg-docs-core
 xscreensaver
 xsensors
 xserver-xorg
 xserver-xorg-video-fbdev
-xterm
-xtermcontrol
-xtermset
 xwallpaper
-zip
