@@ -97,7 +97,7 @@ cleaning()
 		;;
 
 		oldcache) # remove old `cache/rootfs` except for the newest 8 files
-		if [[ -d "${SRC}"/cache/rootfs && $(ls -1 "${SRC}"/cache/rootfs/*.lz4 2> /dev/null | wc -l) -gt "${ROOTFS_CACHE_MAX}" ]]; then
+		if [[ -d "${SRC}"/cache/rootfs && $(ls -1 "${SRC}"/cache/rootfs/*.zst* 2> /dev/null | wc -l) -gt "${ROOTFS_CACHE_MAX}" ]]; then
 			display_alert "Cleaning" "rootfs cache (old)" "info"
 			(cd "${SRC}"/cache/rootfs; ls -t *.lz4 | sed -e "1,${ROOTFS_CACHE_MAX}d" | xargs -d '\n' rm -f)
 			# Remove signatures if they are present. We use them for internal purpose
@@ -694,15 +694,15 @@ fingerprint_image()
 		CPU configuration: $CPUMIN - $CPUMAX with $GOVERNOR
 		--------------------------------------------------------------------------------
 		Verify GPG signature:
-		gpg --verify $2.img.asc
+		gpg --verify $2.img.xz.asc
 
 		Verify image file integrity:
-		sha256sum --check $2.img.sha
+		sha256sum --check $2.img.xz.sha
 
-		Prepare SD card (four methodes):
-		zcat $2.img.gz | pv | dd of=/dev/mmcblkX bs=1M
+		Prepare SD card (four methods):
+		xzcat $2.img.xz | pv | dd of=/dev/mmcblkX bs=1M
 		dd if=$2.img of=/dev/mmcblkX bs=1M
-		balena-etcher $2.img.gz -d /dev/mmcblkX
+		balena-etcher $2.img.xz -d /dev/mmcblkX
 		balena-etcher $2.img -d /dev/mmcblkX
 		EOF
 	fi
@@ -1217,13 +1217,14 @@ wait_for_package_manager()
 
 
 
-# Installing debian packages in the armbian build system.
+# Installing debian packages or package files in the armbian build system.
 # The function accepts four optional parameters:
 # autoupdate - If the installation list is not empty then update first.
 # upgrade, clean - the same name for apt
 # verbose - detailed log for the function
 #
 # list="pkg1 pkg2 pkg3 pkgbadname pkg-1.0 | pkg-2.0 pkg5 (>= 9)"
+# or list="pkg1 pkg2 /path-to/output/debs/file-name.deb"
 # install_pkg_deb upgrade verbose $list
 # or
 # install_pkg_deb autoupdate $list
@@ -1238,7 +1239,9 @@ wait_for_package_manager()
 install_pkg_deb ()
 {
 	local list=""
+	local listdeb=""
 	local log_file
+	local add_for_install
 	local for_install
 	local need_autoup=false
 	local need_upgrade=false
@@ -1250,7 +1253,12 @@ install_pkg_deb ()
 	local tmp_file=$(mktemp /tmp/install_log_XXXXX)
 	export DEBIAN_FRONTEND=noninteractive
 
-	list=$(
+	if [ -d $(dirname $LOG_OUTPUT_FILE) ]; then
+		log_file=${LOG_OUTPUT_FILE}
+	else
+		log_file="${SRC}/output/${LOG_SUBPATH}/install.log"
+	fi
+
 	for p in $*;do
 		case $p in
 			autoupdate) need_autoup=true; continue ;;
@@ -1258,21 +1266,32 @@ install_pkg_deb ()
 			clean) need_clean=true; continue ;;
 			verbose) need_verbose=true; continue ;;
 			\||\(*|*\)) continue ;;
+			*[.]deb) listdeb+=" $p"; continue ;;
+			*) list+=" $p" ;;
 		esac
-		echo " $p"
 	done
-	)
-
-	if [ -d $(dirname $LOG_OUTPUT_FILE) ]; then
-		log_file=${LOG_OUTPUT_FILE}
-	else
-		log_file="${SRC}/output/${LOG_SUBPATH}/install.log"
-	fi
 
 	# This is necessary first when there is no apt cache.
 	if $need_upgrade; then
 		apt-get -q update || echo "apt cannot update" >>$tmp_file
 		apt-get -y upgrade || echo "apt cannot upgrade" >>$tmp_file
+	fi
+
+	# Install debian package files
+	if [ -n "$listdeb" ];then
+		for f in $listdeb;do
+			# Calculate dependencies for installing the package file
+			add_for_install=" $(
+				dpkg-deb -f $f Depends | awk '{gsub(/[,]/, "", $0); print $0}'
+			)"
+
+			echo -e "\nfile $f depends on:\n$add_for_install"  >>$log_file
+			install_pkg_deb $add_for_install
+			dpkg -i $f 2>>$log_file
+			dpkg-query -W \
+					   -f '${binary:Package;-27} ${Version;-23}\n' \
+					   $(dpkg-deb -f $f Package) >>$log_file
+		done
 	fi
 
 	# If the package is not installed, check the latest
@@ -1402,7 +1421,7 @@ prepare_host()
 	nfs-kernel-server ntpdate p7zip-full parted patchutils pigz pixz          \
 	pkg-config pv python3-dev python3-distutils qemu-user-static rsync swig   \
 	systemd-container u-boot-tools udev unzip uuid-dev wget whiptail zip      \
-	zlib1g-dev"
+	zlib1g-dev zstd"
 
   if [[ $(dpkg --print-architecture) == amd64 ]]; then
 
@@ -1615,21 +1634,26 @@ prepare_host()
 
 function webseed ()
 {
+
 	# list of mirrors that host our files
 	unset text
-	# Hardcoded to EU mirrors since
 	local CCODE=$(curl -s redirect.armbian.com/geoip | jq '.continent.code' -r)
-	WEBSEED=($(curl -s https://redirect.armbian.com/mirrors | jq -r '.'${CCODE}' | .[] | values'))
+
+	if [[ "$2" == rootfs* ]]; then
+		WEBSEED=($(curl -s ${1}mirrors | jq -r '.'${CCODE}' | .[] | values'))
+		else
+		WEBSEED=($(curl -s https://redirect.armbian.com/mirrors | jq -r '.'${CCODE}' | .[] | values'))
+	fi
+
 	# remove dead mirrors to suppress download errors
-	FILE=".control"
 	while read -r line
 	do
 		REMOVE=$(echo $line | egrep -o 'https?://[^ ]+/')
-        WEBSEED=( "${WEBSEED[@]/$REMOVE}" )
+		WEBSEED=( "${WEBSEED[@]/$REMOVE}" )
 	done < <(
 	for k in ${WEBSEED[@]}
 	do
-	echo "$k$FILE"
+	echo "$k$2/$3"
 	done | parallel --halt soon,fail=10 --jobs 32 wget -q --spider --timeout=15 --tries=4 --retry-connrefused {} 2>&1 >/dev/null)
 
 	# aria2 simply split chunks based on sources count not depending on download speed
@@ -1643,8 +1667,9 @@ function webseed ()
 		https://mirrors.bfsu.edu.cn/armbian-releases/
 		)
 	fi
+
 	for toolchain in ${WEBSEED[@]}; do
-		text="${text} ${toolchain}${1}"
+		text="${text} ${toolchain}"$2/"${3}"
 	done
 	text="${text:1}"
 	echo "${text}"
@@ -1675,23 +1700,29 @@ download_and_verify()
 		return
 	fi
 
+	# rootfs has its own infra
+	if [[ "${remotedir}" == "_rootfs" ]]; then
+		local server="https://cache.armbian.com/"
+		remotedir="rootfs/$ROOTFSCACHE_VERSION"
+	fi
+
 	# switch to china mirror if US timeouts
-	timeout 10 curl --head --fail --silent ${server}${remotedir}/${filename} 2>&1 >/dev/null
+	timeout 10 curl --location --head --fail --silent ${server}${remotedir}/${filename} 2>&1 >/dev/null
 	if [[ $? -ne 7 && $? -ne 22 && $? -ne 0 ]]; then
 		display_alert "Timeout from $server" "retrying" "info"
 		server="https://mirrors.tuna.tsinghua.edu.cn/armbian-releases/"
 
 		# switch to another china mirror if tuna timeouts
-		timeout 10 curl --head --fail --silent ${server}${remotedir}/${filename} 2>&1 >/dev/null
+		timeout 10 curl --location --head --fail --silent ${server}${remotedir}/${filename} 2>&1 >/dev/null
 		if [[ $? -ne 7 && $? -ne 22 && $? -ne 0 ]]; then
 			display_alert "Timeout from $server" "retrying" "info"
 			server="https://mirrors.bfsu.edu.cn/armbian-releases/"
 		fi
 	fi
 
-
 	# check if file exists on remote server before running aria2 downloader
-	[[ ! `timeout 10 curl --head --fail --silent ${server}${remotedir}/${filename}` ]] && return
+	timeout 10 curl --location --head --fail --silent ${server}${remotedir}/${filename} 2>&1 >/dev/null
+	[[ $? -ne 0 ]] && return
 
 	cd "${localdir}" || exit
 
@@ -1699,13 +1730,13 @@ download_and_verify()
 	if [[ -f "${SRC}"/config/torrents/${filename}.asc ]]; then
 		local torrent="${SRC}"/config/torrents/${filename}.torrent
 		ln -sf "${SRC}/config/torrents/${filename}.asc" "${localdir}/${filename}.asc"
-	elif [[ ! `timeout 10 curl --head --fail --silent "${server}${remotedir}/${filename}.asc"` ]]; then
+	elif [[ ! `timeout 10 curl --location --head --fail --silent "${server}${remotedir}/${filename}.asc"` ]]; then
 		return
 	else
 		# download control file
 		local torrent=${server}$remotedir/${filename}.torrent
 		aria2c --download-result=hide --disable-ipv6=$DISABLE_IPV6 --summary-interval=0 --console-log-level=error --auto-file-renaming=false \
-		--continue=false --allow-overwrite=true --dir="${localdir}" ${server}${remotedir}/${filename}.asc $(webseed "$remotedir/${filename}.asc") -o "${filename}.asc"
+		--continue=false --allow-overwrite=true --dir="${localdir}" ${server}${remotedir}/${filename}.asc $(webseed "${server}" "${remotedir}" "${filename}.asc") -o "${filename}.asc"
 		[[ $? -ne 0 ]] && display_alert "Failed to download control file" "" "wrn"
 	fi
 
@@ -1734,10 +1765,10 @@ download_and_verify()
 
 	# direct download if torrent fails
 	if [[ ! -f "${localdir}/${filename}.complete" ]]; then
-		if [[ ! `timeout 10 curl --head --fail --silent ${server}${remotedir}/${filename} 2>&1 >/dev/null` ]]; then
+		if [[ ! `timeout 10 curl --location --head --fail --silent ${server}${remotedir}/${filename} 2>&1 >/dev/null` ]]; then
 			display_alert "downloading using http(s) network" "$filename"
-			aria2c --download-result=hide --rpc-save-upload-metadata=false --console-log-level=error \
-			--dht-file-path="${SRC}"/cache/.aria2/dht.dat --disable-ipv6=$DISABLE_IPV6 --summary-interval=0 --auto-file-renaming=false --dir="${localdir}" ${server}${remotedir}/${filename} $(webseed "${remotedir}/${filename}") -o "${filename}"
+			aria2c --allow-overwrite=true --download-result=hide --rpc-save-upload-metadata=false --console-log-level=error \
+			--dht-file-path="${SRC}"/cache/.aria2/dht.dat --disable-ipv6=$DISABLE_IPV6 --summary-interval=0 --auto-file-renaming=false --dir="${localdir}" ${server}${remotedir}/${filename} $(webseed "${server}" "${remotedir}" "${filename}") -o "${filename}"
 			# mark complete
 			[[ $? -eq 0 ]] && touch "${localdir}/${filename}.complete" && echo ""
 

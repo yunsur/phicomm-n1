@@ -29,7 +29,14 @@ HOSTRELEASE=$(cat /etc/os-release | grep VERSION_CODENAME | cut -d"=" -f2)
 [[ -z $EXIT_PATCHING_ERROR ]] && EXIT_PATCHING_ERROR="" # exit patching if failed
 [[ -z $HOST ]] && HOST="$BOARD" # set hostname to the board
 cd "${SRC}" || exit
-[[ -z "${ROOTFSCACHE_VERSION}" ]] && ROOTFSCACHE_VERSION=20
+
+# if variable not provided, check which is current version in the cache storage
+if [[ -z "${ROOTFSCACHE_VERSION}" ]]; then
+	ROOTFSCACHE_VERSION=$(curl https://api.github.com/repos/armbian/cache/releases/latest -s --fail | jq .tag_name -r || true)
+	# anonymous API access is very limited which is why we need a fallback
+	ROOTFSCACHE_VERSION=${ROOTFSCACHE_VERSION:-$(curl -L --silent https://cache.armbian.com/rootfs/latest --fail)}
+fi
+
 [[ -z "${CHROOT_CACHE_VERSION}" ]] && CHROOT_CACHE_VERSION=7
 BUILD_REPOSITORY_URL=$(improved_git remote get-url $(improved_git remote 2>/dev/null | grep origin) 2>/dev/null)
 BUILD_REPOSITORY_COMMIT=$(improved_git describe --match=d_e_a_d_b_e_e_f --always --dirty 2>/dev/null)
@@ -148,7 +155,7 @@ esac
 ARCH=armhf
 KERNEL_IMAGE_TYPE=zImage
 CAN_BUILD_STRETCH=yes
-ATF_COMPILE=no
+ATF_COMPILE=yes
 [[ -z $CRYPTROOT_SSH_UNLOCK ]] && CRYPTROOT_SSH_UNLOCK=yes
 [[ -z $CRYPTROOT_SSH_UNLOCK_PORT ]] && CRYPTROOT_SSH_UNLOCK_PORT=2022
 # Default to pdkdf2, this used to be the default with cryptroot <= 2.0, however

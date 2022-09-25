@@ -1,3 +1,13 @@
+From 40ac7e29eca7d71da118a0f727b9e22456453425 Mon Sep 17 00:00:00 2001
+From: Igor Pecovnik <igor.pecovnik@gmail.com>
+Date: Sat, 20 Aug 2022 07:21:47 +0200
+Subject: [PATCH] fix
+
+Signed-off-by: Igor Pecovnik <igor.pecovnik@gmail.com>
+---
+ .../wireless/rtl8723du/os_dep/ioctl_cfg80211.c   | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
+
 diff --git a/drivers/net/wireless/rtl8723du/Kconfig b/drivers/net/wireless/rtl8723du/Kconfig
 new file mode 100644
 index 000000000..63bbe8e63
