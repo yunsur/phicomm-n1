@@ -22,12 +22,13 @@ cd phicomm-n1
 
 ```text
 ./compile.sh \
-BOARD=arm-64 \
+BOARD=phicomm-n1 \
 BRANCH=current \
 RELEASE=bullseye \
 BUILD_MINIMAL=no \
 BUILD_DESKTOP=no \
 KERNEL_ONLY=no \
 KERNEL_CONFIGURE=no \
-COMPRESS_OUTPUTIMAGE=sha,img
+COMPRESS_OUTPUTIMAGE=sha,img \
+ENABLE_EXTENSIONS=bluez-firmware
 ```

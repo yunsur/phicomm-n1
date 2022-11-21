@@ -60,6 +60,7 @@ inxi
 kde-plasma-desktop
 kerneloops
 keyutils
+kwin-x11
 language-pack-gnome-de
 language-pack-gnome-en
 language-pack-gnome-es
@@ -111,12 +112,14 @@ policykit-desktop-privileges
 printer-driver-all
 profile-sync-daemon
 pulseaudio-module-bluetooth
+plasma-workspace-wayland
 redshift
 samba
 slick-greeter
 smbclient
 software-properties-gtk
 spice-vdagent
+systemsettings
 system-config-printer
 system-config-printer-common
 terminator
