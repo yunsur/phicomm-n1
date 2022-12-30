@@ -1,5 +1,13 @@
 #!/bin/bash
 #
+#
+# Deprecation warning: armbian-install will replace this script after some period of tesstings. 
+#
+# If you want to add a feature or fix something, use armbian-install (same folder)
+#
+#
+#
+#
 # Copyright (c) Authors: https://www.armbian.com/authors
 #
 # Tool to transfer the rootfs of an already running Armbian installation from SD card
@@ -154,6 +162,8 @@ create_armbian()
 	rsync -avrltD --delete --exclude-from=$EX_LIST / "${TempDir}"/rootfs | \
 	nl | awk '{ printf "%.0f\n", 100*$1/"'"$TODO"'" }' \
 	> "${nsi_conn_progress}" ;
+	 # create empty persistent journal directory if it exists before install
+	[ -d /var/log.hdd/journal ] && mkdir "${TempDir}"/rootfs/var/log/journal
 	 # save exit code from rsync
 	echo  ${PIPESTATUS[0]} >"${nsi_conn_done}"
 	} &
@@ -302,7 +312,11 @@ create_armbian()
 			echo "$targetuuid	/		$choosen_fs	${mountopts[$choosen_fs]}" >> "${TempDir}"/rootfs/etc/fstab
 			# swap file not supported under btrfs but we might have made a partition
 			[[ -n ${emmcswapuuid} ]] && sed -e 's,/var/swap.*,'$emmcswapuuid' 	none		swap	sw								0	0,g' -i "${TempDir}"/rootfs/etc/fstab
-			[[ -f "${TempDir}"/bootfs/boot/armbianEnv.txt ]] && sed -e 's,rootfstype=.*,rootfstype='$eMMCFilesystemChoosen',g' -i "${TempDir}"/bootfs/boot/armbianEnv.txt
+			if [[ -f "${TempDir}"/bootfs/boot/armbianEnv.txt ]]; then
+			    sed -e 's,rootfstype=.*,rootfstype='$eMMCFilesystemChoosen',g' -i "${TempDir}"/bootfs/boot/armbianEnv.txt
+			else
+			    echo 'rootfstype='$eMMCFilesystemChoosen >>"${TempDir}"/bootfs/boot/armbianEnv.txt
+			fi
 		else
 			[[ -f "${TempDir}"/bootfs/boot/armbianEnv.txt ]] && sed -e 's,rootfstype=.*,rootfstype='$choosen_fs',g' -i "${TempDir}"/bootfs/boot/armbianEnv.txt
 			echo "$targetuuid	/		$choosen_fs	${mountopts[$choosen_fs]}" >> "${TempDir}"/rootfs/etc/fstab
@@ -482,6 +496,12 @@ format_emmc()
 
 		# (convert to sectors for partitioning)
 		DEFAULT_BOOTSIZE_SECTORS=$(((${DEFAULT_BOOTSIZE} * 1024 * 1024) / 512))
+
+		# check if the filesystem tools are actually installed
+		if ! command -v mkfs.${eMMCFilesystemChoosen} >/dev/null 2>&1; then
+			echo "Error: Filesystem tools for ${eMMCFilesystemChoosen} not installed, exiting"
+			exit 9
+		fi
 
 		# check whether swap is currently defined and a new swap partition is needed
 		grep -q swap /etc/fstab
